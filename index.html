@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="./lib/vconsole.min.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=FE4b98f7b5736da1fc869143d3d7ae70"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa"></script>
     <script>var vConsole = new VConsole();</script>
 
     <title>Hello City</title>
@@ -13,32 +13,31 @@
 
 <body>
     <script type="text/javascript">
-        var data={}
+        var data = {}
         function positionHandler(pos) {
-            data.curPos={
-                latitude:pos.coords.latitude,
-                longitude:pos.coords.longitude,
-                errCode:-1
-            }
+            data.curPos = {
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude,
+                errCode: -1
+            };
+            var map = new BMap.Map("allmap"); // 创建Map实例
+            //当前搜索中心点
+            var mPoint = new BMap.Point(data.curPos.latitude, data.curPos.longitude);
+            //这里添加了将搜索结果打印到控制台的函数
+            var local = new BMap.LocalSearch(map, { renderOptions: { map: map, autoViewport: false }, onSearchComplete: function (e) { console.log(e) } });
+            var result = local.searchNearby('餐馆', mPoint, 1000);
+
         }
         function errorHandler(e) {
             console.log(e);
-            data.curPos={
-                errCode:0
-            }
+            data.curPos = {
+                errCode: 0
+            };
+            console.log('没获取到位置。')
+
         }
         navigator.geolocation.getCurrentPosition(positionHandler, errorHandler);
         debugger;
-        
-        if (data.curPos.errCode<0){
-            var map = new BMap.Map("allmap"); // 创建Map实例
-            //当前搜索中心点
-            var mPoint = new BMap.Point(116.404, 39.915); 
-            map.enableScrollWheelZoom();
-            map.centerAndZoom(mPoint,15);
-        }else{
-            console.log('没获取到位置。')
-        }
     </script>
 
 
