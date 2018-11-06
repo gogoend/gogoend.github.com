@@ -1,24 +1,31 @@
-<html lang="zh"><head>
+<html lang="zh">
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="./lib/vconsole.min.js">
-    
+
     </script>
     <title>Hello City</title>
-  </head>
-  
-  <body>
+</head>
+
+<body>
     <script type="text/javascript">
-    function positionHandler(pos){
-        console.log(pos)
-    }
-    function errorHandler(e){
-        console.log(e)
-    }
-    navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
+        function positionHandler(pos) {
+            console.log(pos)
+        }
+        function errorHandler(e) {
+            console.log(e)
+        }
+        vConsole.ready(
+            function () {
+                navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
+            }
     </script>
-  
-  
-  
-  </body></html>
+
+
+
+</body>
+
+</html>
