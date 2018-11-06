@@ -12,13 +12,21 @@
 
 <body>
     <script type="text/javascript">
+        var data={}
         function positionHandler(pos) {
-            console.log(pos)
+            data.curPos={
+                latitude:pos.coords.latitude,
+                longitude:pos.coords.longitude,
+                msg:'Position Success.'
+            }
         }
         function errorHandler(e) {
-            console.log(e)
+            console.log(e);
+            data.curPos={
+                msg:'Position Failure.'
+            }
         }
-        navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
+        navigator.geolocation.getCurrentPosition(positionHandler, errorHandler);
     </script>
 
 
