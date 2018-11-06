@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="./lib/vconsole.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=FE4b98f7b5736da1fc869143d3d7ae70"></script>
     <script>var vConsole = new VConsole();</script>
 
     <title>Hello City</title>
@@ -17,16 +18,27 @@
             data.curPos={
                 latitude:pos.coords.latitude,
                 longitude:pos.coords.longitude,
-                msg:'Position Success.'
+                errCode:-1
             }
         }
         function errorHandler(e) {
             console.log(e);
             data.curPos={
-                msg:'Position Failure.'
+                errCode:0
             }
         }
         navigator.geolocation.getCurrentPosition(positionHandler, errorHandler);
+        debugger;
+        
+        if (data.curPos.errCode<0){
+            var map = new BMap.Map("allmap"); // 创建Map实例
+            //当前搜索中心点
+            var mPoint = new BMap.Point(116.404, 39.915); 
+            map.enableScrollWheelZoom();
+            map.centerAndZoom(mPoint,15);
+        }else{
+            console.log('没获取到位置。')
+        }
     </script>
 
 
