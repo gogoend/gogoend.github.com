@@ -1,3 +1,24 @@
-<script>
-document.write('Hello World~')
-</script>
+<html lang="zh"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="./lib/vconsole.min.js">
+    
+    </script>
+    <title>Hello City</title>
+  </head>
+  
+  <body>
+    <script type="text/javascript">
+    function positionHandler(pos){
+        console.log(pos)
+    }
+    function errorHandler(e){
+        console.log(e)
+    }
+    navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
+    </script>
+  
+  
+  
+  </body></html>
