@@ -18,11 +18,7 @@
         function errorHandler(e) {
             console.log(e)
         }
-        vConsole.ready(
-            function () {
-                navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
-            }
-        )
+        navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
     </script>
 
 
