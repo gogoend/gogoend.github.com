@@ -15,6 +15,7 @@
 
 <body>
     <div id="container" style="height: 1000px;"></div>
+    <div id="container2" style="height: 1000px;"></div>
 
     <script type="text/javascript">
         window.onload = function () {
@@ -29,10 +30,12 @@
         //调百度地图
         function bMap(place, rad) {
             var map = new BMap.Map("container2"); // 创建Map实例
+            map.centerAndZoom(new BMap.Point(data.curPos.longitude,data.curPos.latitude), 11);  // 初始化地图,设置中心点坐标和地图级别
+            //map.setCurrentCity("北京");// 设置地图显示的城市 此项是必须设置的
             //当前搜索中心点
             var mPoint = new BMap.Point(data.curPos.longitude,data.curPos.latitude);
             //这里添加了将搜索结果打印到控制台的函数
-            var local = new BMap.LocalSearch(map, { renderOptions: { map: map, autoViewport: false }, onSearchComplete: function (e) { console.log(e) } });
+            var local = new BMap.LocalSearch(map, { renderOptions: { map: map, autoViewport: false },pageCapacity:100, onSearchComplete: function (e) { console.log(e) } });
             var result = local.searchNearby(place, mPoint, rad);//要查找的地点名称、中心点、半径
         }
         //调高德地图
@@ -53,11 +56,10 @@
                     map: map, // 展现结果的地图实例
                     autoFitView: true // 是否自动调整地图视野使绘制的 Marker点都处于视口的可见范围
                 });
-                console.log("纬度：" + data.curPos.latitude + "，经度：" + data.curPos.longitude)
+                console.log("经度：" + data.curPos.longitude + "，纬度：" + data.curPos.latitude)
 
                 var cPoint = [data.curPos.longitude,data.curPos.latitude];
-                console.log(cPoint)
-
+                console.log(cPoint);
                 placeSearch.searchNearBy('', cPoint, rad, function (status, result) {
                     console.log(JSON.stringify(status));
                     console.log(JSON.stringify(result));
@@ -83,8 +85,8 @@
                 errCode: -1
             };
             console.log(data);
-            aMap('卫生间', 2000);
-            // bMap('卫生间', 2000);
+            //aMap('卫生间', 2000);
+            bMap('卫生间', 2000);
         }
         function errorHandler(e) {
             console.log(e);
