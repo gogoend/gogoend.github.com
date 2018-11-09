@@ -4,35 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="./lib/vconsole.min.js"></script>
-    <!-- <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa"></script> -->
+    <!--     <script src="./lib/vconsole.min.js"></script> -->
+    <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa"></script>
     <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.10&key=a250c70fdd65a748d68b74dddcc362ec"></script>
 
     <script></script>
-    <script>var vConsole = new VConsole();</script>
-
+    <!--     <script>var vConsole = new VConsole();</script> -->
     <title>Hello City</title>
 </head>
 
 <body>
-    <div id="container"></div>
+    <div id="container" style="height: 1000px;"></div>
+
     <script type="text/javascript">
+        window.onload = function () {
+            navigator.geolocation.getCurrentPosition(positionHandler, errorHandler, positionOption)
+        };
         var data = {}
+        var positionOption = {
+            enableHighAccuracy: true,
+            maximumAge: 30000,
+            timeout: 5000
+        }
         //调百度地图
-        function baiduMap(place, rad) {
-            var map = new BMap.Map("allmap"); // 创建Map实例
+        function bMap(place, rad) {
+            var map = new BMap.Map("container2"); // 创建Map实例
             //当前搜索中心点
-            var mPoint = new BMap.Point(data.curPos.latitude, data.curPos.longitude);
+            var mPoint = new BMap.Point(data.curPos.longitude,data.curPos.latitude);
             //这里添加了将搜索结果打印到控制台的函数
             var local = new BMap.LocalSearch(map, { renderOptions: { map: map, autoViewport: false }, onSearchComplete: function (e) { console.log(e) } });
-            var result = local.searchNearby(placeName, mPoint, rad);//要查找的地点名称、中心点、半径
+            var result = local.searchNearby(place, mPoint, rad);//要查找的地点名称、中心点、半径
         }
         //调高德地图
         function aMap(place, rad) {
-            var map = new AMap.Map("", { resizeEnable: true });
+            var map = new AMap.Map("container", {
+                resizeEnable: true,
+                zoom: 6,
+                center: [data.curPos.longitude,data.curPos.latitude]
+            });
 
             AMap.service(["AMap.PlaceSearch"], function () {
-
+                console.log(place);
                 var placeSearch = new AMap.PlaceSearch({
                     type: place, // 兴趣点类别
                     pageSize: 20, // 单页显示结果条数
@@ -41,30 +53,38 @@
                     map: map, // 展现结果的地图实例
                     autoFitView: true // 是否自动调整地图视野使绘制的 Marker点都处于视口的可见范围
                 });
+                console.log("纬度：" + data.curPos.latitude + "，经度：" + data.curPos.longitude)
 
-                var cPoint = [data.curPos.latitude, data.curPos.longitude];
+                var cPoint = [data.curPos.longitude,data.curPos.latitude];
+                console.log(cPoint)
 
                 placeSearch.searchNearBy('', cPoint, rad, function (status, result) {
                     console.log(JSON.stringify(status));
                     console.log(JSON.stringify(result));
                 });
-
             });
+            var circleMarker = new AMap.CircleMarker({
+                center: [data.curPos.longitude,data.curPos.latitude],  // 圆心位置
+                radius: 10, // 圆半径
+                fillColor: 'red',   // 圆形填充颜色
+                strokeColor: '#fff', // 描边颜色
+                strokeWeight: 2, // 描边宽度
+            });
+
+            map.add(circleMarker);
 
         };
 
 
         function positionHandler(pos) {
             data.curPos = {
-                latitude: pos.coords.latitude,
                 longitude: pos.coords.longitude,
+                latitude: pos.coords.latitude,
                 errCode: -1
             };
             console.log(data);
             aMap('卫生间', 2000);
-
-
-
+            // bMap('卫生间', 2000);
         }
         function errorHandler(e) {
             console.log(e);
@@ -72,11 +92,10 @@
                 errCode: 0
             };
             console.log('没获取到位置。')
-
         }
-        window.onload = function () {
-            navigator.geolocation.getCurrentPosition(positionHandler, errorHandler)
-        };
+
+
+
     </script>
 </body>
 
