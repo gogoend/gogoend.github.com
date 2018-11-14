@@ -33,10 +33,11 @@
             navigator.geolocation.getCurrentPosition(positionHandler, errorHandler, positionOption)
         };
         var data = {}
+        //浏览器定位设置
         var positionOption = {
             enableHighAccuracy: true,
             maximumAge: 30000,
-            timeout: 5000
+            timeout: 60000
         }
         //调百度地图
         function bMap(place, rad) {
@@ -50,6 +51,9 @@
             var circle = new BMap.Circle(mPoint,2000,{fillColor:"red",fillOpacity:0.1,strokeColor:"red", strokeWeight:2, strokeOpacity:0.3});
             //增加圆
             map.addOverlay(circle);
+            //添加标注点
+            var marker = new BMap.Marker(mPoint);  // 创建标注
+	        map.addOverlay(marker);
             //这里添加了将搜索结果打印到控制台的函数
             var local = new BMap.LocalSearch(map, { renderOptions: { map: map, autoViewport: false },pageCapacity:100, onSearchComplete: function (e) { console.log(e) } });
             var result = local.searchNearby(place, mPoint, rad);//要查找的地点名称、中心点、半径
