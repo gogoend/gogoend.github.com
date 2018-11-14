@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="./lib/vconsole.min.js"></script>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa&s=1"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/getscript?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa&s=1"></script>
     <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.10&key=a250c70fdd65a748d68b74dddcc362ec"></script>
 
     <script>
@@ -30,7 +30,8 @@
 
     <script type="text/javascript">
         window.onload = function () {
-            navigator.geolocation.getCurrentPosition(positionHandler, errorHandler, positionOption)
+            navigator.geolocation.getCurrentPosition(positionHandler, errorHandler, positionOption);
+            window.addEventListener("deviceorientation", orientationHandler, true);
         };
         var data = {}
         //浏览器定位设置
@@ -52,8 +53,10 @@
             //增加圆
             map.addOverlay(circle);
             //添加标注点
-            var marker = new BMap.Marker(mPoint);  // 创建标注
+            var marker = new BMap.Marker(mPoint,{size:90});  // 创建标注
+            marker.addEventListener('click',function(e){console.log(e)})
 	        map.addOverlay(marker);
+            marker.setAnimation(BMAP_ANIMATION_BOUNCE)
             //这里添加了将搜索结果打印到控制台的函数
             var local = new BMap.LocalSearch(map, { renderOptions: { map: map, autoViewport: false },pageCapacity:100, onSearchComplete: function (e) { console.log(e) } });
             var result = local.searchNearby(place, mPoint, rad);//要查找的地点名称、中心点、半径
@@ -106,7 +109,7 @@
             };
             console.log(data);
             //aMap('卫生间', 2000);
-            bMap('卫生间', 2000);
+            bMap('kfc', 2000);
         }
         function errorHandler(e) {
             console.log(e);
@@ -116,6 +119,14 @@
             console.log('没获取到位置。')
         }
 
+        //orientationHandler的参数中包含有手机传感器数据
+        function orientationHandler(orientData) {
+            var absolute = orientData.absolute;
+            var alpha = orientData.alpha;
+            var beta = orientData.beta;
+            var gamma = orientData.gamma;
+            console.log(orientData);
+        }
 
 
     </script>
