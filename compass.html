@@ -88,7 +88,7 @@
 
         window.addEventListener("deviceorientation", orientationHandler, true);
         function orientationHandler(orientData) {
-            compassApp.compassRad = Math.floor(orientData.gamma);
+            compassApp.compassRad = Math.floor(orientData.alpha);
             document.getElementById('compassPointer').style.transform="rotate("+compassApp.compassRad+"deg)"
 
         }
