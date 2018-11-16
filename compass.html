@@ -101,13 +101,12 @@
             methods: {
                 fullScreen: function () {
                     if (!this.fullScreenStatus) {
-                        document.body.requestFullscreen(); this.fullScreenStatus = true
+                        document.body.webkitRequestFullscreen();
+                        this.fullScreenStatus = true
                     } else {
-                        document.webkitExitFullscreen(); this.fullScreenStatus = false
+                        document.webkitExitFullscreen();
+                        this.fullScreenStatus = false
                     }
-
-
-
                 }
             }
         });
