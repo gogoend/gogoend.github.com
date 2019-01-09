@@ -1,0 +1,113 @@
+<body style="padding: 0;margin: 0">
+    <div class="outter" style="
+    position: absolute;
+    left: 0%;
+    top: 0%;
+    background-image:url('./stick_bg.svg');
+    border-radius:50%;
+    width: 400px;
+    height:400px;
+    background-color: rgba(0,0,0,0.5);">
+        <div class="inner" style="width: 100px;
+    height: 100px;
+    background-color: rgba(255,255,255,0.5);
+    position: absolute;
+    top: 150px;
+    left: 150px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+    border-radius: 50%"></div>
+    </div>
+    <script>
+        
+        //获得节点已算出的样式
+        var getStyle = function (node) {
+            return window.getComputedStyle(node, false);
+        }
+        //获得外部容器（定界框）
+        var outter = document.querySelector('.outter');
+        //获得内部手柄（摇杆）
+        var inner = document.querySelector('.inner');
+        var originX = parseInt(inner.style.left);
+        var originY = parseInt(inner.style.top);
+        //
+        var findCoord = function (position, distance, radius) {
+            var b={};
+            b.x = /*position.x - */distance * Math.cos(radius);
+            b.y = /*position.y - */distance * Math.sin(radius);
+            //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
+            return b;
+        };
+        //
+
+        //处理鼠标事件
+        function mouseHandler(e) {
+            switch (e.type) {
+                case 'mousedown': {
+                    console.log('mousedown');
+                    inner.addEventListener('mousemove', mouseHandler, false);
+                    inner.addEventListener('mouseup', mouseHandler, false);
+                    break;
+                };
+                case 'mousemove': {
+                    console.log('mousemove')
+
+                    inner.style.left = e.clientX - 0.5 * parseInt(getStyle(inner).width) - parseInt(getStyle(outter).left) + 'px';
+                    inner.style.top = e.clientY - 0.5 * parseInt(getStyle(inner).height) - parseInt(getStyle(outter).top) + 'px';
+                    //手柄的偏移量、偏移角度
+                    var pointerOffset = Math.sqrt(Math.pow(Math.abs(inner.offsetLeft - originX), 2) + Math.pow(Math.abs(inner.offsetTop - originY), 2));
+                    var deg=Math.atan2(inner.offsetTop - originY,inner.offsetLeft - originX);
+                    console.log(deg*(180/Math.PI));
+
+                    //处理偏移量超过外容器边界的情况，超出时锁定内部手柄到定界框边沿
+                    if (pointerOffset > (parseInt(getStyle(outter).height) / 2 - 50)) {
+                        console.log('outter');
+                        pointerOffset=(parseInt(getStyle(outter).height) / 2 - 50);
+
+                        var pos = findCoord({
+                            x:parseInt(inner.style.left),
+                            y:parseInt(inner.style.top)
+                        }, pointerOffset, deg);
+                        inner.style.left=pos.x+150;
+                        inner.style.top=pos.y+150;
+                        console.log(pos);
+                        //...
+
+                    }
+
+                    // if (inner.offsetTop > 300) {
+                    //     inner.style.top = 300
+                    // }
+                    // if (inner.offsetTop < 0) {
+                    //     inner.style.top = 0
+                    // }
+                    // if (inner.offsetLeft > 300) {
+                    //     inner.style.left = 300
+                    // }
+                    // if (inner.offsetLeft < 0) {
+                    //     inner.style.left = 0
+                    // }
+                    // console.log(inner.style.left + ' ' + inner.style.top)
+                    console.log(inner.offsetLeft + ' ' + inner.offsetTop);
+                    // console.log(e.clientX + ' ' + e.clientY);
+                    // var disX, disY;
+                    // disX = e.clientX - inner.offsetLeft;
+                    // disY = e.clientY - inner.offsetTop;
+                    // inner.style.left = e.clientX - disX + 'px';
+                    // inner.style.top = e.clientY - disY + 'px';
+                    // console.log(disX+' '+disY);
+                    break;
+                };
+                case 'mouseup': {
+                    console.log('mouseup')
+                    inner.style.left = originX + 'px';
+                    inner.style.top = originY + 'px';
+                    inner.removeEventListener('mouseup', mouseHandler, false);
+                    inner.removeEventListener('mousemove', mouseHandler, false);
+                    break;
+                }
+            }
+        }
+        inner.addEventListener('mousedown', mouseHandler, false);
+
+    </script>
+</body>
