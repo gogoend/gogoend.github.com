@@ -1,15 +1,15 @@
 <body style="padding: 0;margin: 0">
     <div class="outter" style="
     position: absolute;
-    left: 0%;
-    top: 0%;
+    left: 30%;
+    top: 30%;
     background-image:url('./stick_bg.svg');
     border-radius:50%;
-    width: 400px;
-    height:400px;
+    width: 500px;
+    height:500px;
     background-color: rgba(0,0,0,0.5);">
-        <div class="inner" style="width: 100px;
-    height: 100px;
+        <div class="inner" style="width: 200px;
+    height: 200px;
     background-color: rgba(255,255,255,0.5);
     position: absolute;
     top: 150px;
@@ -18,7 +18,16 @@
     border-radius: 50%"></div>
     </div>
     <script>
-        
+        //创建DOM
+        var DOMConfig={
+            outterSize:null,
+            innerSize:null,
+            position:[null,null]
+        }
+        function stickDOMGenerator(config){
+
+        }
+
         //获得节点已算出的样式
         var getStyle = function (node) {
             return window.getComputedStyle(node, false);
@@ -29,9 +38,9 @@
         var inner = document.querySelector('.inner');
         var originX = parseInt(inner.style.left);
         var originY = parseInt(inner.style.top);
-        //
+        //用于计算当拖动超出范围时手柄的锁定坐标（代码片段来自nipplejs）
         var findCoord = function (position, distance, radius) {
-            var b={};
+            var b = {};
             b.x = /*position.x - */distance * Math.cos(radius);
             b.y = /*position.y - */distance * Math.sin(radius);
             //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
@@ -39,66 +48,93 @@
         };
         //
 
+        //处理鼠标移动
+        function mouseMoveHandler(e) {
+
+            var result = {};
+
+            result.innerLeft = e.clientX - 0.5 * parseInt(getStyle(inner).width) - parseInt(getStyle(outter).left);// inner.style.left
+            result.innerTop = e.clientY - 0.5 * parseInt(getStyle(inner).height) - parseInt(getStyle(outter).top);// inner.style.top
+            //手柄的偏移量、偏移角度
+            result.distanceOffset = Math.sqrt(Math.pow(Math.abs(result.innerLeft - originX), 2) + Math.pow(Math.abs(result.innerTop - originY), 2));
+            result.radOffset = Math.atan2(result.innerTop - originY, result.innerLeft - originX);
+            result.degOffset = result.radOffset * (180 / Math.PI);
+
+            //处理偏移量超过外容器边界的情况，超出时锁定内部手柄到定界框边沿
+            if (result.distanceOffset > (parseInt(getStyle(outter).height) / 2 - parseInt(getStyle(inner).height)/2)) {
+                console.log('outter');
+                //锁定偏移距离
+                result.distanceOffset = (parseInt(getStyle(outter).height) / 2 - parseInt(getStyle(inner).height)/2);
+                result.lockedPos = findCoord({
+                    x: parseInt(result.innerLeft),
+                    y: parseInt(result.innerTop)
+                }, result.distanceOffset, result.radOffset);
+                    result.innerLeft = result.lockedPos.x + originX;
+                    result.innerTop = result.lockedPos.y + originY;
+                console.log(result.lockedPos);
+                //...
+            }
+
+
+            // if (result.distanceOffset > (parseInt(getStyle(outter).height) / 2 - parseInt(getStyle(inner).height))) {
+            //     console.log('outter');
+            //     //锁定偏移距离
+            //     result.distanceOffset = (parseInt(getStyle(outter).height) / 2 - parseInt(getStyle(inner).height));
+            //     result.lockedPos = findCoord({
+            //         x: parseInt(result.innerLeft),
+            //         y: parseInt(result.innerTop)
+            //     }, result.distanceOffset, result.radOffset);
+            //     result.innerLeft = result.lockedPos.x + originX;
+            //     result.innerTop = result.lockedPos.y + originY;
+            //     console.log(result.lockedPos);
+            //     //...
+            // }
+
+            //console.table(result);
+
+            // if (inner.offsetTop > 300) {
+            //     inner.style.top = 300
+            // }
+            // if (inner.offsetTop < 0) {
+            //     inner.style.top = 0
+            // }
+            // if (inner.offsetLeft > 300) {
+            //     inner.style.left = 300
+            // }
+            // if (inner.offsetLeft < 0) {
+            //     inner.style.left = 0
+            // }
+            // console.log(inner.style.left + ' ' + inner.style.top)
+            // console.log(inner.offsetLeft + ' ' + inner.offsetTop);
+            // console.log(e.clientX + ' ' + e.clientY);
+            // var disX, disY;
+            // disX = e.clientX - inner.offsetLeft;
+            // disY = e.clientY - inner.offsetTop;
+            // inner.style.left = e.clientX - disX + 'px';
+            // inner.style.top = e.clientY - disY + 'px';
+            // console.log(disX+' '+disY);
+            return result;
+
+        }
+
         //处理鼠标事件
         function mouseHandler(e) {
+
             switch (e.type) {
                 case 'mousedown': {
-                    console.log('mousedown');
+                    // console.log('mousedown');
                     inner.addEventListener('mousemove', mouseHandler, false);
                     inner.addEventListener('mouseup', mouseHandler, false);
                     break;
                 };
                 case 'mousemove': {
-                    console.log('mousemove')
-
-                    inner.style.left = e.clientX - 0.5 * parseInt(getStyle(inner).width) - parseInt(getStyle(outter).left) + 'px';
-                    inner.style.top = e.clientY - 0.5 * parseInt(getStyle(inner).height) - parseInt(getStyle(outter).top) + 'px';
-                    //手柄的偏移量、偏移角度
-                    var pointerOffset = Math.sqrt(Math.pow(Math.abs(inner.offsetLeft - originX), 2) + Math.pow(Math.abs(inner.offsetTop - originY), 2));
-                    var deg=Math.atan2(inner.offsetTop - originY,inner.offsetLeft - originX);
-                    console.log(deg*(180/Math.PI));
-
-                    //处理偏移量超过外容器边界的情况，超出时锁定内部手柄到定界框边沿
-                    if (pointerOffset > (parseInt(getStyle(outter).height) / 2 - 50)) {
-                        console.log('outter');
-                        pointerOffset=(parseInt(getStyle(outter).height) / 2 - 50);
-
-                        var pos = findCoord({
-                            x:parseInt(inner.style.left),
-                            y:parseInt(inner.style.top)
-                        }, pointerOffset, deg);
-                        inner.style.left=pos.x+150;
-                        inner.style.top=pos.y+150;
-                        console.log(pos);
-                        //...
-
-                    }
-
-                    // if (inner.offsetTop > 300) {
-                    //     inner.style.top = 300
-                    // }
-                    // if (inner.offsetTop < 0) {
-                    //     inner.style.top = 0
-                    // }
-                    // if (inner.offsetLeft > 300) {
-                    //     inner.style.left = 300
-                    // }
-                    // if (inner.offsetLeft < 0) {
-                    //     inner.style.left = 0
-                    // }
-                    // console.log(inner.style.left + ' ' + inner.style.top)
-                    console.log(inner.offsetLeft + ' ' + inner.offsetTop);
-                    // console.log(e.clientX + ' ' + e.clientY);
-                    // var disX, disY;
-                    // disX = e.clientX - inner.offsetLeft;
-                    // disY = e.clientY - inner.offsetTop;
-                    // inner.style.left = e.clientX - disX + 'px';
-                    // inner.style.top = e.clientY - disY + 'px';
-                    // console.log(disX+' '+disY);
+                    var result=mouseMoveHandler(e);
+                    inner.style.left = result.innerLeft + 'px';
+                    inner.style.top = result.innerTop + 'px';
                     break;
                 };
                 case 'mouseup': {
-                    console.log('mouseup')
+                    // console.log('mouseup')
                     inner.style.left = originX + 'px';
                     inner.style.top = originY + 'px';
                     inner.removeEventListener('mouseup', mouseHandler, false);
