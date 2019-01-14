@@ -73,22 +73,18 @@
         }
 
         //初始矩阵
-        var originMatrix3 = function () {
-            return [
-                1, 0, 0,
-                0, 1, 0,
-                0, 0, 1
-            ]
-        };
+        const originMatrix3 = Object.freeze([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        ]);
 
-        var originMatrix4 = function () {
-            return [
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]
-        };
+        const originMatrix4 = Object.freeze([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ]);
 
         //解析从computedStyle获得transform matrix
         var parseTransformMatrix = function (cssTransformText) {
@@ -97,7 +93,7 @@
             if (cssTransformText.match('matrix') && !cssTransformText.match('matrix3d')) {
                 //console.log('2D变换');
                 var arr = cssTransformText.replace('matrix', '').replace('(', '').replace(')', '').replace(' ', '').split(',');
-                var res = originMatrix3();
+                var res = originMatrix3.concat();//深拷贝数组，而非引用原数组
                 res[0] = parseFloat(arr[0]);
                 res[1] = parseFloat(arr[1]);
                 res[3] = parseFloat(arr[2]);
@@ -109,10 +105,10 @@
             } else if (cssTransformText.match('matrix') && cssTransformText.match('matrix3d')) {
                 //console.log('3D变换');
                 var arr = cssTransformText.replace('matrix3d', '').replace('(', '').replace(')', '').replace(' ', '').split(',');
-                var res = originMatrix4();
+                var res = originMatrix4.concat();
             } else if (cssTransformText.match('none')) {
                 // console.log('没有变换');
-                return originMatrix3();
+                return originMatrix3;
             } else {
                 //console.log('CSS Transform matrix不合法')
                 return false;
@@ -164,7 +160,7 @@
             var findLockedCoord = function (position, distance, radius) {
                 var b = [];
                 b.x = /*position.x - */distance * Math.cos(radius);
-                b.y = /*position.y - */distance * Math.sin(radius);
+                b.y =/*position.y - */distance * Math.sin(radius);
                 //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
                 return b;
             };
@@ -230,12 +226,12 @@
                 var rawMatrix3 = parseTransformMatrix(getStyle(target).transform);
 
                 //平移矩阵
-                var translateMatrix3 = originMatrix3();
+                var translateMatrix3 = originMatrix3.slice(0);
                 translateMatrix3[6] = result.innerOffsetLeft * 0.1;
                 translateMatrix3[7] = result.innerOffsetTop * 0.1;
 
                 //旋转矩阵
-                var rotateMatrix3 = originMatrix3();
+                var rotateMatrix3 = originMatrix3.slice(0);
                 rotateMatrix3[0] = Math.cos(result.rad);
                 rotateMatrix3[1] = -Math.sin(result.rad);
                 rotateMatrix3[3] = Math.sin(result.rad);
