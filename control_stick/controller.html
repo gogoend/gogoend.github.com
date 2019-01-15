@@ -1,5 +1,5 @@
 <body style="padding: 0;margin: 0">
-    <div class="target" style="width:20px;height: 20px;background-color: chocolate"></div>
+    <div data-role="target" style="width:20px;height: 20px;background-color: chocolate"></div>
     <!-- <div class="outter" style="
     position: absolute;
     left: 30%;
@@ -19,110 +19,16 @@
     border-radius: 50%"></div>
     </div> -->
 
+    <script src="./util.js"></script>
+
     <script>
         "use strict";
-
-
-        //范围内随机数产生器
-        var rand = function (min, max, ifInt) {
-            if (ifInt == true) {
-                return Math.floor(Math.random() * (max - min) + min);
-            } else {
-                return Math.random() * (max - min) + min;
-            }
-        }
-        //UUID生成器
-        var uuid = function () {
-            var charPool = '0123456789abcdef';
-            var digit = '';
-            var point;
-            for (var i = 0; i < 32; i++) {
-                point = rand(0, charPool.length, true);
-                digit += charPool.charAt(point);
-            }
-            return digit;
-        }
-
-        //获得节点已算出的样式
-        var getStyle = function (node) {
-            return window.getComputedStyle(node, false);
-        }
-
-        //勾股定理
-        var gougu = function (a, b) {
-            return Math.sqrt(a * a + b * b);
-        }
-
-        //矩阵相乘
-        var martixMuitply = function (m1, m2) {
-            if (m1.length !== m2.length) {
-                return NaN;
-            }
-            if (m1.length === 9 && m2.length === 9) {
-                /*
-                    0,1,2,      
-                m = 3,4,5,      
-                    6,7,8       
-                */
-                return [
-                    m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6], m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7], m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8],
-                    m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6], m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7], m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8],
-                    m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6], m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7], m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]
-                ]
-            }
-        }
-
-        //初始矩阵
-        const originMatrix3 = Object.freeze([
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1
-        ]);
-
-        const originMatrix4 = Object.freeze([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
-        ]);
-
-        //解析从computedStyle获得transform matrix
-        var parseTransformMatrix = function (cssTransformText) {
-            //matrix(0,1,3,4,6,7)
-            //cssTransformText = 'matrix(0,1,3,4,6,7)';
-            if (cssTransformText.match('matrix') && !cssTransformText.match('matrix3d')) {
-                //console.log('2D变换');
-                var arr = cssTransformText.replace('matrix', '').replace('(', '').replace(')', '').replace(' ', '').split(',');
-                var res = originMatrix3.concat();//深拷贝数组，而非引用原数组
-                res[0] = parseFloat(arr[0]);
-                res[1] = parseFloat(arr[1]);
-                res[3] = parseFloat(arr[2]);
-                res[4] = parseFloat(arr[3]);
-                res[6] = parseFloat(arr[4]);
-                res[7] = parseFloat(arr[5]);
-                console.log(res)
-                return res;
-            } else if (cssTransformText.match('matrix') && cssTransformText.match('matrix3d')) {
-                //console.log('3D变换');
-                var arr = cssTransformText.replace('matrix3d', '').replace('(', '').replace(')', '').replace(' ', '').split(',');
-                var res = originMatrix4.concat();
-            } else if (cssTransformText.match('none')) {
-                // console.log('没有变换');
-                return originMatrix3;
-            } else {
-                //console.log('CSS Transform matrix不合法')
-                return false;
-            }
-
-        }
-
-
         //stick配置
         var stickConfig = {
             zoneSize: '500px',//外部尺寸
             stickSize: '200px',//内部尺寸
             position: [null, null],//位置
-            target: null,//控制目标：DOM或THREE.Object3D
+            target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
             moveFactor: 0.1,//移动因数
         }
 
@@ -147,13 +53,12 @@
             zone.appendChild(stick)
             document.body.appendChild(zone);
 
-
             //获得外部容器（定界框）
             var zone = document.querySelector('[data-role=zone]');
             //获得内部手柄（摇杆）
             var stick = document.querySelector('[data-role=stick]');
             //变换目标
-            var target = document.querySelector('.target');
+            var target = conf.target;
             var originX = parseInt(stick.style.left);
             var originY = parseInt(stick.style.top);
             //用于计算当拖动超出范围时手柄的锁定坐标（来自nipplejs）
@@ -166,19 +71,14 @@
             };
             //
 
-
-
-
-
-
             //处理鼠标移动
             var mouseMoveHandler = function (e) {
 
                 var result = {
-                    innerLeft: undefined,
-                    innerTop: undefined,                 //用于计算stick样式
-                    innerOffsetLeft: undefined,
-                    innerOffsetTop: undefined,           //获得stick相对于zone中心的x,y偏移量
+                    stickLeft: undefined,
+                    stickTop: undefined,                 //用于计算stick样式
+                    stickOffsetLeft: undefined,
+                    stickOffsetTop: undefined,           //获得stick相对于zone中心的x,y偏移量
                     distance: undefined,                 //获得stick相对于zone中心的距离
                     force: undefined,                     //当stick移动超出zone时，移出以后stick
                     rad: undefined,
@@ -187,15 +87,15 @@
                     transformMatrix: undefined                    //变换矩阵
                 };
 
-                result.innerLeft = e.clientX - 0.5 * parseInt(getStyle(stick).width) - parseInt(getStyle(zone).left);// inner.style.left
-                result.innerTop = e.clientY - 0.5 * parseInt(getStyle(stick).height) - parseInt(getStyle(zone).top);// inner.style.top
-                result.innerOffsetLeft = result.innerLeft - originX;
-                result.innerOffsetTop = result.innerTop - originY;
+                result.stickLeft = e.clientX - 0.5 * parseInt(getStyle(stick).width) - parseInt(getStyle(zone).left);// inner.style.left
+                result.stickTop = e.clientY - 0.5 * parseInt(getStyle(stick).height) - parseInt(getStyle(zone).top);// inner.style.top
+                result.stickOffsetLeft = result.stickLeft - originX;
+                result.stickOffsetTop = result.stickTop - originY;
 
                 //手柄的偏移量、偏移角度
-                result.distance = gougu(result.innerLeft - originX, result.innerTop - originY);
+                result.distance = gougu(result.stickLeft - originX, result.stickTop - originY);
                 result.force = result.distance;
-                result.rad = Math.atan2(result.innerTop - originY, result.innerLeft - originX);
+                result.rad = Math.atan2(result.stickTop - originY, result.stickLeft - originX);
                 result.deg = result.rad * (180 / Math.PI);
                 var lockedDistanceOffset = (parseInt(getStyle(zone).height) / 2 - parseInt(getStyle(stick).height) / 2);
 
@@ -205,49 +105,53 @@
                     //锁定偏移距离
                     //result.distance = (parseInt(getStyle(outter).height) / 2 - parseInt(getStyle(inner).height) / 2);
                     result.lockedPos = findLockedCoord({
-                        x: parseInt(result.innerLeft),
-                        y: parseInt(result.innerTop)
+                        x: parseInt(result.stickLeft),
+                        y: parseInt(result.stickTop)
                     }, lockedDistanceOffset, result.rad);
                     result.force = result.distance;
                     result.distance = lockedDistanceOffset;
-                    result.innerLeft = result.lockedPos.x + originX;
-                    result.innerTop = result.lockedPos.y + originY;
+                    result.stickLeft = result.lockedPos.x + originX;
+                    result.stickTop = result.lockedPos.y + originY;
 
                     //计算移出以后的偏移量，并同步角度变化
                     // result.continueX = e.clientX - 0.5 * parseInt(getStyle(stick).width) - parseInt(getStyle(zone).left);
                     // result.continueY = e.clientY - 0.5 * parseInt(getStyle(stick).height) - parseInt(getStyle(zone).top);
-                    //result.continueDistanceOffset = gougu(result.innerLeft - originX , result.innerTop - originY);
+                    //result.continueDistanceOffset = gougu(result.stickLeft - originX , result.stickTop - originY);
                     //偏移距离被锁定，但鼠标移出后角度不应当锁定，emmmmmm
                     // result.rad;
                     // result.degOffset;
                 }
 
-                //原始矩阵
-                var rawMatrix3 = parseTransformMatrix(getStyle(target).transform);
 
-                //平移矩阵
+                //矩阵相关部分
                 var translateMatrix3 = originMatrix3.slice(0);
-                translateMatrix3[6] = result.innerOffsetLeft * 0.1;
-                translateMatrix3[7] = result.innerOffsetTop * 0.1;
-
-                //旋转矩阵
                 var rotateMatrix3 = originMatrix3.slice(0);
-                rotateMatrix3[0] = Math.cos(result.rad);
-                rotateMatrix3[1] = -Math.sin(result.rad);
-                rotateMatrix3[3] = Math.sin(result.rad);
-                rotateMatrix3[4] = Math.cos(result.rad);
 
-                //矩阵相乘
-                //console.log(parseTransformMatrix(getStyle(target).transform));
-                // result.transformMatrix = martixMuitply(rawMatrix3,martixMuitply(rotateMatrix3,translateMatrix3));
-                result.transformMatrix = martixMuitply(rawMatrix3, translateMatrix3);
+                if (target instanceof Element === true) {
+                    //原始矩阵
+                    var rawMatrix3 = parseTransformMatrix(getStyle(target).transform);
 
-                // result.transformMatrix = martixMuitply(translateMatrix3, rotateMatrix3);
+                    //平移矩阵
+                    translateMatrix3[6] = result.stickOffsetLeft * conf.moveFactor;
+                    translateMatrix3[7] = result.stickOffsetTop * conf.moveFactor;
 
-                console.log([rawMatrix3, translateMatrix3, rotateMatrix3, result.transformMatrix])
+                    //旋转矩阵
+                    rotateMatrix3[0] = Math.cos(result.rad);
+                    rotateMatrix3[1] = -Math.sin(result.rad);
+                    rotateMatrix3[3] = Math.sin(result.rad);
+                    rotateMatrix3[4] = Math.cos(result.rad);
 
-                result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
+                    //矩阵相乘
+                    //console.log(parseTransformMatrix(getStyle(target).transform));
+                    // result.transformMatrix = martixMuitply(rawMatrix3,martixMuitply(rotateMatrix3,translateMatrix3));
+                    result.transformMatrix = martixMuitply(rawMatrix3, translateMatrix3);
 
+                    // result.transformMatrix = martixMuitply(translateMatrix3, rotateMatrix3);
+
+                    console.log([rawMatrix3, translateMatrix3, rotateMatrix3, result.transformMatrix])
+
+                    result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
+                }
                 // if (console.table) {
                 //     console.table(result);
                 // } else {
@@ -298,8 +202,8 @@
                     };
                     case 'mousemove': {
                         var result = mouseMoveHandler(e);
-                        stick.style.left = result.innerLeft + 'px';
-                        stick.style.top = result.innerTop + 'px';
+                        stick.style.left = result.stickLeft + 'px';
+                        stick.style.top = result.stickTop + 'px';
                         target.style.transform = result.cssTransformText;
                         break;
                     };
@@ -325,8 +229,5 @@
         }
 
         stickInit(stickConfig);
-
-
-
     </script>
 </body>
