@@ -17,7 +17,7 @@
 
 <body>
     <div data-role="target" style="width:20px;height: 20px;background-color: chocolate"></div>
-    <!-- <div data-role="target2" style="width:20px;height: 20px;background-color: blue"></div> -->
+    <div data-role="target2" style="width:20px;height: 20px;background-color: blue"></div>
 
     <!-- <div class="outter" style="
     position: absolute;
@@ -50,16 +50,19 @@
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
             moveFactor: 0.4,//移动因数
         }
-        new stickInit(stickConfig);
+        var a=new stickInit(stickConfig);
+        
+
 
         var stickConfig2 = {
             zoneSize: 150,//外部尺寸
             stickSize: 40,//内部尺寸
             position: [null, null, 30, 30],//位置
-            target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
+            target: document.querySelector('[data-role=target2]'),//控制目标：DOM或THREE.Object3D
             moveFactor: 0.41,//移动因数
         }
-        new stickInit(stickConfig2);
+        var b=new stickInit(stickConfig2);
+
     </script>
 </body>
 
