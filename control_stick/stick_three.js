@@ -10,9 +10,7 @@ var stickInit = function (conf) {
         console.error('There is nothing being select.');
         return false;
     }
-
-
-
+    
     //创建DOM
     var zone = document.createElement('div');
     zone.setAttribute('data-role', 'zone');
@@ -71,6 +69,8 @@ var stickInit = function (conf) {
         //判断是否为触摸事件
         if (e.type.match('touch') !== null) { e = e.touches[e.touches.length - 1] }
 
+
+
         result.stickLeft = e.clientX - 0.5 * parseInt(util.getStyle(stick).width) - parseInt(util.getStyle(zone).left);// inner.style.left
         result.stickTop = e.clientY - 0.5 * parseInt(util.getStyle(stick).height) - parseInt(util.getStyle(zone).top);// inner.style.top
         result.stickOffsetLeft = result.stickLeft - originX;
@@ -106,76 +106,42 @@ var stickInit = function (conf) {
             // result.degOffset;
         }
 
-        if (target instanceof Element === true) {
+
+        if (target instanceof THREE.Object3D==true) {
+            //矩阵相关部分
+            var translateMatrix4 = util.originMatrix4.slice(0);
+            var rotateMatrix4 = util.originMatrix4.slice(0);
             //原始矩阵
-            var rawMatrix = util.parseTransformMatrix(util.getStyle(target).transform);
-            //console.log(rawMatrix);
+            var rawMatrix4 = target.matrixWorld.concat();
+            console.log(rawMatrix4);
 
-            if (rawMatrix.length == 9) {
-                //初始化原矩阵
-                var translateMatrix3 = util.originMatrix3.slice(0);
-                var rotateMatrix3 = util.originMatrix3.slice(0);
-                //平移矩阵
-                translateMatrix3[6] = result.stickOffsetLeft * conf.moveFactor;
-                translateMatrix3[7] = result.stickOffsetTop * conf.moveFactor;
+            //平移矩阵
+            translateMatrix4[6] = result.stickOffsetLeft * conf.moveFactor;
+            translateMatrix4[7] = result.stickOffsetTop * conf.moveFactor;
 
-                //旋转矩阵
-                rotateMatrix3[0] = Math.cos(result.rad);
-                rotateMatrix3[1] = -Math.sin(result.rad);
-                rotateMatrix3[3] = Math.sin(result.rad);
-                rotateMatrix3[4] = Math.cos(result.rad);
+            //旋转矩阵
+            rotateMatrix4[0] = Math.cos(result.rad);
+            rotateMatrix4[1] = -Math.sin(result.rad);
+            rotateMatrix4[3] = Math.sin(result.rad);
+            rotateMatrix4[4] = Math.cos(result.rad);
 
-                //矩阵相乘
-                //console.log(util.parseTransformMatrix(util.getStyle(target).transform));
-                // result.transformMatrix = util.matrixMuitply(rawMatrix,util.matrixMuitply(rotateMatrix3,translateMatrix3));
-                result.transformMatrix = util.matrixMuitply(rawMatrix, translateMatrix3);
+            //矩阵相乘
+            //console.log(util.parseTransformMatrix(util.getStyle(target).transform));
+            // result.transformMatrix = util.matrixMuitply(rawMatrix3,util.matrixMuitply(rotateMatrix3,translateMatrix3));
+            result.transformMatrix = util.matrixMuitply(rawMatrix3, translateMatrix3);
 
-                // result.transformMatrix = util.matrixMuitply(translateMatrix3, rotateMatrix3);
+            // result.transformMatrix = util.matrixMuitply(translateMatrix3, rotateMatrix3);
 
-                // console.log([rawMatrix, translateMatrix3, rotateMatrix3, result.transformMatrix])
-                result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
+            // console.log([rawMatrix3, translateMatrix3, rotateMatrix3, result.transformMatrix])
 
-            } else if (rawMatrix.length == 16) {
-                console.log('3D');
-                //初始化原矩阵
-                var translateMatrix4 = util.originMatrix4.slice(0);
-                var rotateMatrix4 = util.originMatrix4.slice(0);
-
-                /*
-                    0 , 1 , 2 , 3 ,
-                m = 4 , 5 , 6 , 7 ,
-                    8 , 9 , 10, 11,
-                    12, 13, 14, 15 
-                */
-
-                //平移矩阵
-                translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
-                translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
-                translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
-
-                //沿着y轴旋转矩阵
-                rotateMatrix4[0] = Math.cos(result.rad);
-                rotateMatrix4[2] = -Math.sin(result.rad);
-                rotateMatrix4[8] = Math.sin(result.rad);
-                rotateMatrix4[10] = Math.cos(result.rad);
-
-                //矩阵相乘
-                result.transformMatrix = util.matrixMuitply(rawMatrix, rotateMatrix4);
-
-                result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5]+ ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] +',' + result.transformMatrix[8] +',' + result.transformMatrix[9] +',' + result.transformMatrix[10] +',' + result.transformMatrix[11] +',' + result.transformMatrix[12] +',' + result.transformMatrix[13] +',' + result.transformMatrix[14] +',' + result.transformMatrix[15] + ')';
-                console.log();
-
-            } else {
-                console.log('矩阵无效')
-            }
-            // if (console.table) {
-            //     console.table(result);
-            // } else {
-            //     console.log(result)
-            // }
-
-            //console.log(result)
         }
+        // if (console.table) {
+        //     console.table(result);
+        // } else {
+        //     console.log(result)
+        // }
+
+        //console.log(result)
 
 
         // if (inner.offsetTop > 300) {

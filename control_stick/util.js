@@ -41,11 +41,25 @@ var util = {
             m = 3,4,5,      
                 6,7,8       
             */
-            return [
-                m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6], m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7], m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8],
-                m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6], m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7], m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8],
-                m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6], m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7], m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8]
-            ]
+            var m = [];
+            m[0] = m1[0] * m2[0] + m1[1] * m2[3] + m1[2] * m2[6]; m[1] = m1[0] * m2[1] + m1[1] * m2[4] + m1[2] * m2[7]; m[2] = m1[0] * m2[2] + m1[1] * m2[5] + m1[2] * m2[8];
+            m[3] = m1[3] * m2[0] + m1[4] * m2[3] + m1[5] * m2[6]; m[4] = m1[3] * m2[1] + m1[4] * m2[4] + m1[5] * m2[7]; m[5] = m1[3] * m2[2] + m1[4] * m2[5] + m1[5] * m2[8];
+            m[6] = m1[6] * m2[0] + m1[7] * m2[3] + m1[8] * m2[6]; m[7] = m1[6] * m2[1] + m1[7] * m2[4] + m1[8] * m2[7]; m[8] = m1[6] * m2[2] + m1[7] * m2[5] + m1[8] * m2[8];
+            return m;
+        } else if (m1.length === 16 && m2.length === 16) {
+            /*
+                0 , 1 , 2 , 3 ,
+            m = 4 , 5 , 6 , 7 ,
+                8 , 9 , 10, 11,
+                12, 13, 14, 15 
+            */
+            var m = [];
+            m[0]  = m1[0] * m2[0] + m1[1] * m2[4] + m1[2]  * m2[8] + m1[3]  * m2[12]; m[1]  = m1[0]  * m2[1] + m1[1] * m2[5] + m1[2]  * m2[9] + m1[3]  * m2[13]; m[2]  = m1[0]  * m2[2] + m1[1] * m2[6] + m1[2]  * m2[10] + m1[3]  * m2[14]; m[3]  = m1[0] * m2[3] + m1[1] * m2[7] + m1[2] * m2[11] + m1[3] * m2[15];
+            m[4]  = m1[4] * m2[0] + m1[5] * m2[4] + m1[6]  * m2[8] + m1[7]  * m2[12]; m[5]  = m1[4]  * m2[1] + m1[5] * m2[5] + m1[6]  * m2[9] + m1[7]  * m2[13]; m[6]  = m1[4]  * m2[2] + m1[5] * m2[6] + m1[6]  * m2[10] + m1[7]  * m2[14]; m[7]  = m1[4] * m2[3] + m1[5] * m2[7] + m1[6] * m2[11] + m1[7] * m2[15];
+            m[8]  = m1[8] * m2[0] + m1[9] * m2[4] + m1[10] * m2[8] + m1[11] * m2[12]; m[9]  = m1[8]  * m2[1] + m1[9] * m2[5] + m1[10] * m2[9] + m1[11] * m2[13]; m[10] = m1[8]  * m2[2] + m1[9] * m2[6] + m1[10] * m2[10] + m1[11] * m2[14]; m[11] = m1[8] * m2[3] + m1[9] * m2[7] + m1[10] * m2[11]+ m1[11]* m2[15];
+            m[12] = m1[12]* m2[0] + m1[3] * m2[4] + m1[14] * m2[8] + m1[15] * m2[12]; m[13] = m1[12] * m2[1] + m1[3] * m2[5] + m1[14] * m2[9] + m1[15] * m2[13]; m[14] = m1[12] * m2[2] + m1[3] * m2[6] + m1[14] * m2[10] + m1[15] * m2[14]; m[15] = m1[12]* m2[3] + m1[13]* m2[7] + m1[14] * m2[11]+ m1[15]* m2[15];
+
+            return m;
         }
     },
 
@@ -70,19 +84,19 @@ var util = {
         if (cssTransformText.match('matrix') && !cssTransformText.match('matrix3d')) {
             //console.log('2D变换');
             var arr = cssTransformText.replace('matrix', '').replace('(', '').replace(')', '').replace(' ', '').split(',');
-            var res = util.originMatrix3.concat();//深拷贝数组，而非引用原数组
+            var res = util.originMatrix3.concat();//初始化无变换矩阵，深拷贝数组，而非引用原数组
             res[0] = parseFloat(arr[0]);
             res[1] = parseFloat(arr[1]);
             res[3] = parseFloat(arr[2]);
             res[4] = parseFloat(arr[3]);
             res[6] = parseFloat(arr[4]);
             res[7] = parseFloat(arr[5]);
-            // console.log(res)
             return res;
         } else if (cssTransformText.match('matrix') && cssTransformText.match('matrix3d')) {
             //console.log('3D变换');
             var arr = cssTransformText.replace('matrix3d', '').replace('(', '').replace(')', '').replace(' ', '').split(',');
-            var res = originMatrix4.concat();
+            var res = arr;
+            return res;
         } else if (cssTransformText.match('none')) {
             // console.log('没有变换');
             return util.originMatrix3;
