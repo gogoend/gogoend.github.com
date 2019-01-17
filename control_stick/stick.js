@@ -4,6 +4,13 @@
 //stick初始化
 var stickInit = function (conf) {
 
+        //变换目标
+        var target = conf.target;
+        if(!target){
+            console.error('There is nothing being select.');
+            return false;
+        }
+
 
 
     //创建DOM
@@ -33,8 +40,7 @@ var stickInit = function (conf) {
     // var zone = document.querySelector('[data-role=zone]');
     // //获得内部手柄（摇杆）
     // var stick = document.querySelector('[data-role=stick]');
-    //变换目标
-    var target = conf.target;
+
     var originX = parseInt(stick.style.left);
     var originY = parseInt(stick.style.top);
     //用于计算当拖动超出范围时手柄的锁定坐标（来自nipplejs）
