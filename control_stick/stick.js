@@ -175,6 +175,31 @@ var stickInit = function (conf) {
             // }
 
             //console.log(result)
+        }else if (target instanceof THREE.Object3D===true) {
+            //矩阵相关部分
+            var translateMatrix4 = util.originMatrix4.slice(0);
+            var rotateMatrix4 = util.originMatrix4.slice(0);
+            //原始矩阵
+            var rawMatrix = target.matrixWorld.elements.slice(0);
+
+            //平移矩阵
+            translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
+            translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
+            // translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
+            //沿着y轴旋转矩阵
+            rotateMatrix4[0] = Math.cos(result.rad);
+            rotateMatrix4[2] = -Math.sin(result.rad);
+            rotateMatrix4[8] = Math.sin(result.rad);
+            rotateMatrix4[10] = Math.cos(result.rad);
+            //矩阵相乘
+            result.transformMatrix = rotateMatrix4;
+            result.transformMatrixList=new THREE.Matrix4();
+            var m=result.transformMatrix;
+            result.transformMatrixList.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
+            // console.log(...result.transformMatrix);
+
+            // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
+
         }
 
 
@@ -222,7 +247,8 @@ var stickInit = function (conf) {
                 var result = mouseMoveHandler(e);
                 stick.style.left = result.stickLeft + 'px';
                 stick.style.top = result.stickTop + 'px';
-                target.style.transform = result.cssTransformText;
+                if(target instanceof Element)  target.style.transform = result.cssTransformText;
+                else if(target instanceof THREE.Object3D)target.applyMatrix(result.transformMatrixList);
                 return result;
                 break;
             };
