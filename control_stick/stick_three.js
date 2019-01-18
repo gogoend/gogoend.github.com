@@ -124,12 +124,11 @@ var stickInit = function (conf) {
             rotateMatrix4[8] = Math.sin(result.rad);
             rotateMatrix4[10] = Math.cos(result.rad);
             //矩阵相乘
-            result.transformMatrix = util.matrixMuitply(rawMatrix, rotateMatrix4);
+            result.transformMatrix = rotateMatrix4;
             result.transformMatrixList=new THREE.Matrix4();
             var m=result.transformMatrix;
             result.transformMatrixList.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
             // console.log(...result.transformMatrix);
-
 
             // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
 
