@@ -112,27 +112,26 @@ var stickInit = function (conf) {
             var translateMatrix4 = util.originMatrix4.slice(0);
             var rotateMatrix4 = util.originMatrix4.slice(0);
             //原始矩阵
-            var rawMatrix4 = target.matrixWorld.concat();
-            console.log(rawMatrix4);
+            var rawMatrix = target.matrixWorld.elements.slice(0);
 
             //平移矩阵
-            translateMatrix4[6] = result.stickOffsetLeft * conf.moveFactor;
-            translateMatrix4[7] = result.stickOffsetTop * conf.moveFactor;
-
-            //旋转矩阵
+            translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
+            translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
+            translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
+            //沿着y轴旋转矩阵
             rotateMatrix4[0] = Math.cos(result.rad);
-            rotateMatrix4[1] = -Math.sin(result.rad);
-            rotateMatrix4[3] = Math.sin(result.rad);
-            rotateMatrix4[4] = Math.cos(result.rad);
-
+            rotateMatrix4[2] = -Math.sin(result.rad);
+            rotateMatrix4[8] = Math.sin(result.rad);
+            rotateMatrix4[10] = Math.cos(result.rad);
             //矩阵相乘
-            //console.log(util.parseTransformMatrix(util.getStyle(target).transform));
-            // result.transformMatrix = util.matrixMuitply(rawMatrix3,util.matrixMuitply(rotateMatrix3,translateMatrix3));
-            result.transformMatrix = util.matrixMuitply(rawMatrix3, translateMatrix3);
+            result.transformMatrix = util.matrixMuitply(rawMatrix, rotateMatrix4);
+            result.transformMatrixList=new THREE.Matrix4();
+            var m=result.transformMatrix;
+            result.transformMatrixList.set(m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7],m[8],m[9],m[10],m[11],m[12],m[13],m[14],m[15]);
+            // console.log(...result.transformMatrix);
 
-            // result.transformMatrix = util.matrixMuitply(translateMatrix3, rotateMatrix3);
 
-            // console.log([rawMatrix3, translateMatrix3, rotateMatrix3, result.transformMatrix])
+            // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
 
         }
         // if (console.table) {
@@ -188,7 +187,8 @@ var stickInit = function (conf) {
                 var result = mouseMoveHandler(e);
                 stick.style.left = result.stickLeft + 'px';
                 stick.style.top = result.stickTop + 'px';
-                target.style.transform = result.cssTransformText;
+                //target.style.transform = result.cssTransformText;
+                target.applyMatrix(result.transformMatrixList);
                 return result;
                 break;
             };
