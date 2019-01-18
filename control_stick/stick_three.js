@@ -69,8 +69,6 @@ var stickInit = function (conf) {
         //判断是否为触摸事件
         if (e.type.match('touch') !== null) { e = e.touches[e.touches.length - 1] }
 
-
-
         result.stickLeft = e.clientX - 0.5 * parseInt(util.getStyle(stick).width) - parseInt(util.getStyle(zone).left);// inner.style.left
         result.stickTop = e.clientY - 0.5 * parseInt(util.getStyle(stick).height) - parseInt(util.getStyle(zone).top);// inner.style.top
         result.stickOffsetLeft = result.stickLeft - originX;
@@ -117,7 +115,7 @@ var stickInit = function (conf) {
             //平移矩阵
             translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
             translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
-            translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
+            // translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
             //沿着y轴旋转矩阵
             rotateMatrix4[0] = Math.cos(result.rad);
             rotateMatrix4[2] = -Math.sin(result.rad);
