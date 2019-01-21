@@ -2,21 +2,21 @@
 // import util from 'util';
 
 //stick初始化
-var stickInit = function (conf) {
+var Stick = function (conf) {
 
     //变换目标
     var target = conf.target;
+    this.target=target;
     if (!target) {
         console.error('There is nothing being select.');
         return false;
     }
 
-
-
     //创建DOM
     var zone = document.createElement('div');
+    this.zone=zone;
     zone.setAttribute('data-role', 'zone');
-    zone.style.cssText = 'position: absolute;background-image:url(\'./stick_bg.svg\');border-radius:50%;background-color: rgba(0,0,0,0.5);';
+    zone.style.cssText = 'position: absolute;background-image:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4wLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0i5Zu+5bGCXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDI0IDEwMjQ7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtvcGFjaXR5OjAuNjt9DQoJLnN0MXtmaWxsOiNGRkZGRkY7fQ0KCS5zdDJ7ZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDo0O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCjwvc3R5bGU+DQo8ZyBjbGFzcz0ic3QwIj4NCgk8Y2lyY2xlIGN4PSI1MTIiIGN5PSI1MTIiIHI9IjUxMiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiw0YzY4LjYsMCwxMzUuMSwxMy40LDE5Ny43LDM5LjljNjAuNSwyNS42LDExNC44LDYyLjIsMTYxLjUsMTA4LjljNDYuNyw0Ni43LDgzLjMsMTAxLDEwOC45LDE2MS41DQoJCWMyNi41LDYyLjYsMzkuOSwxMjkuMiwzOS45LDE5Ny43cy0xMy40LDEzNS4xLTM5LjksMTk3LjdjLTI1LjYsNjAuNS02Mi4yLDExNC44LTEwOC45LDE2MS41Yy00Ni43LDQ2LjctMTAxLDgzLjMtMTYxLjUsMTA4LjkNCgkJYy02Mi42LDI2LjUtMTI5LjIsMzkuOS0xOTcuNywzOS45cy0xMzUuMS0xMy40LTE5Ny43LTM5LjljLTYwLjUtMjUuNi0xMTQuOC02Mi4yLTE2MS41LTEwOC45Yy00Ni43LTQ2LjctODMuMy0xMDEtMTA4LjktMTYxLjUNCgkJQzE3LjQsNjQ3LjEsNCw1ODAuNiw0LDUxMnMxMy40LTEzNS4xLDM5LjktMTk3LjdjMjUuNi02MC41LDYyLjItMTE0LjgsMTA4LjktMTYxLjVjNDYuNy00Ni43LDEwMS04My4zLDE2MS41LTEwOC45DQoJCUMzNzYuOSwxNy40LDQ0My40LDQsNTEyLDQgTTUxMiwwQzIyOS4yLDAsMCwyMjkuMiwwLDUxMnMyMjkuMiw1MTIsNTEyLDUxMnM1MTItMjI5LjIsNTEyLTUxMlM3OTQuOCwwLDUxMiwwTDUxMiwweiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiwxMDYuNGM1NC44LDAsMTA3LjksMTAuNywxNTcuOSwzMS45YzQ4LjMsMjAuNCw5MS43LDQ5LjcsMTI4LjksODYuOXM2Ni41LDgwLjYsODYuOSwxMjguOQ0KCQljMjEuMSw1MCwzMS45LDEwMy4xLDMxLjksMTU3LjlzLTEwLjcsMTA3LjktMzEuOSwxNTcuOWMtMjAuNCw0OC4zLTQ5LjcsOTEuNy04Ni45LDEyOC45cy04MC42LDY2LjUtMTI4LjksODYuOQ0KCQljLTUwLDIxLjEtMTAzLjEsMzEuOS0xNTcuOSwzMS45cy0xMDcuOS0xMC43LTE1Ny45LTMxLjljLTQ4LjMtMjAuNC05MS43LTQ5LjctMTI4LjktODYuOXMtNjYuNS04MC42LTg2LjktMTI4LjkNCgkJYy0yMS4xLTUwLTMxLjktMTAzLjEtMzEuOS0xNTcuOXMxMC43LTEwNy45LDMxLjktMTU3LjljMjAuNC00OC4zLDQ5LjctOTEuNyw4Ni45LTEyOC45czgwLjYtNjYuNSwxMjguOS04Ni45DQoJCUM0MDQuMSwxMTcuMSw0NTcuMiwxMDYuNCw1MTIsMTA2LjQgTTUxMiwxMDIuNGMtMjI2LjIsMC00MDkuNiwxODMuNC00MDkuNiw0MDkuNlMyODUuOCw5MjEuNiw1MTIsOTIxLjZTOTIxLjYsNzM4LjIsOTIxLjYsNTEyDQoJCVM3MzguMiwxMDIuNCw1MTIsMTAyLjRMNTEyLDEwMi40eiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiwyMDguOGM0MC45LDAsODAuNiw4LDExOCwyMy44YzM2LjEsMTUuMyw2OC41LDM3LjEsOTYuNCw2NWMyNy44LDI3LjgsNDkuNyw2MC4zLDY1LDk2LjQNCgkJYzE1LjgsMzcuNCwyMy44LDc3LjEsMjMuOCwxMThzLTgsODAuNi0yMy44LDExOGMtMTUuMywzNi4xLTM3LjEsNjguNS02NSw5Ni40Yy0yNy44LDI3LjgtNjAuMyw0OS43LTk2LjQsNjUNCgkJYy0zNy40LDE1LjgtNzcuMSwyMy44LTExOCwyMy44cy04MC42LTgtMTE4LTIzLjhjLTM2LjEtMTUuMy02OC41LTM3LjEtOTYuNC02NXMtNDkuNy02MC4zLTY1LTk2LjRjLTE1LjgtMzcuNC0yMy44LTc3LjEtMjMuOC0xMTgNCgkJczgtODAuNiwyMy44LTExOGMxNS4zLTM2LjEsMzcuMS02OC41LDY1LTk2LjRjMjcuOC0yNy44LDYwLjMtNDkuNyw5Ni40LTY1QzQzMS40LDIxNi44LDQ3MS4xLDIwOC44LDUxMiwyMDguOCBNNTEyLDIwNC44DQoJCWMtMTY5LjcsMC0zMDcuMiwxMzcuNS0zMDcuMiwzMDcuMlMzNDIuMyw4MTkuMiw1MTIsODE5LjJTODE5LjIsNjgxLjcsODE5LjIsNTEyUzY4MS43LDIwNC44LDUxMiwyMDQuOEw1MTIsMjA0Ljh6Ii8+DQo8L2c+DQo8Zz4NCgk8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNTEyLDMxMS4yYzI3LjEsMCw1My40LDUuMyw3OC4yLDE1LjhjMjMuOSwxMC4xLDQ1LjQsMjQuNiw2My44LDQzYzE4LjQsMTguNCwzMi45LDM5LjksNDMsNjMuOA0KCQljMTAuNSwyNC44LDE1LjgsNTEuMSwxNS44LDc4LjJzLTUuMyw1My40LTE1LjgsNzguMmMtMTAuMSwyMy45LTI0LjYsNDUuNC00Myw2My44Yy0xOC40LDE4LjQtMzkuOSwzMi45LTYzLjgsNDMNCgkJYy0yNC44LDEwLjUtNTEuMSwxNS44LTc4LjIsMTUuOHMtNTMuNC01LjMtNzguMi0xNS44Yy0yMy45LTEwLjEtNDUuNC0yNC42LTYzLjgtNDNzLTMyLjktMzkuOS00My02My44DQoJCWMtMTAuNS0yNC44LTE1LjgtNTEuMS0xNS44LTc4LjJzNS4zLTUzLjQsMTUuOC03OC4yYzEwLjEtMjMuOSwyNC42LTQ1LjQsNDMtNjMuOHMzOS45LTMyLjksNjMuOC00Mw0KCQlDNDU4LjYsMzE2LjUsNDg0LjksMzExLjIsNTEyLDMxMS4yIE01MTIsMzA3LjJjLTExMy4xLDAtMjA0LjgsOTEuNy0yMDQuOCwyMDQuOFMzOTguOSw3MTYuOCw1MTIsNzE2LjhTNzE2LjgsNjI1LjEsNzE2LjgsNTEyDQoJCVM2MjUuMSwzMDcuMiw1MTIsMzA3LjJMNTEyLDMwNy4yeiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiw0MTMuNmM1NC4zLDAsOTguNCw0NC4xLDk4LjQsOTguNHMtNDQuMSw5OC40LTk4LjQsOTguNGMtNTQuMywwLTk4LjQtNDQuMS05OC40LTk4LjQNCgkJUzQ1Ny43LDQxMy42LDUxMiw0MTMuNiBNNTEyLDQwOS42Yy01Ni42LDAtMTAyLjQsNDUuOC0xMDIuNCwxMDIuNFM0NTUuNCw2MTQuNCw1MTIsNjE0LjRTNjE0LjQsNTY4LjYsNjE0LjQsNTEyDQoJCVM1NjguNiw0MDkuNiw1MTIsNDA5LjZMNTEyLDQwOS42eiIvPg0KPC9nPg0KPGc+DQoJPGxpbmUgY2xhc3M9InN0MiIgeDE9IjMiIHkxPSI1MTIiIHgyPSIxMDIyIiB5Mj0iNTEyIi8+DQo8L2c+DQo8bGluZSBjbGFzcz0ic3QyIiB4MT0iNTEyIiB5MT0iMyIgeDI9IjUxMiIgeTI9IjEwMjEiLz4NCjwvc3ZnPg0K");border-radius:50%;background-color: rgba(0,0,0,0.5);';
     zone.style.width = conf.zoneSize + 'px';//'500px';
     zone.style.height = conf.zoneSize + 'px';//'500px';
     //设置zone在视口中的位置
@@ -25,15 +25,15 @@ var stickInit = function (conf) {
     if (conf.position[2] !== null) zone.style.bottom = conf.position[2] + 'px';
     if (conf.position[3] !== null) zone.style.left = conf.position[3] + 'px';
 
-
     var stick = document.createElement('div');
+    this.stick=stick;
     stick.setAttribute('data-role', 'stick');
     stick.style.cssText = 'background-color: rgba(255,255,255,0.5);position: absolute;box-shadow: 2px 2px 10px rgba(0,0,0,0.5);border-radius: 50%;';
     stick.style.width = conf.stickSize + 'px';//'200px';
     stick.style.height = conf.stickSize + 'px';//'200px';
     stick.style.top = (conf.zoneSize - conf.stickSize) / 2 + 'px';//'150px';
     stick.style.left = (conf.zoneSize - conf.stickSize) / 2 + 'px';
-    zone.appendChild(stick)
+    zone.appendChild(stick);
     document.body.appendChild(zone);
 
     // //获得外部容器（定界框）
@@ -43,15 +43,6 @@ var stickInit = function (conf) {
 
     var originX = parseInt(stick.style.left);
     var originY = parseInt(stick.style.top);
-    //用于计算当拖动超出范围时手柄的锁定坐标（来自nipplejs）
-    var findLockedCoord = function (position, distance, radius) {
-        var b = [];
-        b.x = /*position.x - */distance * Math.cos(radius);
-        b.y =/*position.y - */distance * Math.sin(radius);
-        //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
-        return b;
-    };
-    //
 
     var result = {
         stickLeft: undefined,
@@ -66,6 +57,17 @@ var stickInit = function (conf) {
         transformMatrix: undefined                    //变换矩阵
     };
 
+    this.result=result;
+    
+    //用于计算当拖动超出范围时手柄的锁定坐标（来自nipplejs）
+    var findLockedCoord = function (position, distance, radius) {
+        var b = [];
+        b.x = /*position.x - */distance * Math.cos(radius);
+        b.y =/*position.y - */distance * Math.sin(radius);
+        //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
+        return b;
+    };
+    //
     //处理鼠标移动
     var mouseMoveHandler = function (e) {
         //判断是否为触摸事件
@@ -126,13 +128,8 @@ var stickInit = function (conf) {
                 rotateMatrix3[4] = Math.cos(result.rad);
 
                 //矩阵相乘
-                //console.log(util.parseTransformMatrix(util.getStyle(target).transform));
-                // result.transformMatrix = util.matrixMuitply(rawMatrix,util.matrixMuitply(rotateMatrix3,translateMatrix3));
                 result.transformMatrix = util.matrixMuitply(rawMatrix, translateMatrix3);
 
-                // result.transformMatrix = util.matrixMuitply(translateMatrix3, rotateMatrix3);
-
-                // console.log([rawMatrix, translateMatrix3, rotateMatrix3, result.transformMatrix])
                 result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
 
             } else if (rawMatrix.length == 16) {
@@ -168,13 +165,6 @@ var stickInit = function (conf) {
             } else {
                 console.log('矩阵无效')
             }
-            // if (console.table) {
-            //     console.table(result);
-            // } else {
-            //     console.log(result)
-            // }
-
-            //console.log(result)
         }else if (target instanceof THREE.Object3D===true) {
             //矩阵相关部分
             var translateMatrix4 = util.originMatrix4.slice(0);
@@ -202,48 +192,21 @@ var stickInit = function (conf) {
 
         }
 
-
-        // if (inner.offsetTop > 300) {
-        //     inner.style.top = 300
-        // }
-        // if (inner.offsetTop < 0) {
-        //     inner.style.top = 0
-        // }
-        // if (inner.offsetLeft > 300) {
-        //     inner.style.left = 300
-        // }
-        // if (inner.offsetLeft < 0) {
-        //     inner.style.left = 0
-        // }
-        // console.log(inner.style.left + ' ' + inner.style.top)
-        // console.log(inner.offsetLeft + ' ' + inner.offsetTop);
-        // console.log(e.clientX + ' ' + e.clientY);
-        // var disX, disY;
-        // disX = e.clientX - inner.offsetLeft;
-        // disY = e.clientY - inner.offsetTop;
-        // inner.style.left = e.clientX - disX + 'px';
-        // inner.style.top = e.clientY - disY + 'px';
-        // console.log(disX+' '+disY);
         return result;
     }
 
     //处理鼠标事件
     function mouseHandler(e) {
-        // if (e.target !== inner) {
-        //     //console.log(e)
-        //     return;
-        // }
-
+        e.preventDefault();
         switch (e.type) {
             case 'mousedown': {
-                e.preventDefault();
                 // console.log('mousedown');
                 zone.addEventListener('mousemove', mouseHandler, false);
                 zone.addEventListener('mouseup', mouseHandler, false);
                 break;
             };
+            case 'touchmove':
             case 'mousemove': {
-                e.preventDefault();
                 var result = mouseMoveHandler(e);
                 stick.style.left = result.stickLeft + 'px';
                 stick.style.top = result.stickTop + 'px';
@@ -253,7 +216,6 @@ var stickInit = function (conf) {
                 break;
             };
             case 'mouseup': {
-                e.preventDefault();
                 // console.log('mouseup')
                 stick.style.left = originX + 'px';
                 stick.style.top = originY + 'px';
@@ -262,23 +224,12 @@ var stickInit = function (conf) {
                 break;
             };
             case 'touchstart': {
-                e.preventDefault();
                 // console.log('mousedown');
                 zone.addEventListener('touchmove', mouseHandler, false);
                 zone.addEventListener('touchup', mouseHandler, false);
                 break;
             };
-            case 'touchmove': {
-                e.preventDefault();
-                var result = mouseMoveHandler(e);
-                stick.style.left = result.stickLeft + 'px';
-                stick.style.top = result.stickTop + 'px';
-                target.style.transform = result.cssTransformText;
-                return result;
-                break;
-            };
             case 'touchend': {
-                e.preventDefault();
                 // console.log('mouseup')
                 stick.style.left = originX + 'px';
                 stick.style.top = originY + 'px';
