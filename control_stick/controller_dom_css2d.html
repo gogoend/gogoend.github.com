@@ -48,9 +48,9 @@
             stickSize: 40,//内部尺寸
             position: [null, 30, 30, null],//位置
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
-            moveFactor: 0.4,//移动因数
+            moveFactor: 0.05,//移动因数
         }
-        var a=new stickInit(stickConfig);
+        var a=new Stick(stickConfig);
         
 
 
@@ -59,9 +59,9 @@
             stickSize: 40,//内部尺寸
             position: [null, null, 30, 30],//位置
             target: document.querySelector('[data-role=target2]'),//控制目标：DOM或THREE.Object3D
-            moveFactor: 0.41,//移动因数
+            moveFactor: 0.1,//移动因数
         }
-        var b=new stickInit(stickConfig2);
+        var b=new Stick(stickConfig2);
 
     </script>
 </body>

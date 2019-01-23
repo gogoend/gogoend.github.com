@@ -28,6 +28,7 @@
             position: absolute;
             width: 200px;
             height: 200px;
+            opacity: 0.6;
         }
 
         .back {
@@ -99,24 +100,26 @@
     <script>
         //stick配置
         var stickConfig = {
+            type:'rotateX',
             zoneSize: 100,//外部尺寸
             stickSize: 40,//内部尺寸
             position: [null, 30, 30, null],//位置
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
             moveFactor: 0.4,//移动因数
         }
-        var a = new stickInit(stickConfig);
+        var a = new Stick(stickConfig);
 
 
 
         var stickConfig2 = {
+            type:'rotateX',
             zoneSize: 150,//外部尺寸
             stickSize: 40,//内部尺寸
             position: [null, null, 30, 30],//位置
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
             moveFactor: 0.005,//移动因数
         }
-        var b = new stickInit(stickConfig2);
+        var b = new Stick(stickConfig2);
 
     </script>
 </body>

@@ -24,13 +24,21 @@
 
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        var renderer = new THREE.WebGLRenderer();
+        var renderer = new THREE.WebGLRenderer({
+            "antialias":true
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
+
         var geometry = new THREE.BoxGeometry(1, 1, 1);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        var material = new THREE.MeshNormalMaterial();
         var cube = new THREE.Mesh(geometry, material);
         scene.add(cube);
+
+        var cube2 = new THREE.Mesh(geometry, material);
+        scene.add(cube2);
+        cube2.position.x=2;
+
         camera.position.z = 5;
         function animate() {
             requestAnimationFrame(animate);
@@ -46,11 +54,12 @@
 
         //stick配置
         var stickConfig = {
+            type:'rotateZ',
             zoneSize: 200,//外部尺寸
             stickSize: 40,//内部尺寸
             position: [null, 30, 30, null],//位置
             target: cube,//控制目标：DOM或THREE.Object3D
-            moveFactor: 0.0000000000000001,//移动因数
+            moveFactor: 0.9,//移动因数
         }
         var a = new Stick(stickConfig);
 
