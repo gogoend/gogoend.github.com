@@ -2,15 +2,8 @@
 // import util from 'util';
 
 //stick初始化
-// var Stick = function (conf) {
-//     var _this = this;
-//     _this.uuid = util.uuid();
-//     _this.conf = conf;
-
-// }
 var Stick = function (conf) {
 
-    this.uuid = util.uuid();
     //变换目标
     var target = conf.target;
     this.target = target;
@@ -78,15 +71,7 @@ var Stick = function (conf) {
     //处理鼠标移动
     var mouseMoveHandler = function (e) {
         //判断是否为触摸事件
-        if (e.type.match('touch') !== null) {
-            console.log(e.touches);
-
-            //判断
-            e = e.touches[e.touches.length - 1];
-            if (false) {
-                return 0;
-            }
-        }
+        if (e.type.match('touch') !== null) { e = e.touches[e.touches.length - 1] }
 
         result.stickLeft = e.clientX - 0.5 * parseInt(util.getStyle(stick).width) - parseInt(util.getStyle(zone).left);// inner.style.left
         result.stickTop = e.clientY - 0.5 * parseInt(util.getStyle(stick).height) - parseInt(util.getStyle(zone).top);// inner.style.top
@@ -122,28 +107,27 @@ var Stick = function (conf) {
             // result.rad;
             // result.degOffset;
         }
+        var mmp=util.matrixMuitply; 
 
         if (target instanceof Element || target instanceof THREE.Object3D) {
+            
             //原始矩阵
             var rawMatrix = target instanceof Element ? util.parseTransformMatrix(util.getStyle(target).transform) : target.matrixWorld.elements.slice(0);
-            if ((rawMatrix.length !== 9 && rawMatrix.length !== 16) || !rawMatrix.length || !rawMatrix) {
-                console.log('矩阵无效')
-            }
             //console.log(rawMatrix);
 
             if (rawMatrix.length == 9) {
-                console.log('2D');
                 //初始化原矩阵
                 var translateMatrix3 = util.originMatrix3.slice(0);
                 var rotateMatrix3 = util.originMatrix3.slice(0);
                 //平移矩阵
                 translateMatrix3[6] = result.stickOffsetLeft * conf.moveFactor;
                 translateMatrix3[7] = result.stickOffsetTop * conf.moveFactor;
+
                 //旋转矩阵
-                rotateMatrix3[0] = Math.cos(result.rad);
-                rotateMatrix3[1] = -Math.sin(result.rad);
-                rotateMatrix3[3] = Math.sin(result.rad);
-                rotateMatrix3[4] = Math.cos(result.rad);
+                rotateMatrix3[0] = Math.cos(result.rad) * conf.moveFactor;
+                rotateMatrix3[1] = -Math.sin(result.rad) * conf.moveFactor;
+                rotateMatrix3[3] = Math.sin(result.rad) * conf.moveFactor;
+                rotateMatrix3[4] = Math.cos(result.rad) * conf.moveFactor;
 
                 //矩阵相乘
                 result.transformMatrix = util.matrixMuitply(rawMatrix, translateMatrix3);
@@ -154,16 +138,17 @@ var Stick = function (conf) {
                 console.log('3D');
                 //初始化原矩阵
                 var translateMatrix4 = util.originMatrix4.slice(0);
-                var rotateMatrix4x = util.originMatrix4.slice(0), rotateMatrix4y = util.originMatrix4.slice(0), rotateMatrix4z = util.originMatrix4.slice(0);
+                var rotateMatrix4x = util.originMatrix4.slice(0),
+                    rotateMatrix4y = util.originMatrix4.slice(0),
+                    rotateMatrix4z = util.originMatrix4.slice(0);
                 var rotateMatrix4;
-                var mmp = util.matrixMuitply;
-
                 /*
                     0 , 1 , 2 , 3 ,
                 m = 4 , 5 , 6 , 7 ,
                     8 , 9 , 10, 11,
                     12, 13, 14, 15 
                 */
+
                 //平移矩阵
                 translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
                 translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
@@ -185,8 +170,8 @@ var Stick = function (conf) {
                     || conf.type == 'rotateZXY'
                     || conf.type == 'rotateZYX') {
                     rotateMatrix4x[5] = Math.cos(result.rad) * conf.moveFactor;
-                    rotateMatrix4x[6] = -Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4x[9] = Math.sin(result.rad) * conf.moveFactor;
+                    rotateMatrix4x[6] = Math.sin(result.rad) * conf.moveFactor;
+                    rotateMatrix4x[9] = -Math.sin(result.rad) * conf.moveFactor;
                     rotateMatrix4x[10] = Math.cos(result.rad) * conf.moveFactor;
                 }
 
@@ -223,56 +208,55 @@ var Stick = function (conf) {
                     || conf.type == 'rotateZXY'
                     || conf.type == 'rotateZYX') {
                     rotateMatrix4z[0] = Math.cos(result.rad) * conf.moveFactor;
-                    rotateMatrix4z[1] = -Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4z[4] = Math.sin(result.rad) * conf.moveFactor;
+                    rotateMatrix4z[1] = Math.sin(result.rad) * conf.moveFactor;
+                    rotateMatrix4z[4] = -Math.sin(result.rad) * conf.moveFactor;
                     rotateMatrix4z[5] = Math.cos(result.rad) * conf.moveFactor;
                 }
 
-            }
-            //旋转顺序以及方式
-            switch (conf.type) {
-                case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
-                case 'rotateY': rotateMatrix4 = rotateMatrix4y; break;
-                case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
+                //旋转顺序以及方式
+                switch (conf.type) {
+                    case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
+                    case 'rotateY': rotateMatrix4 = rotateMatrix4y; break;
+                    case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
 
-                case 'rotateXY': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4y); break;
-                case 'rotateXZ': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4z); break;
-                case 'rotateYX': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4x); break;
-                case 'rotateYZ': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4z); break;
-                case 'rotateZX': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4x); break;
-                case 'rotateZY': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4y); break;
+                    case 'rotateXY': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4y); break;
+                    case 'rotateXZ': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4z); break;
+                    case 'rotateYX': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4x); break;
+                    case 'rotateYZ': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4z); break;
+                    case 'rotateZX': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4x); break;
+                    case 'rotateZY': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4y); break;
 
-                case 'rotateXYZ': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4y), rotateMatrix4z); break;
-                case 'rotateXZY': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4z), rotateMatrix4y); break;
-                case 'rotateYXZ': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4x), rotateMatrix4z); break;
-                case 'rotateYZX': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4z), rotateMatrix4x); break;
-                case 'rotateZXY': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4x), rotateMatrix4y); break;
-                case 'rotateZYX': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x); break;
+                    case 'rotateXYZ': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4y), rotateMatrix4z); break;
+                    case 'rotateXZY': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4z), rotateMatrix4y); break;
+                    case 'rotateYXZ': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4x), rotateMatrix4z); break;
+                    case 'rotateYZX': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4z), rotateMatrix4x); break;
+                    case 'rotateZXY': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4x), rotateMatrix4y); break;
+                    case 'rotateZYX': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x); break;
 
-            }
+                }
+                console.log(rotateMatrix4);
 
-            //result.transformMatrix = rotateMatrix4;
-
-            if (target instanceof Element) {
-                //矩阵相乘
-                result.transformMatrix = mmp(rawMatrix, rotateMatrix4);
-                result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ',' + result.transformMatrix[8] + ',' + result.transformMatrix[9] + ',' + result.transformMatrix[10] + ',' + result.transformMatrix[11] + ',' + result.transformMatrix[12] + ',' + result.transformMatrix[13] + ',' + result.transformMatrix[14] + ',' + result.transformMatrix[15] + ')';
-                console.log();
-            } else if (target instanceof THREE.Object3D) {
-                //矩阵相乘
-                result.transformMatrix = rotateMatrix4;
-                result.transformMatrixList = new THREE.Matrix4();
-                var m = result.transformMatrix;
-                result.transformMatrixList.set(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
-                // console.log(...result.transformMatrix);
-                // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
-            } else {
-                console.error('目标元素不支持，必须为Element或THREE.Object3D。');
+                if (target instanceof Element) {
+                    //矩阵相乘
+                    result.transformMatrix = mmp(rawMatrix, rotateMatrix4);
+                    result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ',' + result.transformMatrix[8] + ',' + result.transformMatrix[9] + ',' + result.transformMatrix[10] + ',' + result.transformMatrix[11] + ',' + result.transformMatrix[12] + ',' + result.transformMatrix[13] + ',' + result.transformMatrix[14] + ',' + result.transformMatrix[15] + ')';
+                    console.log();
+                } else if (target instanceof THREE.Object3D) {
+                    //矩阵相乘
+                    result.transformMatrix = rotateMatrix4;
+                    console.log(rotateMatrix4);
+                    result.transformMatrixList = new THREE.Matrix4();
+                    var m = result.transformMatrix;
+                    result.transformMatrixList.set(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
+                    // console.log(...result.transformMatrix);
+                    // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
+                } else {
+                    console.error('目标元素不支持，必须为Element或THREE.Object3D。');
+                }
             }
         }
         return result;
     }
-
 
     //处理鼠标事件
     function mouseHandler(e) {
