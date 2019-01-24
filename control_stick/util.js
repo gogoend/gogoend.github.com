@@ -1,6 +1,22 @@
 "use strict";
 //范围内随机数产生器
 var util = {
+    //字符串乱序（类似php同名函数）
+    // var strShuffle=function(str){
+    //     var strArray=[];
+    //     strArray.length=str.length;
+    //     for(var i=0;i<strArray.length;i++){
+    //         var index=rand(0,strArray.length-1,true)
+    //         var char=str.substring(i,i+1);
+    //         while(strArray[index]===undefined){
+    //             index=rand(0,strArray.length-1,true)
+    //             strArray[index]=char;
+    //             console.log(strArray);
+    //         }
+    //     }
+    //     console.log(strArray.join());
+    // },
+    //范围内取随机数
     rand: function (min, max, ifInt) {
         if (ifInt == true) {
             return Math.floor(Math.random() * (max - min) + min);
@@ -14,7 +30,7 @@ var util = {
         var digit = '';
         var point;
         for (var i = 0; i < 32; i++) {
-            point = rand(0, charPool.length, true);
+            point = util.rand(0, charPool.length, true);
             digit += charPool.charAt(point);
         }
         return digit;
