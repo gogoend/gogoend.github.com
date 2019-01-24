@@ -107,10 +107,10 @@ var Stick = function (conf) {
             // result.rad;
             // result.degOffset;
         }
-        var mmp=util.matrixMuitply; 
+        var mmp = util.matrixMuitply;
 
         if (target instanceof Element || target instanceof THREE.Object3D) {
-            
+
             //原始矩阵
             var rawMatrix = target instanceof Element ? util.parseTransformMatrix(util.getStyle(target).transform) : target.matrixWorld.elements.slice(0);
             //console.log(rawMatrix);
@@ -169,10 +169,10 @@ var Stick = function (conf) {
                     || conf.type == 'rotateYZX'
                     || conf.type == 'rotateZXY'
                     || conf.type == 'rotateZYX') {
-                    rotateMatrix4x[5] = Math.cos(result.rad) * conf.moveFactor;
-                    rotateMatrix4x[6] = Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4x[9] = -Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4x[10] = Math.cos(result.rad) * conf.moveFactor;
+                    rotateMatrix4x[5] = Math.cos(result.rad);
+                    rotateMatrix4x[6] = Math.sin(result.rad);
+                    rotateMatrix4x[9] = -Math.sin(result.rad);
+                    rotateMatrix4x[10] = Math.cos(result.rad);
                 }
 
                 //沿着y轴旋转矩阵
@@ -188,10 +188,10 @@ var Stick = function (conf) {
                     || conf.type == 'rotateYZX'
                     || conf.type == 'rotateZXY'
                     || conf.type == 'rotateZYX') {
-                    rotateMatrix4y[0] = Math.cos(result.rad) * conf.moveFactor;
-                    rotateMatrix4y[2] = -Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4y[8] = Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4y[10] = Math.cos(result.rad) * conf.moveFactor;
+                    rotateMatrix4y[0] = Math.cos(result.rad);
+                    rotateMatrix4y[2] = -Math.sin(result.rad);
+                    rotateMatrix4y[8] = Math.sin(result.rad);
+                    rotateMatrix4y[10] = Math.cos(result.rad);
                 }
 
                 //沿着z轴的旋转矩阵
@@ -207,10 +207,10 @@ var Stick = function (conf) {
                     || conf.type == 'rotateYZX'
                     || conf.type == 'rotateZXY'
                     || conf.type == 'rotateZYX') {
-                    rotateMatrix4z[0] = Math.cos(result.rad) * conf.moveFactor;
-                    rotateMatrix4z[1] = Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4z[4] = -Math.sin(result.rad) * conf.moveFactor;
-                    rotateMatrix4z[5] = Math.cos(result.rad) * conf.moveFactor;
+                    rotateMatrix4z[0] = Math.cos(result.rad);
+                    rotateMatrix4z[1] = Math.sin(result.rad);
+                    rotateMatrix4z[4] = -Math.sin(result.rad);
+                    rotateMatrix4z[5] = Math.cos(result.rad);
                 }
 
                 //旋转顺序以及方式
