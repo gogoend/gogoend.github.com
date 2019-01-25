@@ -66,7 +66,7 @@
 
 <body>
     <div class="scene">
-        <ul data-role="target" class="cube" style="transform: rotateX(45deg) rotateY(45deg) rotateZ(45deg)">
+        <ul data-role="target" class="cube" style="">
             <li class="side back"></li>
             <li class="side left"></li>
             <li class="side right"></li>
@@ -100,9 +100,9 @@
     <script>
         //stick配置
         var stickConfig = {
-            type:'rotateX',
+            type:'translateX',
             zoneSize: 100,//外部尺寸
-            stickSize: 40,//内部尺寸
+            stickSize: 60,//内部尺寸
             position: [null, 30, 30, null],//位置
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
             moveFactor: 0.4,//移动因数
@@ -112,12 +112,12 @@
 
 
         var stickConfig2 = {
-            type:'rotateX',
+            type:'droneRCRight',
             zoneSize: 150,//外部尺寸
             stickSize: 40,//内部尺寸
             position: [null, null, 30, 30],//位置
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
-            moveFactor: 0.005,//移动因数
+            moveFactor: 0.5,//移动因数
         }
         var b = new Stick(stickConfig2);
 

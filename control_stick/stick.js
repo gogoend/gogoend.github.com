@@ -5,7 +5,7 @@
 class Stick {
     constructor(conf) {
         //变换目标
-        this.conf=conf;
+        this.conf = conf;
         var target = conf.target;
         this.target = target;
         if (!target) {
@@ -16,6 +16,7 @@ class Stick {
         var zone = document.createElement('div');
         this.zone = zone;
         zone.setAttribute('data-role', 'zone');
+        zone.setAttribute('data-conf-type',this.conf.type);
         zone.style.cssText = 'position: absolute;background-image:url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMi4wLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0i5Zu+5bGCXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxMDI0IDEwMjQ7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtvcGFjaXR5OjAuNjt9DQoJLnN0MXtmaWxsOiNGRkZGRkY7fQ0KCS5zdDJ7ZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDo0O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCjwvc3R5bGU+DQo8ZyBjbGFzcz0ic3QwIj4NCgk8Y2lyY2xlIGN4PSI1MTIiIGN5PSI1MTIiIHI9IjUxMiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiw0YzY4LjYsMCwxMzUuMSwxMy40LDE5Ny43LDM5LjljNjAuNSwyNS42LDExNC44LDYyLjIsMTYxLjUsMTA4LjljNDYuNyw0Ni43LDgzLjMsMTAxLDEwOC45LDE2MS41DQoJCWMyNi41LDYyLjYsMzkuOSwxMjkuMiwzOS45LDE5Ny43cy0xMy40LDEzNS4xLTM5LjksMTk3LjdjLTI1LjYsNjAuNS02Mi4yLDExNC44LTEwOC45LDE2MS41Yy00Ni43LDQ2LjctMTAxLDgzLjMtMTYxLjUsMTA4LjkNCgkJYy02Mi42LDI2LjUtMTI5LjIsMzkuOS0xOTcuNywzOS45cy0xMzUuMS0xMy40LTE5Ny43LTM5LjljLTYwLjUtMjUuNi0xMTQuOC02Mi4yLTE2MS41LTEwOC45Yy00Ni43LTQ2LjctODMuMy0xMDEtMTA4LjktMTYxLjUNCgkJQzE3LjQsNjQ3LjEsNCw1ODAuNiw0LDUxMnMxMy40LTEzNS4xLDM5LjktMTk3LjdjMjUuNi02MC41LDYyLjItMTE0LjgsMTA4LjktMTYxLjVjNDYuNy00Ni43LDEwMS04My4zLDE2MS41LTEwOC45DQoJCUMzNzYuOSwxNy40LDQ0My40LDQsNTEyLDQgTTUxMiwwQzIyOS4yLDAsMCwyMjkuMiwwLDUxMnMyMjkuMiw1MTIsNTEyLDUxMnM1MTItMjI5LjIsNTEyLTUxMlM3OTQuOCwwLDUxMiwwTDUxMiwweiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiwxMDYuNGM1NC44LDAsMTA3LjksMTAuNywxNTcuOSwzMS45YzQ4LjMsMjAuNCw5MS43LDQ5LjcsMTI4LjksODYuOXM2Ni41LDgwLjYsODYuOSwxMjguOQ0KCQljMjEuMSw1MCwzMS45LDEwMy4xLDMxLjksMTU3LjlzLTEwLjcsMTA3LjktMzEuOSwxNTcuOWMtMjAuNCw0OC4zLTQ5LjcsOTEuNy04Ni45LDEyOC45cy04MC42LDY2LjUtMTI4LjksODYuOQ0KCQljLTUwLDIxLjEtMTAzLjEsMzEuOS0xNTcuOSwzMS45cy0xMDcuOS0xMC43LTE1Ny45LTMxLjljLTQ4LjMtMjAuNC05MS43LTQ5LjctMTI4LjktODYuOXMtNjYuNS04MC42LTg2LjktMTI4LjkNCgkJYy0yMS4xLTUwLTMxLjktMTAzLjEtMzEuOS0xNTcuOXMxMC43LTEwNy45LDMxLjktMTU3LjljMjAuNC00OC4zLDQ5LjctOTEuNyw4Ni45LTEyOC45czgwLjYtNjYuNSwxMjguOS04Ni45DQoJCUM0MDQuMSwxMTcuMSw0NTcuMiwxMDYuNCw1MTIsMTA2LjQgTTUxMiwxMDIuNGMtMjI2LjIsMC00MDkuNiwxODMuNC00MDkuNiw0MDkuNlMyODUuOCw5MjEuNiw1MTIsOTIxLjZTOTIxLjYsNzM4LjIsOTIxLjYsNTEyDQoJCVM3MzguMiwxMDIuNCw1MTIsMTAyLjRMNTEyLDEwMi40eiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiwyMDguOGM0MC45LDAsODAuNiw4LDExOCwyMy44YzM2LjEsMTUuMyw2OC41LDM3LjEsOTYuNCw2NWMyNy44LDI3LjgsNDkuNyw2MC4zLDY1LDk2LjQNCgkJYzE1LjgsMzcuNCwyMy44LDc3LjEsMjMuOCwxMThzLTgsODAuNi0yMy44LDExOGMtMTUuMywzNi4xLTM3LjEsNjguNS02NSw5Ni40Yy0yNy44LDI3LjgtNjAuMyw0OS43LTk2LjQsNjUNCgkJYy0zNy40LDE1LjgtNzcuMSwyMy44LTExOCwyMy44cy04MC42LTgtMTE4LTIzLjhjLTM2LjEtMTUuMy02OC41LTM3LjEtOTYuNC02NXMtNDkuNy02MC4zLTY1LTk2LjRjLTE1LjgtMzcuNC0yMy44LTc3LjEtMjMuOC0xMTgNCgkJczgtODAuNiwyMy44LTExOGMxNS4zLTM2LjEsMzcuMS02OC41LDY1LTk2LjRjMjcuOC0yNy44LDYwLjMtNDkuNyw5Ni40LTY1QzQzMS40LDIxNi44LDQ3MS4xLDIwOC44LDUxMiwyMDguOCBNNTEyLDIwNC44DQoJCWMtMTY5LjcsMC0zMDcuMiwxMzcuNS0zMDcuMiwzMDcuMlMzNDIuMyw4MTkuMiw1MTIsODE5LjJTODE5LjIsNjgxLjcsODE5LjIsNTEyUzY4MS43LDIwNC44LDUxMiwyMDQuOEw1MTIsMjA0Ljh6Ii8+DQo8L2c+DQo8Zz4NCgk8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNTEyLDMxMS4yYzI3LjEsMCw1My40LDUuMyw3OC4yLDE1LjhjMjMuOSwxMC4xLDQ1LjQsMjQuNiw2My44LDQzYzE4LjQsMTguNCwzMi45LDM5LjksNDMsNjMuOA0KCQljMTAuNSwyNC44LDE1LjgsNTEuMSwxNS44LDc4LjJzLTUuMyw1My40LTE1LjgsNzguMmMtMTAuMSwyMy45LTI0LjYsNDUuNC00Myw2My44Yy0xOC40LDE4LjQtMzkuOSwzMi45LTYzLjgsNDMNCgkJYy0yNC44LDEwLjUtNTEuMSwxNS44LTc4LjIsMTUuOHMtNTMuNC01LjMtNzguMi0xNS44Yy0yMy45LTEwLjEtNDUuNC0yNC42LTYzLjgtNDNzLTMyLjktMzkuOS00My02My44DQoJCWMtMTAuNS0yNC44LTE1LjgtNTEuMS0xNS44LTc4LjJzNS4zLTUzLjQsMTUuOC03OC4yYzEwLjEtMjMuOSwyNC42LTQ1LjQsNDMtNjMuOHMzOS45LTMyLjksNjMuOC00Mw0KCQlDNDU4LjYsMzE2LjUsNDg0LjksMzExLjIsNTEyLDMxMS4yIE01MTIsMzA3LjJjLTExMy4xLDAtMjA0LjgsOTEuNy0yMDQuOCwyMDQuOFMzOTguOSw3MTYuOCw1MTIsNzE2LjhTNzE2LjgsNjI1LjEsNzE2LjgsNTEyDQoJCVM2MjUuMSwzMDcuMiw1MTIsMzA3LjJMNTEyLDMwNy4yeiIvPg0KPC9nPg0KPGc+DQoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTUxMiw0MTMuNmM1NC4zLDAsOTguNCw0NC4xLDk4LjQsOTguNHMtNDQuMSw5OC40LTk4LjQsOTguNGMtNTQuMywwLTk4LjQtNDQuMS05OC40LTk4LjQNCgkJUzQ1Ny43LDQxMy42LDUxMiw0MTMuNiBNNTEyLDQwOS42Yy01Ni42LDAtMTAyLjQsNDUuOC0xMDIuNCwxMDIuNFM0NTUuNCw2MTQuNCw1MTIsNjE0LjRTNjE0LjQsNTY4LjYsNjE0LjQsNTEyDQoJCVM1NjguNiw0MDkuNiw1MTIsNDA5LjZMNTEyLDQwOS42eiIvPg0KPC9nPg0KPGc+DQoJPGxpbmUgY2xhc3M9InN0MiIgeDE9IjMiIHkxPSI1MTIiIHgyPSIxMDIyIiB5Mj0iNTEyIi8+DQo8L2c+DQo8bGluZSBjbGFzcz0ic3QyIiB4MT0iNTEyIiB5MT0iMyIgeDI9IjUxMiIgeTI9IjEwMjEiLz4NCjwvc3ZnPg0K");border-radius:50%;background-color: rgba(0,0,0,0.5);';
         zone.style.width = conf.zoneSize + 'px'; //'500px';
         zone.style.height = conf.zoneSize + 'px'; //'500px';
@@ -73,12 +74,12 @@ class Stick {
     //添加事件
     addEvt() {
         //处理鼠标事件
-        var _this=this;
-        var zone = _this.zone, mouseMoveHandler = _this.mouseMoveHandler, stick = _this.stick,target=_this.target;
-        var originX=this.originX,originY=this.originY;
+        var _this = this;
+        var zone = _this.zone, mouseMoveHandler = _this.mouseMoveHandler, stick = _this.stick, target = _this.target;
+        var originX = this.originX, originY = this.originY;
         console.log(_this.stick);
         function mouseHandler(e) {
-            console.log(_this.zone);
+            // console.log(_this.zone);
             e.preventDefault();
             switch (e.type) {
                 case 'mousedown':
@@ -92,7 +93,7 @@ class Stick {
                 case 'touchmove':
                 case 'mousemove':
                     {
-                        var result = mouseMoveHandler(e,_this);
+                        var result = mouseMoveHandler(e, _this);
                         stick.style.left = result.stickLeft + 'px';
                         stick.style.top = result.stickTop + 'px';
                         if (target instanceof Element)
@@ -147,8 +148,8 @@ class Stick {
         //return result;
     };
     //处理鼠标移动
-    mouseMoveHandler(e,scope) {
-        var stick=scope.stick,zone=scope.zone,result=scope.result,originX=scope.originX,originY=scope.originY,target=scope.target,conf=scope.conf;
+    mouseMoveHandler(e, scope) {
+        var stick = scope.stick, zone = scope.zone, result = scope.result, originX = scope.originX, originY = scope.originY, target = scope.target, conf = scope.conf;
         console.log(scope);
         //判断是否为触摸事件
         if (e.type.match('touch') !== null) {
@@ -210,21 +211,75 @@ class Stick {
                 console.log('3D');
                 //初始化原矩阵
                 var translateMatrix4 = util.originMatrix4.slice(0);
-                var rotateMatrix4x = util.originMatrix4.slice(0), rotateMatrix4y = util.originMatrix4.slice(0), rotateMatrix4z = util.originMatrix4.slice(0);
-                var rotateMatrix4;
+                var rotateMatrix4 = util.originMatrix4.slice(0);
+                var rotateMatrix4x = util.originMatrix4.slice(0), 
+                    rotateMatrix4y = util.originMatrix4.slice(0), 
+                    rotateMatrix4z = util.originMatrix4.slice(0);
+                //四阶矩阵
                 /*
                     0 , 1 , 2 , 3 ,
                 m = 4 , 5 , 6 , 7 ,
                     8 , 9 , 10, 11,
                     12, 13, 14, 15
                 */
+
+                //右手坐标系
+                /*
+
+                             y               
+                             |         /     
+                             |       /      
+                             |     /       
+                             |   /        
+                             | /         
+                -------------|---------------x
+                           / |                
+                         /   |                
+                       /     |                
+                     /       |                
+                   /         |                
+                 z
+                
+                */
+
+                /*无人机飞控 美国手
+                左：x轴偏移控制机身自旋，y轴偏移控制上升下降
+                右：偏移控制平面内各个方向移动
+                */
+
+                /*
+
+                     ||            ||
+                     ||            ||
+                 ____||____________||____   
+                /                        \        
+                |   +---+        +---+    |       
+                |   | o |  [--]  | o |    |       
+                |   +---+        +---+    |       
+                |         _______         |       
+                +--------/       \--------+       
+
+                */
+
                 //平移矩阵
-                translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
-                translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
-                translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
+                if(conf.type=='translateX'){
+                    translateMatrix4[12] = result.stickOffsetTop * conf.moveFactor;
+                }
+                if(conf.type=='translateY'||conf.type=='droneRCLeft'){
+                    translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
+                }
+                if(conf.type=='translateZ'){
+                    translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
+                }
+                if(conf.type=='translateXZ'||conf.type=='droneRCRight'){
+                    translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
+                    translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;    
+                }
+
                 //旋转矩阵
+                //X-俯仰，Y-环视，Z-翻滚
                 //沿着x轴旋转矩阵
-                if (conf.type == 'rotateX'
+                if (conf.type == 'rotateX'||conf.type=='droneRCCamera'
                     || conf.type == 'rotateXY'
                     || conf.type == 'rotateXZ'
                     || conf.type == 'rotateYX'
@@ -241,7 +296,7 @@ class Stick {
                     rotateMatrix4x[10] = Math.cos(result.rad);
                 }
                 //沿着y轴旋转矩阵
-                if (conf.type == 'rotateY'
+                if (conf.type == 'rotateY'||conf.type=='droneRCLeft'
                     || conf.type == 'rotateXY'
                     || conf.type == 'rotateYX'
                     || conf.type == 'rotateYZ'
@@ -276,9 +331,11 @@ class Stick {
                 }
                 //旋转顺序以及方式
                 switch (conf.type) {
+                    case 'droneRCCamera':
                     case 'rotateX':
                         rotateMatrix4 = rotateMatrix4x;
                         break;
+                    case 'droneRCLeft':
                     case 'rotateY':
                         rotateMatrix4 = rotateMatrix4y;
                         break;
@@ -322,20 +379,23 @@ class Stick {
                         rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x);
                         break;
                 }
-                console.log(rotateMatrix4);
+                var tempResultMatrix4=mmp(translateMatrix4,rotateMatrix4);
                 if (target instanceof Element) {
                     //矩阵相乘
-                    result.transformMatrix = mmp(rawMatrix, rotateMatrix4);
+                    result.transformMatrix = mmp(rawMatrix, tempResultMatrix4);
                     result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ',' + result.transformMatrix[8] + ',' + result.transformMatrix[9] + ',' + result.transformMatrix[10] + ',' + result.transformMatrix[11] + ',' + result.transformMatrix[12] + ',' + result.transformMatrix[13] + ',' + result.transformMatrix[14] + ',' + result.transformMatrix[15] + ')';
                     console.log();
                 }
                 else if (target instanceof THREE.Object3D) {
                     //矩阵相乘
-                    result.transformMatrix = rotateMatrix4;
-                    console.log(rotateMatrix4);
+                    result.transformMatrix = tempResultMatrix4;
+                    // console.log(rotateMatrix4);
                     result.transformMatrixList = new THREE.Matrix4();
-                    var m = result.transformMatrix;
+                    var m = tempResultMatrix4;
+                    console.log(m);
                     result.transformMatrixList.set(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
+                    console.log(result.transformMatrixList);
+
                     // console.log(...result.transformMatrix);
                     // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
                 }
@@ -346,5 +406,4 @@ class Stick {
         }
         return result;
     };
-
 }

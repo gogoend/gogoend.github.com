@@ -48,6 +48,8 @@ var util = {
 
     //矩阵相乘
     matrixMuitply: function (m1, m2) {
+        // console.log(m1);
+        // console.log(m2);
         if (m1.length !== m2.length) {
             return NaN;
         }
@@ -115,7 +117,7 @@ var util = {
             return res;
         } else if (cssTransformText.match('none')) {
             // console.log('没有变换');
-            return util.originMatrix3;
+            return util.originMatrix4;
         } else {
             //console.log('CSS Transform matrix不合法')
             return false;
