@@ -143,15 +143,26 @@ var Stick = function (conf) {
                 var rotateMatrix4x = util.originMatrix4.slice(0),
                     rotateMatrix4y = util.originMatrix4.slice(0),
                     rotateMatrix4z = util.originMatrix4.slice(0);
+                
+                if(!(target instanceof Element)){
+                //原始位置移动到原点矩阵
                 var rawPosition=target.position;
                 var rawPositionMatrix=util.originMatrix4.slice(0);
 
+                rawPositionMatrix[12]=-target.position.x;
+                rawPositionMatrix[13]=-target.position.y;
+                rawPositionMatrix[14]=-target.position.z;
+                //console.log(rawPositionMatrix);
 
-                rawPositionMatrix[12]=rawPosition.x;
-                rawPositionMatrix[13]=rawPosition.y;
-                rawPositionMatrix[14]=rawPosition.z;
-                console.log(rawPositionMatrix);
+                //原点移动到原始位置矩阵
 
+                var rawPositionMatrix0=util.originMatrix4.slice(0);
+
+                rawPositionMatrix0[12]=target.position.x;
+                rawPositionMatrix0[13]=target.position.y;
+                rawPositionMatrix0[14]=target.position.z;
+                //console.log(rawPositionMatrix0);
+                }
 
                 //四阶矩阵
                 /*
@@ -200,20 +211,20 @@ var Stick = function (conf) {
                 */
 
                 //平移矩阵
-                // if (conf.type == 'translateX') {
+                // if (conf.type === 'translateX') {
                 //     translateMatrix4[12] = result.stickOffsetTop * conf.moveFactor;
                 // }
-                // if (conf.type == 'translateY' || conf.type == 'droneRCLeft') {
+                // if (conf.type === 'translateY' || conf.type == 'droneRCLeft') {
                 //     translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
                 // }
-                // if (conf.type == 'translateZ') {
+                // if (conf.type === 'translateZ') {
                 //     translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
                 // }
-                // if (conf.type == 'translateXZ' || conf.type == 'droneRCRight') {
+                // if (conf.type === 'translateXZ' || conf.type == 'droneRCRight') {
                 //     translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
                 //     translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
                 // }
-                // if (conf.type == 'translateXY') {
+                // if (conf.type === 'translateXY') {
                 //     translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
                 //     translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
                 // }
@@ -225,22 +236,19 @@ var Stick = function (conf) {
                 ) {
                     translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
                 }
-
                 if (
-                    conf.type == 'translateY'
+                    conf.type == 'translateY' ||conf.type == 'droneRCLeft'
                     || conf.type == 'translateXY'
                 ) {
                     translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
                 }
-
                 if (
                     conf.type == 'translateZ'
                     || conf.type == 'translateXZ' || conf.type == 'droneRCRight'
                 ) {
                     translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
                 }
-
-                console.log(translateMatrix4);
+                // console.log(translateMatrix4);
 
                 //旋转矩阵
                 //X-俯仰，Y-环视，Z-翻滚
@@ -310,41 +318,51 @@ var Stick = function (conf) {
 
                 //旋转顺序以及方式
                 switch (conf.type) {
-                    case 'rotateX': rotateMatrix4 = mmp(rotateMatrix4x,rawPositionMatrix); break;
-                    case 'rotateY': rotateMatrix4 = mmp(rotateMatrix4y,rawPositionMatrix); break;
-                    case 'rotateZ': rotateMatrix4 = mmp(rotateMatrix4z,rawPositionMatrix); break;
+                    case 'rotateX': rotateMatrix4 =   rotateMatrix4x; break;
+                    case 'rotateY': rotateMatrix4 =   rotateMatrix4y; break;
+                    case 'rotateZ': rotateMatrix4 =   rotateMatrix4z; break;
 
-                    case 'rotateXY': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4y),rawPositionMatrix); break;
-                    case 'rotateXZ': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4z),rawPositionMatrix); break;
-                    case 'rotateYX': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4x),rawPositionMatrix); break;
-                    case 'rotateYZ': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4z),rawPositionMatrix); break;
-                    case 'rotateZX': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4x),rawPositionMatrix); break;
-                    case 'rotateZY': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y),rawPositionMatrix); break;
+                    case 'rotateXY': rotateMatrix4 =  mmp(rotateMatrix4x, rotateMatrix4y); break;
+                    case 'rotateXZ': rotateMatrix4 =  mmp(rotateMatrix4x, rotateMatrix4z); break;
+                    case 'rotateYX': rotateMatrix4 =  mmp(rotateMatrix4y, rotateMatrix4x); break;
+                    case 'rotateYZ': rotateMatrix4 =  mmp(rotateMatrix4y, rotateMatrix4z); break;
+                    case 'rotateZX': rotateMatrix4 =  mmp(rotateMatrix4z, rotateMatrix4x); break;
+                    case 'rotateZY': rotateMatrix4 =  mmp(rotateMatrix4z, rotateMatrix4y); break;
 
-                    case 'rotateXYZ': rotateMatrix4 = mmp(mmp(mmp(rotateMatrix4x, rotateMatrix4y), rotateMatrix4z),rawPositionMatrix); break;
-                    case 'rotateXZY': rotateMatrix4 = mmp(mmp(mmp(rotateMatrix4x, rotateMatrix4z), rotateMatrix4y),rawPositionMatrix); break;
-                    case 'rotateYXZ': rotateMatrix4 = mmp(mmp(mmp(rotateMatrix4y, rotateMatrix4x), rotateMatrix4z),rawPositionMatrix); break;
-                    case 'rotateYZX': rotateMatrix4 = mmp(mmp(mmp(rotateMatrix4y, rotateMatrix4z), rotateMatrix4x),rawPositionMatrix); break;
-                    case 'rotateZXY': rotateMatrix4 = mmp(mmp(mmp(rotateMatrix4z, rotateMatrix4x), rotateMatrix4y),rawPositionMatrix); break;
-                    case 'rotateZYX': rotateMatrix4 = mmp(mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x),rawPositionMatrix); break;
-
+                    case 'rotateXYZ': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4y), rotateMatrix4z); break;
+                    case 'rotateXZY': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4z), rotateMatrix4y); break;
+                    case 'rotateYXZ': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4x), rotateMatrix4z); break;
+                    case 'rotateYZX': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4z), rotateMatrix4x); break;
+                    case 'rotateZXY': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4x), rotateMatrix4y); break;
+                    case 'rotateZYX': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x); break;
                 }
-                console.log(rotateMatrix4);
+                // console.log(rotateMatrix4);
                 var tempResultMatrix4 = mmp(translateMatrix4, rotateMatrix4);
+                console.log('原始矩阵：'+rawMatrix);
+                console.log('平移矩阵：'+translateMatrix4);
+                console.log('旋转矩阵：'+rotateMatrix4);
+
+                console.log('变换复合矩阵：'+tempResultMatrix4);
 
 
                 if (target instanceof Element) {
                     //矩阵相乘
                     result.transformMatrix = mmp(rawMatrix, tempResultMatrix4);
                     result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ',' + result.transformMatrix[8] + ',' + result.transformMatrix[9] + ',' + result.transformMatrix[10] + ',' + result.transformMatrix[11] + ',' + result.transformMatrix[12] + ',' + result.transformMatrix[13] + ',' + result.transformMatrix[14] + ',' + result.transformMatrix[15] + ')';
-                    console.log();
                 } else if (target instanceof THREE.Object3D) {
                     //矩阵相乘
-                    result.transformMatrix = tempResultMatrix4;
-                    console.log(tempResultMatrix4);
+                    console.log('位置矩阵：'+rawPositionMatrix);
+                    result.transformMatrix =tempResultMatrix4; //mmp(mmp(rawPositionMatrix,tempResultMatrix4),rawPositionMatrix0);
+                    // console.log(tempResultMatrix4);
                     result.transformMatrixList = new THREE.Matrix4();
-                    var m = tempResultMatrix4;
-                    result.transformMatrixList.set(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
+                    //var m = tempResultMatrix4;
+                    //console.log(m);
+                    result.transformMatrixList.fromArray(result.transformMatrix);
+                    //result.transformMatrixList.set(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
+                    result.transformMatrixList;
+                    return result;
+
+
                     // console.log(...result.transformMatrix);
                     // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
                 } else {
@@ -372,8 +390,12 @@ var Stick = function (conf) {
                 stick.style.top = result.stickTop + 'px';
                 if (target instanceof Element) target.style.transform = result.cssTransformText;
                 else if (target instanceof THREE.Object3D) { 
+                    console.log(result.transformMatrixList);
                     target.applyMatrix(result.transformMatrixList); 
                     console.log(result.transformMatrixList.transpose().elements); 
+                    console.log(target.matrixWorld.elements);
+                    console.log(target.matrix.elements);
+
                 }
                 return result;
                 break;

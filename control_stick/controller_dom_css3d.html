@@ -18,10 +18,14 @@
         }
 
         .cube {
-            position: relative;
+            position: absolute;
+            left: 30%;
+            top:20%;
             width: 200px;
             height: 200px;
             transform-style: preserve-3d;
+            transform: rotateX(0.1deg);
+            perspective: 1600px;
         }
 
         .side {
@@ -100,8 +104,8 @@
     <script>
         //stick配置
         var stickConfig = {
-            type:'translateXZ',
-            zoneSize: 100,//外部尺寸
+            type:'translateXY',
+            zoneSize: 400,//外部尺寸
             stickSize: 60,//内部尺寸
             position: [null, 30, 30, null],//位置
             target: document.querySelector('[data-role=target]'),//控制目标：DOM或THREE.Object3D
@@ -112,7 +116,7 @@
 
 
         var stickConfig2 = {
-            type:'rotateX',
+            type:'rotateY',
             zoneSize: 150,//外部尺寸
             stickSize: 40,//内部尺寸
             position: [null, null, 30, 30],//位置
