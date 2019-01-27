@@ -149,18 +149,18 @@ var Stick = function (conf) {
                 var rawPosition=target.position;
                 var rawPositionMatrix=util.originMatrix4.slice(0);
 
-                rawPositionMatrix[12]=-target.position.x;
-                rawPositionMatrix[13]=-target.position.y;
-                rawPositionMatrix[14]=-target.position.z;
+                rawPositionMatrix[12]=-rawPosition.x;
+                rawPositionMatrix[13]=-rawPosition.y;
+                rawPositionMatrix[14]=-rawPosition.z;
                 //console.log(rawPositionMatrix);
 
                 //原点移动到原始位置矩阵
 
                 var rawPositionMatrix0=util.originMatrix4.slice(0);
 
-                rawPositionMatrix0[12]=target.position.x;
-                rawPositionMatrix0[13]=target.position.y;
-                rawPositionMatrix0[14]=target.position.z;
+                rawPositionMatrix0[12]=rawPosition.x;
+                rawPositionMatrix0[13]=rawPosition.y;
+                rawPositionMatrix0[14]=rawPosition.z;
                 //console.log(rawPositionMatrix0);
                 }
 
@@ -352,7 +352,7 @@ var Stick = function (conf) {
                 } else if (target instanceof THREE.Object3D) {
                     //矩阵相乘
                     console.log('位置矩阵：'+rawPositionMatrix);
-                    result.transformMatrix =tempResultMatrix4; //mmp(mmp(rawPositionMatrix,tempResultMatrix4),rawPositionMatrix0);
+                    result.transformMatrix =/*tempResultMatrix4;*/mmp(mmp(rawPositionMatrix,tempResultMatrix4),rawPositionMatrix0);
                     // console.log(tempResultMatrix4);
                     result.transformMatrixList = new THREE.Matrix4();
                     //var m = tempResultMatrix4;
