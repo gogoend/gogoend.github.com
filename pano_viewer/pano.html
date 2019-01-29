@@ -1,0 +1,92 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <script src="../lib/three.js"></script>
+    <script src="../control_stick/util.js"></script>
+    <script src="../control_stick/stick.js"></script>
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        var scene=new THREE.Scene();
+        var camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+        var renderer=new THREE.WebGLRenderer({
+            "antialias":true
+        });
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        
+        var panoGeometry= new THREE.SphereGeometry(1,36,36);
+        var panoPhotoMaterial = new THREE.MeshStandardMaterial({
+            "color":0xff2580
+        });
+        var panoSphere=new THREE.Mesh(panoGeometry,panoPhotoMaterial);
+        scene.add(panoSphere);
+
+        var g=new THREE.Group();
+        g.add(camera);
+        scene.add(g);
+
+        g.position.z=5;
+        camera.lookAt(panoSphere.position);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.onresize = function () {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        }
+
+
+        // var scene = new THREE.Scene();
+        // var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        // var renderer = new THREE.WebGLRenderer({
+        //     "antialias":true
+        // });
+        // renderer.setSize(window.innerWidth, window.innerHeight);
+        // document.body.appendChild(renderer.domElement);
+
+        // var geometry = new THREE.BoxGeometry(1, 1, 1);
+        // var material = new THREE.MeshNormalMaterial();
+        // var cube = new THREE.Mesh(geometry, material);
+        // scene.add(cube);
+
+        // var cube2 = new THREE.Mesh(geometry, material);
+        // scene.add(cube2);
+        // cube2.position.x=2;
+
+        // camera.position.z = 5;
+        // camera.lookAt(cube2.position);
+        // function animate() {
+        //     requestAnimationFrame(animate);
+        //     renderer.render(scene, camera);
+        // }
+        // animate();
+
+        // window.onresize = function () {
+        //     renderer.setSize(window.innerWidth, window.innerHeight);
+        //     camera.aspect = window.innerWidth / window.innerHeight;
+        //     camera.updateProjectionMatrix();
+        // }
+    </script>
+</body>
+
+</html>
