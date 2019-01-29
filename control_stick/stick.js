@@ -88,7 +88,7 @@ var Stick = function (conf) {
 
         //处理偏移量超过外容器边界的情况，超出时锁定内部手柄到定界框边沿
         if (result.distance > lockedDistanceOffset) {
-            console.log('outter');
+            console.log('已移出限界');
             //锁定偏移距离
             //result.distance = (parseInt(util.getStyle(outter).height) / 2 - parseInt(util.getStyle(inner).height) / 2);
             result.lockedPos = findLockedCoord({
@@ -117,6 +117,8 @@ var Stick = function (conf) {
             //console.log(rawMatrix);
 
             if (rawMatrix.length == 9) {
+                console.log('2D变换模式');
+
                 //初始化原矩阵
                 var translateMatrix3 = util.originMatrix3.slice(0);
                 var rotateMatrix3 = util.originMatrix3.slice(0);
@@ -136,33 +138,37 @@ var Stick = function (conf) {
                 result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
 
             } else if (rawMatrix.length == 16) {
-                console.log('3D');
+                console.log('3D变换模式');
                 //初始化原矩阵
-                var translateMatrix4 = util.originMatrix4.slice(0);
-                var rotateMatrix4 = util.originMatrix4.slice(0);
+                var translateMatrix4 = util.originMatrix4.slice(0);//位移矩阵
+                var rotateMatrix4 = util.originMatrix4.slice(0);//旋转矩阵
                 var rotateMatrix4x = util.originMatrix4.slice(0),
                     rotateMatrix4y = util.originMatrix4.slice(0),
                     rotateMatrix4z = util.originMatrix4.slice(0);
-                
-                if(!(target instanceof Element)){
-                //原始位置移动到原点矩阵
-                var rawPosition=target.position;
-                var rawPositionMatrix=util.originMatrix4.slice(0);
 
-                rawPositionMatrix[12]=-rawPosition.x;
-                rawPositionMatrix[13]=-rawPosition.y;
-                rawPositionMatrix[14]=-rawPosition.z;
+                var rawPositionMatrix = util.originMatrix4.slice(0); //原始位置移动到原点矩阵
+
+                var rawPositionMatrix0 = util.originMatrix4.slice(0);//原点移动到原始位置矩阵
+
+                if (!(target instanceof Element)) {
+                    var rawPosition = target.position;//获得THREE.Object3D的位置
+                }else{
+                    var rawPosition={
+                        x:rawMatrix[12],
+                        y:rawMatrix[13],
+                        z:rawMatrix[14]
+                    };
+                    //获得Element中CSS Transform矩阵中与位置相关的元素
+                }
+                rawPositionMatrix[12] = -rawPosition.x;
+                rawPositionMatrix[13] = -rawPosition.y;
+                rawPositionMatrix[14] = -rawPosition.z;
                 //console.log(rawPositionMatrix);
 
-                //原点移动到原始位置矩阵
-
-                var rawPositionMatrix0=util.originMatrix4.slice(0);
-
-                rawPositionMatrix0[12]=rawPosition.x;
-                rawPositionMatrix0[13]=rawPosition.y;
-                rawPositionMatrix0[14]=rawPosition.z;
+                rawPositionMatrix0[12] = rawPosition.x;
+                rawPositionMatrix0[13] = rawPosition.y;
+                rawPositionMatrix0[14] = rawPosition.z;
                 //console.log(rawPositionMatrix0);
-                }
 
                 //四阶矩阵
                 /*
@@ -211,23 +217,6 @@ var Stick = function (conf) {
                 */
 
                 //平移矩阵
-                // if (conf.type === 'translateX') {
-                //     translateMatrix4[12] = result.stickOffsetTop * conf.moveFactor;
-                // }
-                // if (conf.type === 'translateY' || conf.type == 'droneRCLeft') {
-                //     translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
-                // }
-                // if (conf.type === 'translateZ') {
-                //     translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
-                // }
-                // if (conf.type === 'translateXZ' || conf.type == 'droneRCRight') {
-                //     translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
-                //     translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
-                // }
-                // if (conf.type === 'translateXY') {
-                //     translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
-                //     translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
-                // }
 
                 if (
                     conf.type == 'translateX'
@@ -237,7 +226,7 @@ var Stick = function (conf) {
                     translateMatrix4[12] = result.stickOffsetLeft * conf.moveFactor;
                 }
                 if (
-                    conf.type == 'translateY' ||conf.type == 'droneRCLeft'
+                    conf.type == 'translateY' || conf.type == 'droneRCLeft'
                     || conf.type == 'translateXY'
                 ) {
                     translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
@@ -254,7 +243,7 @@ var Stick = function (conf) {
                 //X-俯仰，Y-环视，Z-翻滚
                 //沿着x轴旋转矩阵
                 if (
-                       conf.type === 'rotateX'
+                    conf.type === 'rotateX'
                     || conf.type === 'rotateXY'
                     || conf.type === 'rotateXZ'
                     || conf.type === 'rotateYX'
@@ -271,11 +260,11 @@ var Stick = function (conf) {
                     rotateMatrix4x[10] = Math.cos(result.rad);
                 }
 
-                console.log(rotateMatrix4x)
+                // console.log(rotateMatrix4x)
 
                 //沿着y轴旋转矩阵
                 if (
-                       conf.type === 'rotateY'
+                    conf.type === 'rotateY'
                     || conf.type === 'rotateXY'
                     || conf.type === 'rotateYX'
                     || conf.type === 'rotateYZ'
@@ -292,11 +281,11 @@ var Stick = function (conf) {
                     rotateMatrix4y[10] = Math.cos(result.rad);
                 }
 
-                console.log(rotateMatrix4y)
+                // console.log(rotateMatrix4y)
 
                 //沿着z轴的旋转矩阵
                 if (
-                       conf.type === 'rotateZ'
+                    conf.type === 'rotateZ'
                     || conf.type === 'rotateXZ'
                     || conf.type === 'rotateYZ'
                     || conf.type === 'rotateZX'
@@ -313,21 +302,21 @@ var Stick = function (conf) {
                     rotateMatrix4z[5] = Math.cos(result.rad);
                 }
 
-                console.log(rotateMatrix4z)
+                // console.log(rotateMatrix4z)
 
 
                 //旋转顺序以及方式
                 switch (conf.type) {
-                    case 'rotateX': rotateMatrix4 =   rotateMatrix4x; break;
-                    case 'rotateY': rotateMatrix4 =   rotateMatrix4y; break;
-                    case 'rotateZ': rotateMatrix4 =   rotateMatrix4z; break;
+                    case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
+                    case 'rotateY': rotateMatrix4 = rotateMatrix4y; break;
+                    case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
 
-                    case 'rotateXY': rotateMatrix4 =  mmp(rotateMatrix4x, rotateMatrix4y); break;
-                    case 'rotateXZ': rotateMatrix4 =  mmp(rotateMatrix4x, rotateMatrix4z); break;
-                    case 'rotateYX': rotateMatrix4 =  mmp(rotateMatrix4y, rotateMatrix4x); break;
-                    case 'rotateYZ': rotateMatrix4 =  mmp(rotateMatrix4y, rotateMatrix4z); break;
-                    case 'rotateZX': rotateMatrix4 =  mmp(rotateMatrix4z, rotateMatrix4x); break;
-                    case 'rotateZY': rotateMatrix4 =  mmp(rotateMatrix4z, rotateMatrix4y); break;
+                    case 'rotateXY': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4y); break;
+                    case 'rotateXZ': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4z); break;
+                    case 'rotateYX': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4x); break;
+                    case 'rotateYZ': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4z); break;
+                    case 'rotateZX': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4x); break;
+                    case 'rotateZY': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4y); break;
 
                     case 'rotateXYZ': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4y), rotateMatrix4z); break;
                     case 'rotateXZY': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4z), rotateMatrix4y); break;
@@ -338,21 +327,21 @@ var Stick = function (conf) {
                 }
                 // console.log(rotateMatrix4);
                 var tempResultMatrix4 = mmp(translateMatrix4, rotateMatrix4);
-                console.log('原始矩阵：'+rawMatrix);
-                console.log('平移矩阵：'+translateMatrix4);
-                console.log('旋转矩阵：'+rotateMatrix4);
+                console.log('原始矩阵：' + rawMatrix);
+                console.log('平移矩阵：' + translateMatrix4);
+                console.log('旋转矩阵：' + rotateMatrix4);
 
-                console.log('变换复合矩阵：'+tempResultMatrix4);
-
+                console.log('变换复合矩阵：' + tempResultMatrix4);
+                console.log('位置矩阵：' + rawPositionMatrix);
 
                 if (target instanceof Element) {
                     //矩阵相乘
-                    result.transformMatrix = mmp(rawMatrix, tempResultMatrix4);
+                    result.transformMatrix =mmp(mmp(mmp(rawMatrix, rawPositionMatrix),tempResultMatrix4),rawPositionMatrix0);
+                    //result.transformMatrix=mmp(rawMatrix, tempResultMatrix4);
                     result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ',' + result.transformMatrix[8] + ',' + result.transformMatrix[9] + ',' + result.transformMatrix[10] + ',' + result.transformMatrix[11] + ',' + result.transformMatrix[12] + ',' + result.transformMatrix[13] + ',' + result.transformMatrix[14] + ',' + result.transformMatrix[15] + ')';
                 } else if (target instanceof THREE.Object3D) {
                     //矩阵相乘
-                    console.log('位置矩阵：'+rawPositionMatrix);
-                    result.transformMatrix =/*tempResultMatrix4;*/mmp(mmp(rawPositionMatrix,tempResultMatrix4),rawPositionMatrix0);
+                    result.transformMatrix =mmp(mmp(rawPositionMatrix, tempResultMatrix4), rawPositionMatrix0);
                     // console.log(tempResultMatrix4);
                     result.transformMatrixList = new THREE.Matrix4();
                     //var m = tempResultMatrix4;
@@ -389,10 +378,10 @@ var Stick = function (conf) {
                 stick.style.left = result.stickLeft + 'px';
                 stick.style.top = result.stickTop + 'px';
                 if (target instanceof Element) target.style.transform = result.cssTransformText;
-                else if (target instanceof THREE.Object3D) { 
+                else if (target instanceof THREE.Object3D) {
                     console.log(result.transformMatrixList);
-                    target.applyMatrix(result.transformMatrixList); 
-                    console.log(result.transformMatrixList.transpose().elements); 
+                    target.applyMatrix(result.transformMatrixList);
+                    console.log(result.transformMatrixList.transpose().elements);
                     console.log(target.matrixWorld.elements);
                     console.log(target.matrix.elements);
 
