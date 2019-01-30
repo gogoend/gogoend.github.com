@@ -1,8 +1,14 @@
 "use strict";
 // import util from 'util';
 
+//stick管理器
+var StickMgr=function(){
+    var self=this;
+    self.sticks=[];
+}
 //stick初始化
 var Stick = function (conf) {
+    var self=this;
 
     //变换目标
     var target = conf.target;
@@ -60,15 +66,6 @@ var Stick = function (conf) {
 
     this.result = result;
 
-    //用于计算当拖动超出范围时手柄的锁定坐标（来自nipplejs）
-    var findLockedCoord = function (position, distance, radius) {
-        var b = [];
-        b.x = /*position.x - */distance * Math.cos(radius);
-        b.y =/*position.y - */distance * Math.sin(radius);
-        //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
-        return b;
-    };
-    //
     //处理鼠标移动
     var mouseMoveHandler = function (e) {
         //判断是否为触摸事件
@@ -91,7 +88,7 @@ var Stick = function (conf) {
             console.log('已移出限界');
             //锁定偏移距离
             //result.distance = (parseInt(util.getStyle(outter).height) / 2 - parseInt(util.getStyle(inner).height) / 2);
-            result.lockedPos = findLockedCoord({
+            result.lockedPos = util.findLockedCoord({
                 x: parseInt(result.stickLeft),
                 y: parseInt(result.stickTop)
             }, lockedDistanceOffset, result.rad);
@@ -379,12 +376,7 @@ var Stick = function (conf) {
                 stick.style.top = result.stickTop + 'px';
                 if (target instanceof Element) target.style.transform = result.cssTransformText;
                 else if (target instanceof THREE.Object3D) {
-                    console.log(result.transformMatrixList);
                     target.applyMatrix(result.transformMatrixList);
-                    console.log(result.transformMatrixList.transpose().elements);
-                    console.log(target.matrixWorld.elements);
-                    console.log(target.matrix.elements);
-
                 }
                 return result;
                 break;
