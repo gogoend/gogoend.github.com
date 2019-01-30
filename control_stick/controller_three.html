@@ -4,8 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <script src="../lib/three.js"></script>
-    <script src="./util.js"></script>
-    <script src="./stick.js"></script>
+    <!-- <script src="./stick.js" ></script> -->
     <style>
         html,
         body {
@@ -20,7 +19,8 @@
 
 <body>
 
-    <script>
+    <script type="module">
+        import {Stick} from './stick.js';
 
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
