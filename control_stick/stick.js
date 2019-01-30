@@ -1,6 +1,5 @@
 "use strict";
-import util from './util.js';
-console.log(util);
+// import util from 'util';
 
 //stick管理器
 var StickMgr=function(){
@@ -423,10 +422,3 @@ var Stick = function (conf) {
 
     return result;
 }
-
-Stick.prototype.getConf=function(){
-    console.log(this.conf);
-}
-
-export {Stick};
-

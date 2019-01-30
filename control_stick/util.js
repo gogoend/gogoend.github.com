@@ -1,6 +1,6 @@
 "use strict";
 //范围内随机数产生器
-export default {
+var util = {
     //字符串乱序（类似php同名函数）
     // var strShuffle=function(str){
     //     var strArray=[];
