@@ -1,0 +1,56 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <style>
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #touchTest {
+            width: 100vw;
+            height: 100vh;
+            background: rgba(20, 20, 20, 1)
+        }
+        .left,.right{
+            width: 50vw;
+            height: 100vh;
+        }
+        .left{
+            float: left;
+            background-color: aqua;
+            opacity: 0.2;
+        }
+        .right{
+            float: right;
+            background-color: pink;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="touchTest">
+        <div class="left"></div>
+        <div class="right"></div>
+    </div>
+    <script>
+        var touchArea=document.getElementById('touchTest');
+        function touchHandle(e){
+            e.preventDefault();
+            console.log(e.touches);
+            touchArea.addEventListener('touchmove',touchHandle,false);
+            touchArea.addEventListener('touchend',touchHandle,false);
+        }
+        touchArea.addEventListener('touchstart',touchHandle,false);
+
+    </script>
+</body>
+
+</html>
