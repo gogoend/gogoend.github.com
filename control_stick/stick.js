@@ -11,6 +11,10 @@ var StickMgr = function () {
 var Stick = function (conf) {
     var _this = this;
 
+    //保存配置
+    if(conf){_this.conf=conf;}else{console.error('配置错误');return false}
+
+
     //变换目标
 
     if (!conf.target || !conf.target instanceof Element || !THREE || !conf.target instanceof THREE.Object3D) {
@@ -96,13 +100,13 @@ Stick.prototype.getDirection = function (e) {
 }
 
 Stick.prototype.getRawMatrix=function(){
+    var target=this.target;
     if (target instanceof Element || target instanceof THREE.Object3D) {
         //原始矩阵
         var rawMatrix = target instanceof Element ? util.parseTransformMatrix(util.getStyle(target).transform) : target.matrixWorld.elements.slice(0);
         //console.log(rawMatrix);
         if (rawMatrix.length == 9) {
             console.log('2D变换模式');
-
         } else if (rawMatrix.length == 16) {
             console.log('3D变换模式');
             //初始化原矩阵
@@ -142,6 +146,7 @@ Stick.prototype.getRawMatrix=function(){
 
 Stick.prototype.getMatrix = function (conf,target) {
     var mmp = util.matrixMuitply;
+    var result={};
     if (target instanceof Element || target instanceof THREE.Object3D) {
 
         //原始矩阵
@@ -358,21 +363,25 @@ Stick.prototype.getMatrix = function (conf,target) {
                 case 'rotateZYX': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x); break;
             }
             // console.log(rotateMatrix4);
+
             console.log('原始矩阵：' + rawMatrix);
             console.log('平移矩阵：' + translateMatrix4);
             console.log('旋转矩阵：' + rotateMatrix4);
 
-            console.log('变换复合矩阵：' + tempResultMatrix4);
             console.log('位置矩阵：' + rawPositionMatrix);
 
-            // var tempResultMatrix4 = mmp(translateMatrix4, rotateMatrix4);
-            return resultMatrix= mmp(translateMatrix4, rotateMatrix4);
+            var tempResultMatrix4 = mmp(translateMatrix4, rotateMatrix4);
+            console.log('变换复合矩阵：' + tempResultMatrix4);
+
+
+
+            return tempResultMatrix4;
         }
         // return result;
     }
 }
 
-Stick.prototype.applyMatrix = function (target,matrix) {
+Stick.prototype.setMatrix = function (target,matrix) {
     var mmp=util.matrixMuitply;
     //应用矩阵
     if (target instanceof Element) {
@@ -448,6 +457,7 @@ Stick.prototype.eventTodo = function () {
                 stick.style.top = result.stickTop + 'px';
 
                 //...
+                console.log(_this)
                 _this.getMatrix(_this.conf,_this.target);
                 _this.setMatrix(target);
 
