@@ -12,8 +12,7 @@ var Stick = function (conf) {
     var _this = this;
 
     //保存配置
-    if(conf){_this.conf=conf;}else{console.error('配置错误');return false}
-
+    if (conf) { _this.conf = conf; } else { console.error('配置错误'); return false }
 
     //变换目标
 
@@ -38,6 +37,7 @@ var Stick = function (conf) {
     _this.originX = parseInt(_this.stick.style.left);
     _this.originY = parseInt(_this.stick.style.top);
 
+    //ES6模板字符串
     console.log(`起始x：${_this.originX}，起始y：${_this.originY}`)
 
     _this.eventTodo();
@@ -99,8 +99,9 @@ Stick.prototype.getDirection = function (e) {
     return result;
 }
 
-Stick.prototype.getRawMatrix=function(){
-    var target=this.target;
+//获得目标原始矩阵
+Stick.prototype.getRawMatrix = function () {
+    var target = this.target;
     if (target instanceof Element || target instanceof THREE.Object3D) {
         //原始矩阵
         var rawMatrix = target instanceof Element ? util.parseTransformMatrix(util.getStyle(target).transform) : target.matrixWorld.elements.slice(0);
@@ -136,17 +137,24 @@ Stick.prototype.getRawMatrix=function(){
             rawPositionMatrix0[13] = rawPosition.y;
             rawPositionMatrix0[14] = rawPosition.z;
             //console.log(rawPositionMatrix0);
+
+            return [
+                rawPositionMatrix,
+                rawPositionMatrix0
+            ]
         }
-    }else{
+    } else {
         console.error('对象不受到支持。')
         return false;
     }
-    
+
 }
 
-Stick.prototype.getMatrix = function (conf,target) {
+//获得变换矩阵
+Stick.prototype.getMatrix = function (target) {
+    var conf=this.conf
     var mmp = util.matrixMuitply;
-    var result={};
+    var result = {};
     if (target instanceof Element || target instanceof THREE.Object3D) {
 
         //原始矩阵
@@ -156,23 +164,25 @@ Stick.prototype.getMatrix = function (conf,target) {
         if (rawMatrix.length == 9) {
             console.log('2D变换模式');
 
-            //初始化原矩阵
-            var translateMatrix3 = util.originMatrix3.slice(0);
-            var rotateMatrix3 = util.originMatrix3.slice(0);
-            //平移矩阵
-            translateMatrix3[6] = result.stickOffsetLeft * conf.moveFactor;
-            translateMatrix3[7] = result.stickOffsetTop * conf.moveFactor;
+            // //初始化原矩阵
+            // var translateMatrix3 = util.originMatrix3.slice(0);
+            // var rotateMatrix3 = util.originMatrix3.slice(0);
+            // //平移矩阵
+            // translateMatrix3[6] = result.stickOffsetLeft * conf.moveFactor;
+            // translateMatrix3[7] = result.stickOffsetTop * conf.moveFactor;
 
-            //旋转矩阵
-            rotateMatrix3[0] = Math.cos(result.rad) * conf.moveFactor;
-            rotateMatrix3[1] = -Math.sin(result.rad) * conf.moveFactor;
-            rotateMatrix3[3] = Math.sin(result.rad) * conf.moveFactor;
-            rotateMatrix3[4] = Math.cos(result.rad) * conf.moveFactor;
+            // //旋转矩阵
+            // rotateMatrix3[0] = Math.cos(result.rad) * conf.moveFactor;
+            // rotateMatrix3[1] = -Math.sin(result.rad) * conf.moveFactor;
+            // rotateMatrix3[3] = Math.sin(result.rad) * conf.moveFactor;
+            // rotateMatrix3[4] = Math.cos(result.rad) * conf.moveFactor;
 
-            //矩阵相乘
-            result.transformMatrix = util.matrixMuitply(rawMatrix, translateMatrix3);
+            // //矩阵相乘
+            // return mmp(rawMatrix, translateMatrix3);
 
-            result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
+            // return util.matrixMuitply(rawMatrix, translateMatrix3);
+
+            // result.cssTransformText = 'matrix(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ')';
 
         } else if (rawMatrix.length == 16) {
             console.log('3D变换模式');
@@ -373,34 +383,39 @@ Stick.prototype.getMatrix = function (conf,target) {
             var tempResultMatrix4 = mmp(translateMatrix4, rotateMatrix4);
             console.log('变换复合矩阵：' + tempResultMatrix4);
 
-
-
+            //返回变换矩阵
+            // return mmp(mmp(rawPositionMatrix, matrix), rawPositionMatrix0);
             return tempResultMatrix4;
         }
         // return result;
     }
 }
 
-Stick.prototype.setMatrix = function (target,matrix) {
-    var mmp=util.matrixMuitply;
+//对目标设置矩阵
+Stick.prototype.setMatrix = function () {
+    var target=this.conf.target;//目标
+    var mmp = util.matrixMuitply;
+    var result = this.result;//结果
+    var matrix=this.getMatrix(target);//获得的变换矩阵
+    var rawMatrix3d=this.getRawMatrix();//获得的原始矩阵
+    // console.log(rawMatrix3d);
+    var rawPositionMatrix=rawMatrix3d[0];//位置平移到原点矩阵
+    var rawPositionMatrix0=rawMatrix3d[1];//位置平移回原位矩阵
+
     //应用矩阵
     if (target instanceof Element) {
         //矩阵相乘
-        result.transformMatrix = mmp(mmp(mmp(rawMatrix, rawPositionMatrix), matrix), rawPositionMatrix0);
-        //result.transformMatrix=mmp(rawMatrix, tempResultMatrix4);
-        // result.cssTransformText = 'matrix3d(' + result.transformMatrix[0] + ',' + result.transformMatrix[1] + ',' + result.transformMatrix[2] + ',' + result.transformMatrix[3] + ',' + result.transformMatrix[4] + ',' + result.transformMatrix[5] + ',' + result.transformMatrix[6] + ',' + result.transformMatrix[7] + ',' + result.transformMatrix[8] + ',' + result.transformMatrix[9] + ',' + result.transformMatrix[10] + ',' + result.transformMatrix[11] + ',' + result.transformMatrix[12] + ',' + result.transformMatrix[13] + ',' + result.transformMatrix[14] + ',' + result.transformMatrix[15] + ')';
+        //return mmp(mmp(mmp(rawMatrix, rawPositionMatrix), matrix), rawPositionMatrix0);
     } else if (target instanceof THREE.Object3D) {
         //矩阵相乘
-        result.transformMatrix = mmp(mmp(rawPositionMatrix, matrix), rawPositionMatrix0);
-        // console.log(tempResultMatrix4);
-        result.transformMatrixList = new THREE.Matrix4();
-        //var m = tempResultMatrix4;
-        //console.log(m);
-        result.transformMatrixList.fromArray(result.transformMatrix);
-        //result.transformMatrixList.set(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]);
+        console.log(rawPositionMatrix);
+        console.log(matrix);
+        mmp(rawPositionMatrix, matrix)
+        
+        // return mmp(mmp(rawPositionMatrix, matrix), rawPositionMatrix0);
+        // result.transformMatrixList = new THREE.Matrix4();
+        // result.transformMatrixList.fromArray(result.transformMatrix);
 
-        // console.log(...result.transformMatrix);
-        // console.log([rawMatrix, rotateMatrix4, result.transformMatrix])
     } else {
         console.error('目标元素不支持，必须为Element或THREE.Object3D。');
     }
@@ -458,7 +473,7 @@ Stick.prototype.eventTodo = function () {
 
                 //...
                 console.log(_this)
-                _this.getMatrix(_this.conf,_this.target);
+                _this.getMatrix(_this.target);
                 _this.setMatrix(target);
 
                 if (target instanceof Element) target.style.transform = result.cssTransformText;
