@@ -29,16 +29,16 @@
         document.body.appendChild(renderer.domElement);
 
         var panoGeometry= new THREE.SphereGeometry(1,36,36);
+		//直接将x设为-1，使得所有面朝向内测
+		panoGeometry.scale(-1,1,1)
+		
 		var panoImgTex=new THREE.TextureLoader().load('./pano.jpg');
-		panoImgTex.wrapS=THREE.MirroredRepeatWrapping;
-		panoImgTex.wrapT=THREE.RepeatWrapping;
-		panoImgTex.offset=new THREE.Vector2(1,0);
+
 		panoImgTex.anisotropy=8;
 
         var panoPhotoMaterial = new THREE.MeshStandardMaterial({
 			"map":panoImgTex,
             "color":0xffffff,
-			"side":THREE.BackSide
         });
         var panoSphere=new THREE.Mesh(panoGeometry,panoPhotoMaterial);
         scene.add(panoSphere);
