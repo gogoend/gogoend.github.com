@@ -59,8 +59,8 @@ var Stick = function (conf) {
             rawPositionMatrix:null,                   //移到原点矩阵
             rawPositionMatrix0:null,                  //移回原位矩阵
             rawMatrix:null,                           //原始矩阵
-            translateMatrix:[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],                     //位移矩阵
-            rotateMatrix:[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],                        //旋转矩阵
+            translateMatrix:util.originMatrix4.concat(),                     //位移矩阵
+            rotateMatrix:util.originMatrix4.concat(),                        //旋转矩阵
             transformMatrix: null,                    //变换矩阵
         }
     };
