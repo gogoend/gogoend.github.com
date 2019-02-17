@@ -1,5 +1,5 @@
+<!DOCTYPE HTML>
 <html>
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
@@ -28,20 +28,31 @@
         renderer.setSize(window.innerWidth,window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        
         var panoGeometry= new THREE.SphereGeometry(1,36,36);
+		var panoImgTex=new THREE.TextureLoader().load('./pano.jpg');
+		panoImgTex.wrapS=THREE.MirroredRepeatWrapping;
+		panoImgTex.wrapT=THREE.RepeatWrapping;
+		panoImgTex.offset=new THREE.Vector2(1,0);
+		panoImgTex.anisotropy=8;
+
         var panoPhotoMaterial = new THREE.MeshStandardMaterial({
-            "color":0xff2580
+			"map":panoImgTex,
+            "color":0xffffff,
+			"side":THREE.BackSide
         });
         var panoSphere=new THREE.Mesh(panoGeometry,panoPhotoMaterial);
         scene.add(panoSphere);
+		
+		var light=new THREE.AmbientLight(0xffffff,2);
+		scene.add(light);
 
         var g=new THREE.Group();
         g.add(camera);
         scene.add(g);
 
-        g.position.z=5;
-        camera.lookAt(panoSphere.position);
+//        camera.lookAt(panoSphere.position);
+
+        
 
         function animate() {
             requestAnimationFrame(animate);
