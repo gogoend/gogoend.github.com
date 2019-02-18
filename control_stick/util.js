@@ -130,7 +130,18 @@ var util = {
         b.y =/*position.y - */distance * Math.sin(radius);
         //console.log(position.x+' '+position.y+'  '+distance * Math.cos(radius)+' '+distance * Math.sin(radius));
         return b;
-    }
+    },
     //
+
+    //角度转弧度
+    degToRad:function(deg){
+        var rad=(Math.PI/180)*deg;
+        return rad;
+    },
+    //弧度转角度
+    radTodeg:function(rad){
+        var deg=rad*(180/Math.PI);
+        return deg;
+    }
 }
 // export {util};
