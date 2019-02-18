@@ -50,11 +50,28 @@
         g.add(camera);
         scene.add(g);
 
-//        camera.lookAt(panoSphere.position);
+        //摄像机目标
+        var cameraTargetMesh=new THREE.BoxBufferGeometry(0.2,0.2,0.2);
+        var cameraTargetMaterial=new THREE.MeshBasicMaterial({
+            color:0x00ffff
+        })
+        var cameraTarget=new THREE.Mesh(cameraTargetMesh,cameraTargetMaterial);
 
-        
+        //第一个值为半径，第二个值为上下旋转角，第三个值为平面极坐标的旋转角
+        var lookAroundDeg=0;
+        var sphereCood=new THREE.Spherical(10,util.degToRad(225),0);
+        cameraTarget.position.setFromSpherical(sphereCood);
+
+        scene.add(cameraTarget)
+
 
         function animate() {
+            sphereCood.theta+=util.degToRad(0.1);
+            cameraTarget.position.setFromSpherical(sphereCood);
+
+            // console.log(sphereCood.theta)
+            camera.lookAt(cameraTarget.position);
+
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
