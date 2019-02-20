@@ -77,6 +77,12 @@ Stick.prototype.getDirection = function (e) {
 
     //判断是否为触摸事件
     if (e.type.match('touch') !== null) { console.log('触摸事件'); e = e.touches[e.touches.length - 1] }
+
+    /*
+    touchstart  
+    touches[].target
+    */
+
     // console.log(this);
     result.stickLeft = e.clientX - 0.5 * parseInt(util.getStyle(this.stick).width) - parseInt(util.getStyle(this.zone).left);// inner.style.left
     result.stickTop = e.clientY - 0.5 * parseInt(util.getStyle(this.stick).height) - parseInt(util.getStyle(this.zone).top);// inner.style.top
@@ -379,10 +385,11 @@ Stick.prototype.eventTodo = function () {
     //处理鼠标移动
     function mouseHandler(e) {
 
-        e.preventDefault();
         switch (e.type) {
             case 'mousedown': {
                 // console.log('mousedown');
+                e.preventDefault();
+
                 zone.addEventListener('mousemove', mouseHandler, false);
                 zone.addEventListener('mouseup', mouseHandler, false);
                 break;
@@ -391,6 +398,8 @@ Stick.prototype.eventTodo = function () {
             case 'mousemove': {
                 var result = _this.getDirection(e);
                 // console.log(result);
+                e.preventDefault();
+
                 stick.style.left = result.stickLeft + 'px';
                 stick.style.top = result.stickTop + 'px';
 
@@ -398,8 +407,6 @@ Stick.prototype.eventTodo = function () {
                 // console.log(_this)
                 _this.getTransformMatrix(_this.target);
                 _this.setMatrix(target);
-
-
 
                 //return result;
                 break;
@@ -413,13 +420,15 @@ Stick.prototype.eventTodo = function () {
                 break;
             };
             case 'touchstart': {
+                e.preventDefault();
+
                 // console.log('mousedown');
                 zone.addEventListener('touchmove', mouseHandler, false);
-                zone.addEventListener('touchup', mouseHandler, false);
+                zone.addEventListener('touchend', mouseHandler, false);
                 break;
             };
             case 'touchend': {
-                // console.log('mouseup')
+                console.log('mouseup')
                 stick.style.left = _this.originX + 'px';
                 stick.style.top = _this.originY + 'px';
                 zone.removeEventListener('touchup', mouseHandler, false);
