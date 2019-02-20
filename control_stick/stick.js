@@ -248,17 +248,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             //X-俯仰，Y-环视，Z-翻滚
             //沿着x轴旋转矩阵
             if (
-                conf.type === 'rotateX'
-                || conf.type === 'rotateXY'
-                || conf.type === 'rotateXZ'
-                || conf.type === 'rotateYX'
-                || conf.type === 'rotateZX'
-                || conf.type === 'rotateXYZ'
-                || conf.type === 'rotateXZY'
-                || conf.type === 'rotateYXZ'
-                || conf.type === 'rotateYZX'
-                || conf.type === 'rotateZXY'
-                || conf.type === 'rotateZYX') {
+                conf.type === 'rotateX') {
                 rotateMatrix4x[5] = Math.cos(result.rad);
                 rotateMatrix4x[6] = Math.sin(result.rad);
                 rotateMatrix4x[9] = -Math.sin(result.rad);
@@ -269,17 +259,7 @@ Stick.prototype.getTransformMatrix = function (target) {
 
             //沿着y轴旋转矩阵
             if (
-                conf.type === 'rotateY'
-                || conf.type === 'rotateXY'
-                || conf.type === 'rotateYX'
-                || conf.type === 'rotateYZ'
-                || conf.type === 'rotateZY'
-                || conf.type === 'rotateXYZ'
-                || conf.type === 'rotateXZY'
-                || conf.type === 'rotateYXZ'
-                || conf.type === 'rotateYZX'
-                || conf.type === 'rotateZXY'
-                || conf.type === 'rotateZYX') {
+                conf.type === 'rotateY') {
                 rotateMatrix4y[0] = Math.cos(result.rad);
                 rotateMatrix4y[2] = -Math.sin(result.rad);
                 rotateMatrix4y[8] = Math.sin(result.rad);
@@ -290,17 +270,7 @@ Stick.prototype.getTransformMatrix = function (target) {
 
             //沿着z轴的旋转矩阵
             if (
-                conf.type === 'rotateZ'
-                || conf.type === 'rotateXZ'
-                || conf.type === 'rotateYZ'
-                || conf.type === 'rotateZX'
-                || conf.type === 'rotateZY'
-                || conf.type === 'rotateXYZ'
-                || conf.type === 'rotateXZY'
-                || conf.type === 'rotateYXZ'
-                || conf.type === 'rotateYZX'
-                || conf.type === 'rotateZXY'
-                || conf.type === 'rotateZYX') {
+                conf.type === 'rotateZ') {
                 rotateMatrix4z[0] = Math.cos(result.rad);
                 rotateMatrix4z[1] = Math.sin(result.rad);
                 rotateMatrix4z[4] = -Math.sin(result.rad);
@@ -315,20 +285,6 @@ Stick.prototype.getTransformMatrix = function (target) {
                 case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
                 case 'rotateY': rotateMatrix4 = rotateMatrix4y; break;
                 case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
-
-                case 'rotateXY': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4y); break;
-                case 'rotateXZ': rotateMatrix4 = mmp(rotateMatrix4x, rotateMatrix4z); break;
-                case 'rotateYX': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4x); break;
-                case 'rotateYZ': rotateMatrix4 = mmp(rotateMatrix4y, rotateMatrix4z); break;
-                case 'rotateZX': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4x); break;
-                case 'rotateZY': rotateMatrix4 = mmp(rotateMatrix4z, rotateMatrix4y); break;
-
-                case 'rotateXYZ': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4y), rotateMatrix4z); break;
-                case 'rotateXZY': rotateMatrix4 = mmp(mmp(rotateMatrix4x, rotateMatrix4z), rotateMatrix4y); break;
-                case 'rotateYXZ': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4x), rotateMatrix4z); break;
-                case 'rotateYZX': rotateMatrix4 = mmp(mmp(rotateMatrix4y, rotateMatrix4z), rotateMatrix4x); break;
-                case 'rotateZXY': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4x), rotateMatrix4y); break;
-                case 'rotateZYX': rotateMatrix4 = mmp(mmp(rotateMatrix4z, rotateMatrix4y), rotateMatrix4x); break;
             }
             // console.log(rotateMatrix4);
 
