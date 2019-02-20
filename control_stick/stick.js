@@ -77,7 +77,7 @@ Stick.prototype.getDirection = function (e) {
 
     //判断是否为触摸事件
     if (e.type.match('touch') !== null) { console.log('触摸事件'); e = e.touches[e.touches.length - 1] }
-    console.log(this);
+    // console.log(this);
     result.stickLeft = e.clientX - 0.5 * parseInt(util.getStyle(this.stick).width) - parseInt(util.getStyle(this.zone).left);// inner.style.left
     result.stickTop = e.clientY - 0.5 * parseInt(util.getStyle(this.stick).height) - parseInt(util.getStyle(this.zone).top);// inner.style.top
     result.stickOffsetLeft = result.stickLeft - this.originX;
@@ -167,7 +167,7 @@ Stick.prototype.getTransformMatrix = function (target) {
         if (rawMatrix.length == 9) {
             console.log('2D变换模式');
         }else if (rawMatrix.length == 16) {
-            console.log('3D变换模式');
+            // console.log('3D变换模式');
             //初始化原矩阵
             var translateMatrix4 = util.originMatrix4.slice(0);//位移矩阵
             var rotateMatrix4 = util.originMatrix4.slice(0);//旋转矩阵
@@ -242,7 +242,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             ) {
                 translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
             }
-            console.log(translateMatrix4);
+            // console.log(translateMatrix4);
 
             //旋转矩阵
             //X-俯仰，Y-环视，Z-翻滚
@@ -333,23 +333,25 @@ Stick.prototype.getTransformMatrix = function (target) {
             // console.log(rotateMatrix4);
 
             result.matrices.rawMatrix=rawMatrix;
-            console.log('原始矩阵：' + rawMatrix);
 
             result.matrices.translateMatrix=translateMatrix4;
-            console.log('平移矩阵：' + translateMatrix4);
 
             result.matrices.rotateMatrix=rotateMatrix4;
-            console.log('旋转矩阵：' + rotateMatrix4);
 
             
             //console.log('位置矩阵：' + rawPositionMatrix);
 
             var transformMatrix4 = mmp(translateMatrix4, rotateMatrix4);
-            console.log('变换复合矩阵：' + transformMatrix4);
+
+            // console.log(this.type+'原始矩阵：' + rawMatrix);
+            // console.log(this.type+'平移矩阵：' + translateMatrix4);
+            // console.log(this.type+'旋转矩阵：' + rotateMatrix4);
+            console.log(this.type+'变换复合矩阵：' + transformMatrix4);
+
 
             //返回变换矩阵
             // return mmp(mmp(rawPositionMatrix, matrix), rawPositionMatrix0);
-            console.log(transformMatrix4);
+            // console.log(transformMatrix4);
             result.matrices.transformMatrix=transformMatrix4;
             return transformMatrix4;
         }
@@ -432,12 +434,12 @@ Stick.prototype.eventTodo = function () {
             case 'touchmove':
             case 'mousemove': {
                 var result = _this.getDirection(e);
-                console.log(result);
+                // console.log(result);
                 stick.style.left = result.stickLeft + 'px';
                 stick.style.top = result.stickTop + 'px';
 
                 //...
-                console.log(_this)
+                // console.log(_this)
                 _this.getTransformMatrix(_this.target);
                 _this.setMatrix(target);
 
