@@ -86,8 +86,6 @@
                 camera.lookAt(cameraTarget.position);
             }
 
-            sphereCood.phi = Math.max( util.degToRad(185), Math.min( 85, util.degToRad(355) ) );
-
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
@@ -142,9 +140,17 @@
 
                         //
                         sphereCood.theta = mouseData.offsetX * 0.001 + mouseData.onMouseDownTheta;
-                        sphereCood.phi = mouseData.offsetY * 0.001 + mouseData.onMouseDownPhi;
-                        //
-                        
+                        console.log(util.radToDeg(sphereCood.phi))
+
+                        if(util.radToDeg(sphereCood.phi)<185){
+                            sphereCood.phi = util.degToRad(185);
+                        }else if(util.radToDeg(sphereCood.phi)>355){
+                            sphereCood.phi = util.degToRad(355);
+                        }else{
+                            sphereCood.phi = mouseData.offsetY * 0.001 + mouseData.onMouseDownPhi;
+                        }
+
+
                         console.log(sphereCood.theta+' '+sphereCood.phi)
 
                         cameraTarget.position.setFromSpherical(sphereCood);
