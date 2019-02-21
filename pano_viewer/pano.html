@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html>
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
@@ -20,61 +21,75 @@
 
 <body>
     <script>
-        var scene=new THREE.Scene();
-        var camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
-        var renderer=new THREE.WebGLRenderer({
-            "antialias":true
+
+        //THREEJS场景部分
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer({
+            "antialias": true
         });
-        renderer.setSize(window.innerWidth,window.innerHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        var panoGeometry= new THREE.SphereGeometry(1,36,36);
-		//直接将x设为-1，使得所有面朝向内测
-		panoGeometry.scale(-1,1,1)
-		
-		var panoImgTex=new THREE.TextureLoader().load('./pano.jpg');
+        var panoGeometry = new THREE.SphereGeometry(1, 36, 36);
+        //直接将x设为-1，使得所有面朝向内测
+        panoGeometry.scale(-1, 1, 1)
 
-		panoImgTex.anisotropy=8;
+        var panoImgTex = new THREE.TextureLoader().load('./pano.jpg');
+
+        panoImgTex.anisotropy = 8;
 
         var panoPhotoMaterial = new THREE.MeshStandardMaterial({
-			"map":panoImgTex,
-            "color":0xffffff,
+            "map": panoImgTex,
+            "color": 0xffffff,
         });
-        var panoSphere=new THREE.Mesh(panoGeometry,panoPhotoMaterial);
+        var panoSphere = new THREE.Mesh(panoGeometry, panoPhotoMaterial);
         scene.add(panoSphere);
-		
-		var light=new THREE.AmbientLight(0xffffff,2);
-		scene.add(light);
 
-        var g=new THREE.Group();
+        var light = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(light);
+
+        var g = new THREE.Group();
         g.add(camera);
         scene.add(g);
 
         //摄像机目标
-        var cameraTargetMesh=new THREE.BoxBufferGeometry(0.2,0.2,0.2);
-        var cameraTargetMaterial=new THREE.MeshBasicMaterial({
-            color:0x00ffff
+        var cameraTargetMesh = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
+        var cameraTargetMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ffff
         })
-        var cameraTarget=new THREE.Mesh(cameraTargetMesh,cameraTargetMaterial);
+        var cameraTarget = new THREE.Mesh(cameraTargetMesh, cameraTargetMaterial);
+        cameraTarget.name = "cameraTarget";
 
+        /*交互方式：
+        改变全景照片的方向
+            鼠标/触摸：在屏幕上上下滑动改变上下旋转角，左右滑动更改平面旋转角；
+            设备朝向：移动设备改变摄像机目标的位置
+        改变摄像机的FOV
+            鼠标滚轮：向前放大，向后缩小
+        */
+        var lookAroundDeg = 0;
         //第一个值为半径，第二个值为上下旋转角，第三个值为平面极坐标的旋转角
-        var lookAroundDeg=0;
-        var sphereCood=new THREE.Spherical(10,util.degToRad(225),0);
+        var sphereCood = new THREE.Spherical(10, util.degToRad(225), 0);
         cameraTarget.position.setFromSpherical(sphereCood);
 
-        scene.add(cameraTarget)
+        scene.add(cameraTarget);
 
-
+        //交互部分
+        //判断是否存在用户交互
+        var userInteract = false;
         function animate() {
-            sphereCood.theta+=util.degToRad(0.1);
-            cameraTarget.position.setFromSpherical(sphereCood);
 
-            // console.log(sphereCood.theta)
-            camera.lookAt(cameraTarget.position);
+            if (!userInteract) {
+                sphereCood.theta += util.degToRad(0.1);
+                cameraTarget.position.setFromSpherical(sphereCood);
+                camera.lookAt(cameraTarget.position);
+            }
 
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
+        // setInterval(animate,100);
         animate();
 
         window.onresize = function () {
@@ -83,37 +98,59 @@
             camera.updateProjectionMatrix();
         }
 
+        // document.addEventListener("deviceorientation",function(e){
+        //     console.log(e)
+        // },false)
 
-        // var scene = new THREE.Scene();
-        // var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        // var renderer = new THREE.WebGLRenderer({
-        //     "antialias":true
-        // });
-        // renderer.setSize(window.innerWidth, window.innerHeight);
-        // document.body.appendChild(renderer.domElement);
+        var mouseData={
+                originX:0,
+                originY:0,
+                offsetX:0,
+                offsetY:0
+            }
+        function mouseHandler(e) {
 
-        // var geometry = new THREE.BoxGeometry(1, 1, 1);
-        // var material = new THREE.MeshNormalMaterial();
-        // var cube = new THREE.Mesh(geometry, material);
-        // scene.add(cube);
+            switch (e.type) {
+                case "mousedown": {
+                    userInteract=true;
+                    //得到鼠标点击位置
+                    mouseData.originX = e.clientX;
+                    mouseData.originY = e.clientY;
 
-        // var cube2 = new THREE.Mesh(geometry, material);
-        // scene.add(cube2);
-        // cube2.position.x=2;
+                    
 
-        // camera.position.z = 5;
-        // camera.lookAt(cube2.position);
-        // function animate() {
-        //     requestAnimationFrame(animate);
-        //     renderer.render(scene, camera);
-        // }
-        // animate();
+                    document.addEventListener("mousemove",mouseHandler, false);
+                    document.addEventListener("mouseup",mouseHandler, false);
 
-        // window.onresize = function () {
-        //     renderer.setSize(window.innerWidth, window.innerHeight);
-        //     camera.aspect = window.innerWidth / window.innerHeight;
-        //     camera.updateProjectionMatrix();
-        // }
+                    break;
+                }
+                case "mousemove": {
+                    console.log(e);
+                    //鼠标移动时计算鼠标的偏移量
+                    mouseData.offsetX=e.clientX-mouseData.originX;
+                    mouseData.offsetY=e.clientY-mouseData.originY;
+                    console.log(mouseData);
+
+                    sphereCood.theta+=mouseData.offsetX*0.001;
+                    sphereCood.phi+=mouseData.offsetY*0.001;
+
+                    cameraTarget.position.setFromSpherical(sphereCood);
+                    camera.lookAt(cameraTarget.position);
+
+                    break;
+                }
+                case "mouseup": {
+                    userInteract=false;
+                    document.removeEventListener("mousemove",mouseHandler, false);
+
+                    break;
+                }
+            }
+
+        }
+
+        document.addEventListener("mousedown", mouseHandler, false)
+
     </script>
 </body>
 
