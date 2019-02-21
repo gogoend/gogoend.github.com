@@ -139,7 +139,7 @@ var util = {
         return rad;
     },
     //弧度转角度
-    radTodeg:function(rad){
+    radToDeg:function(rad){
         var deg=rad*(180/Math.PI);
         return deg;
     }

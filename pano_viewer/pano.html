@@ -86,6 +86,8 @@
                 camera.lookAt(cameraTarget.position);
             }
 
+            sphereCood.phi = Math.max( util.degToRad(185), Math.min( 85, util.degToRad(355) ) );
+
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
@@ -102,46 +104,58 @@
         //     console.log(e)
         // },false)
 
-        var mouseData={
-                originX:0,
-                originY:0,
-                offsetX:0,
-                offsetY:0
-            }
+        var mouseData = {
+            originX: 0,
+            originY: 0,
+            offsetX: 0,
+            offsetY: 0,
+            onMouseDownTheta: 0,
+            onMouseDownPhi: 0
+
+        }
         function mouseHandler(e) {
 
             switch (e.type) {
                 case "mousedown": {
-                    userInteract=true;
+                    userInteract = true;
                     //得到鼠标点击位置
                     mouseData.originX = e.clientX;
                     mouseData.originY = e.clientY;
 
-                    
+                    //
+                    mouseData.onMouseDownTheta = sphereCood.theta;
+                    mouseData.onMouseDownPhi = sphereCood.phi;
+                    //
 
-                    document.addEventListener("mousemove",mouseHandler, false);
-                    document.addEventListener("mouseup",mouseHandler, false);
+                    document.addEventListener("mousemove", mouseHandler, false);
+                    document.addEventListener("mouseup", mouseHandler, false);
 
                     break;
                 }
                 case "mousemove": {
-                    console.log(e);
-                    //鼠标移动时计算鼠标的偏移量
-                    mouseData.offsetX=e.clientX-mouseData.originX;
-                    mouseData.offsetY=e.clientY-mouseData.originY;
-                    console.log(mouseData);
+                    if (userInteract) {
 
-                    sphereCood.theta+=mouseData.offsetX*0.001;
-                    sphereCood.phi+=mouseData.offsetY*0.001;
+                        //鼠标移动时计算鼠标的偏移量
+                        mouseData.offsetX = e.clientX - mouseData.originX;
+                        mouseData.offsetY = e.clientY - mouseData.originY;
+                        console.log(mouseData);
 
-                    cameraTarget.position.setFromSpherical(sphereCood);
-                    camera.lookAt(cameraTarget.position);
+                        //
+                        sphereCood.theta = mouseData.offsetX * 0.001 + mouseData.onMouseDownTheta;
+                        sphereCood.phi = mouseData.offsetY * 0.001 + mouseData.onMouseDownPhi;
+                        //
+                        
+                        console.log(sphereCood.theta+' '+sphereCood.phi)
 
+                        cameraTarget.position.setFromSpherical(sphereCood);
+                        camera.lookAt(cameraTarget.position);
+
+                    }
                     break;
                 }
                 case "mouseup": {
-                    userInteract=false;
-                    document.removeEventListener("mousemove",mouseHandler, false);
+                    userInteract = false;
+                    document.removeEventListener("mousemove", mouseHandler, false);
 
                     break;
                 }
@@ -149,7 +163,12 @@
 
         }
 
+        function mouseScrollHandler(e){
+            
+        }
+
         document.addEventListener("mousedown", mouseHandler, false)
+        document.addEventListener("mousewheel",mouseScrollHandler,false)
 
     </script>
 </body>
