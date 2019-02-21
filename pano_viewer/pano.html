@@ -142,13 +142,15 @@
                         sphereCood.theta = mouseData.offsetX * 0.001 + mouseData.onMouseDownTheta;
                         console.log(util.radToDeg(sphereCood.phi))
 
-                        if(util.radToDeg(sphereCood.phi)<185){
-                            sphereCood.phi = util.degToRad(185);
-                        }else if(util.radToDeg(sphereCood.phi)>355){
-                            sphereCood.phi = util.degToRad(355);
-                        }else{
-                            sphereCood.phi = mouseData.offsetY * 0.001 + mouseData.onMouseDownPhi;
-                        }
+                        // if(util.radToDeg(sphereCood.phi)<185){
+                        //     sphereCood.phi = util.degToRad(185);
+                        // }else if(util.radToDeg(sphereCood.phi)>355){
+                        //     sphereCood.phi = util.degToRad(355);
+                        // }else{
+                            var phi = mouseData.offsetY * 0.001 + mouseData.onMouseDownPhi;
+                            sphereCood.phi=THREE.Math.clamp(phi,util.degToRad(185),util.degToRad(355))
+                        // }
+                        
 
 
                         console.log(sphereCood.theta+' '+sphereCood.phi)
