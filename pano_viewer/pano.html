@@ -16,10 +16,20 @@
             width: 100vw;
             height: 100vh;
         }
+        .fullScreenBtn {
+            position: absolute;
+            right: 20px;
+            bottom: 10px;
+            border: #62d128 solid 2px;
+            background: #1c1c1c;
+            color: #62d128;
+            padding: 10px 20px
+        }
     </style>
 </head>
 
 <body>
+    <button onclick="fullScreen()" class="fullScreenBtn">全屏</button>
     <script>
 
         //THREEJS场景部分
@@ -107,13 +117,18 @@
             originY: 0,
             offsetX: 0,
             offsetY: 0,
-            onMouseDownTheta: 0,
-            onMouseDownPhi: 0
-
+            originTheta: 0,
+            originPhi: 0
         }
-        function mouseHandler(e) {
-
-            switch (e.type) {
+        function pointHandler(e) {
+            var evtType = e.type;
+            e.preventDefault();
+            if (e.type.match('touch')) {
+                console.log('触摸事件');
+                e = e.touches[0];
+            }
+            switch (evtType) {
+                case "touchstart":
                 case "mousedown": {
                     userInteract = true;
                     //得到鼠标点击位置
@@ -121,15 +136,19 @@
                     mouseData.originY = e.clientY;
 
                     //
-                    mouseData.onMouseDownTheta = sphereCood.theta;
-                    mouseData.onMouseDownPhi = sphereCood.phi;
+                    mouseData.originTheta = sphereCood.theta;
+                    mouseData.originPhi = sphereCood.phi;
                     //
 
-                    document.addEventListener("mousemove", mouseHandler, false);
-                    document.addEventListener("mouseup", mouseHandler, false);
+                    document.addEventListener("mousemove", pointHandler, false);
+                    document.addEventListener("mouseup", pointHandler, false);
+
+                    document.addEventListener("touchmove", pointHandler, false);
+                    document.addEventListener("touchend", pointHandler, false);
 
                     break;
                 }
+                case "touchmove":
                 case "mousemove": {
                     if (userInteract) {
 
@@ -139,21 +158,14 @@
                         console.log(mouseData);
 
                         //
-                        sphereCood.theta = mouseData.offsetX * 0.001 + mouseData.onMouseDownTheta;
+                        sphereCood.theta = mouseData.offsetX * 0.005 + mouseData.originTheta;
                         console.log(util.radToDeg(sphereCood.phi))
 
-                        // if(util.radToDeg(sphereCood.phi)<185){
-                        //     sphereCood.phi = util.degToRad(185);
-                        // }else if(util.radToDeg(sphereCood.phi)>355){
-                        //     sphereCood.phi = util.degToRad(355);
-                        // }else{
-                            var phi = mouseData.offsetY * 0.001 + mouseData.onMouseDownPhi;
-                            sphereCood.phi=THREE.Math.clamp(phi,util.degToRad(185),util.degToRad(355))
-                        // }
-                        
+                        var phi = mouseData.offsetY * 0.005 + mouseData.originPhi;
+                        //来自THREEJS
+                        sphereCood.phi = THREE.Math.clamp(phi, util.degToRad(189), util.degToRad(359))
 
-
-                        console.log(sphereCood.theta+' '+sphereCood.phi)
+                        console.log(sphereCood.theta + ' ' + sphereCood.phi)
 
                         cameraTarget.position.setFromSpherical(sphereCood);
                         camera.lookAt(cameraTarget.position);
@@ -161,9 +173,17 @@
                     }
                     break;
                 }
+
+                case "touchend":
                 case "mouseup": {
                     userInteract = false;
-                    document.removeEventListener("mousemove", mouseHandler, false);
+
+                    document.removeEventListener("mouseup", pointHandler, false);
+                    document.removeEventListener("touchend", pointHandler, false);
+
+                    document.removeEventListener("mousemove", pointHandler, false);
+                    document.removeEventListener("touchmove", pointHandler, false);
+
 
                     break;
                 }
@@ -171,12 +191,114 @@
 
         }
 
-        function mouseScrollHandler(e){
-            
+        function mouseScrollHandler(e) {
+            console.log(e)
         }
 
-        document.addEventListener("mousedown", mouseHandler, false)
-        document.addEventListener("mousewheel",mouseScrollHandler,false)
+        document.addEventListener('touchstart', pointHandler, false);
+        document.addEventListener("mousedown", pointHandler, false);
+        document.addEventListener("mousewheel", mouseScrollHandler, false);
+
+        //请求全屏
+        var fullScreenStatus=false;
+        function fullScreen() {
+            if (!fullScreenStatus) {
+                document.body.requestFullscreen();
+                fullScreenStatus = true
+            } else {
+                document.exitFullscreen();
+                fullScreenStatus = false
+            }
+        }
+
+        //页面管理
+        var hash=location.hash;
+        // console.log(hash);
+        window.addEventListener("hashchange",function(e){
+            console.log(e);
+        },false)
+
+        //序列化查询参数
+        //  http://baidu.com/q ? ttt=opp & bob=555 &ror=666
+        /*
+        query={
+            ttt:"opp",
+            bob:"555",
+            ror:"666"
+        }
+        */
+
+        var serializeURLQuery=function(url,type){
+            //确定是以?还是以#来分割URL
+            switch(type){
+                case "hash":
+                case "#":{
+                    var firstChar=/^#/;
+                    var spliter="#";
+                    break;
+                }
+                
+                case "search":
+                case "?":
+                case undefined:
+                default:
+                {
+                    var firstChar=/^\?/;
+                    var spliter="?";
+                    break;
+                }
+            }
+
+            //判断URL是否被定义，如果没有定义则为当前页面URL
+            switch(url){
+                case undefined:{
+                    url=location.href;
+                    break;
+                }
+                default:
+                {
+                    url=url;
+                    break;
+                }
+            }
+
+            // var foreURL=location.origin+location.pathname;
+            //URL前面部分
+            var foreURL=url.split(spliter)[0];
+
+            //URL中的查询语句：从URL中去掉URL前面部分和分隔符（#或?）
+            var queryString=url.replace(foreURL,"").replace(firstChar,"");
+
+            //使用&分隔参数
+            var queryArray=queryString.split('&');
+
+            var keys=[];
+            var values=[];
+            var paramObjs=[];
+            
+            for(var i=0;i<=queryArray.length-1;i++){
+                var paramObj={};
+
+                keys[i]=queryArray[i].split("=")[0];
+                values[i]=queryArray[i].split("=")[1];
+
+                Object.defineProperty(paramObj,keys[i],{
+                    value:values[i]
+                })
+
+                //索引数组
+                // paramObj[keys[i]]=values[i];
+
+                paramObjs.push(paramObj);
+            }
+
+            return paramObjs;
+
+        }
+
+
+
+        
 
     </script>
 </body>
