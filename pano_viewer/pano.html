@@ -253,7 +253,8 @@
 
             //判断URL是否被定义，如果没有定义则为当前页面URL
             switch (url) {
-                case undefined: {
+                case undefined:
+                case 0: {
                     url = location.href;
                     break;
                 }
@@ -294,7 +295,7 @@
                 //数组push
                 paramArray.push(paramObj);
 
-                console.log(paramArray[i]);
+                paramObjs=paramArray[i];
 
                 //失败了。。。
                 //console.log(Object.assign(paramObjs , paramArray[i] ));
@@ -303,7 +304,7 @@
 
             // console.log(paramArray);
 
-            console.log(paramObjs);
+            return paramObjs;
 
         }
 
