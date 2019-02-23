@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <script src="../lib/three.js"></script>
+    <script src="../lib/vue.js"></script>
     <script src="../control_stick/util.js"></script>
     <script src="../control_stick/stick.js"></script>
     <style>
@@ -16,6 +17,7 @@
             width: 100vw;
             height: 100vh;
         }
+
         .fullScreenBtn {
             position: absolute;
             right: 20px;
@@ -200,7 +202,7 @@
         document.addEventListener("mousewheel", mouseScrollHandler, false);
 
         //请求全屏
-        var fullScreenStatus=false;
+        var fullScreenStatus = false;
         function fullScreen() {
             if (!fullScreenStatus) {
                 document.body.requestFullscreen();
@@ -212,11 +214,11 @@
         }
 
         //页面管理
-        var hash=location.hash;
+        var hash = location.hash;
         // console.log(hash);
-        window.addEventListener("hashchange",function(e){
+        window.addEventListener("hashchange", function (e) {
             console.log(e);
-        },false)
+        }, false)
 
         //序列化查询参数
         //  http://baidu.com/q ? ttt=opp & bob=555 &ror=666
@@ -228,77 +230,86 @@
         }
         */
 
-        var serializeURLQuery=function(url,type){
+        var serializeURLQuery = function (url, type) {
             //确定是以?还是以#来分割URL
-            switch(type){
+            switch (type) {
                 case "hash":
-                case "#":{
-                    var firstChar=/^#/;
-                    var spliter="#";
+                case "#": {
+                    var firstChar = /^#/;
+                    var spliter = "#";
                     break;
                 }
-                
+
                 case "search":
                 case "?":
                 case undefined:
                 default:
-                {
-                    var firstChar=/^\?/;
-                    var spliter="?";
-                    break;
-                }
+                    {
+                        var firstChar = /^\?/;
+                        var spliter = "?";
+                        break;
+                    }
             }
 
             //判断URL是否被定义，如果没有定义则为当前页面URL
-            switch(url){
-                case undefined:{
-                    url=location.href;
+            switch (url) {
+                case undefined: {
+                    url = location.href;
                     break;
                 }
                 default:
-                {
-                    url=url;
-                    break;
-                }
+                    {
+                        url = url;
+                        break;
+                    }
             }
 
             // var foreURL=location.origin+location.pathname;
             //URL前面部分
-            var foreURL=url.split(spliter)[0];
+            var foreURL = url.split(spliter)[0];
 
             //URL中的查询语句：从URL中去掉URL前面部分和分隔符（#或?）
-            var queryString=url.replace(foreURL,"").replace(firstChar,"");
+            var queryString = url.replace(foreURL, "").replace(firstChar, "");
 
             //使用&分隔参数
-            var queryArray=queryString.split('&');
+            var queryArray = queryString.split('&');
 
-            var keys=[];
-            var values=[];
-            var paramObjs=[];
-            
-            for(var i=0;i<=queryArray.length-1;i++){
-                var paramObj={};
+            var keys = [],values = [];
+            var paramObjs={},paramArray = [];
+            var paramObj = {};            
 
-                keys[i]=queryArray[i].split("=")[0];
-                values[i]=queryArray[i].split("=")[1];
+            for (var i = 0; i <= queryArray.length - 1; i++) {
 
-                Object.defineProperty(paramObj,keys[i],{
-                    value:values[i]
+                //尝试用key-value数组生成一一对应的对象
+                keys[i] = queryArray[i].split("=")[0];
+                values[i] = queryArray[i].split("=")[1];
+
+                //为对象分配key-value对
+                Object.defineProperty(paramObj, keys[i], {
+                    value: values[i]
                 })
 
                 //索引数组
                 // paramObj[keys[i]]=values[i];
+                //数组push
+                paramArray.push(paramObj);
 
-                paramObjs.push(paramObj);
+                console.log(paramArray[i]);
+
+                //失败了。。。
+                //console.log(Object.assign(paramObjs , paramArray[i] ));
+
             }
 
-            return paramObjs;
+            // console.log(paramArray);
+
+            console.log(paramObjs);
 
         }
 
 
 
-        
+
 
     </script>
 </body>
