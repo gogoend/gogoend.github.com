@@ -134,14 +134,112 @@ var util = {
     //
 
     //角度转弧度
-    degToRad:function(deg){
-        var rad=(Math.PI/180)*deg;
+    degToRad: function (deg) {
+        var rad = (Math.PI / 180) * deg;
         return rad;
     },
     //弧度转角度
-    radToDeg:function(rad){
-        var deg=rad*(180/Math.PI);
+    radToDeg: function (rad) {
+        var deg = rad * (180 / Math.PI);
         return deg;
+    },
+
+    //数值范围限制，参考自THREEJS
+    clamp: function (value, min, max) {
+        return Math.max(min, Math.min(max,value));
+    },
+
+    //序列化查询参数
+    /*
+        支持以 ? 或 # 进行分割的参数，
+        若URL没有传入则默认为当前的页面地址栏URL
+        URL形如https://www.baidu.com/s?ie=utf-8&f=8&rsv_bp=0&rsv_idx=1&tn=baidu&wd=%E9%9F%A9%E9%94%B4%E6%8D%B7，
+        返回：
+        result={
+            f: "8"
+            ie: "utf-8"
+            rsv_bp: "0"
+            rsv_idx: "1"
+            tn: "baidu"
+            wd: "%E9%9F%A9%E9%94%B4%E6%8D%B7"
+        }
+    */
+    serializeURLQuery: function (url, type) {
+        //确定是以?还是以#来分割URL
+        switch (type) {
+            case "hash":
+            case "#": {
+                var firstChar = /^#/;
+                var spliter = "#";
+                break;
+            }
+
+            case "search":
+            case "?":
+            case undefined:
+            default:
+                {
+                    var firstChar = /^\?/;
+                    var spliter = "?";
+                    break;
+                }
+        }
+
+        //判断URL是否被定义，如果没有定义则为当前页面URL
+        switch (url) {
+            case undefined:
+            case 0: {
+                url = location.href;
+                break;
+            }
+            default:
+                {
+                    url = url;
+                    break;
+                }
+        }
+
+        // var foreURL=location.origin+location.pathname;
+        //URL前面部分
+        var foreURL = url.split(spliter)[0];
+
+        //URL中的查询语句：从URL中去掉URL前面部分和分隔符（#或?）
+        var queryString = url.replace(foreURL, "").replace(firstChar, "");
+
+        //使用&分隔参数
+        var queryArray = queryString.split('&');
+
+        var keys = [], values = [];
+        var paramObjs = {}, paramArray = [];
+        var paramObj = {};
+
+        for (var i = 0; i <= queryArray.length - 1; i++) {
+
+            //尝试用key-value数组生成一一对应的对象
+            keys[i] = queryArray[i].split("=")[0];
+            values[i] = queryArray[i].split("=")[1];
+
+            //为对象分配key-value对
+            Object.defineProperty(paramObj, keys[i], {
+                value: values[i]
+            })
+
+            //索引数组
+            // paramObj[keys[i]]=values[i];
+            //数组push
+            paramArray.push(paramObj);
+
+            paramObjs = paramArray[i];
+
+            //失败了。。。
+            //console.log(Object.assign(paramObjs , paramArray[i] ));
+
+        }
+
+        // console.log(paramArray);
+
+        return paramObjs;
+
     }
 }
 // export {util};
