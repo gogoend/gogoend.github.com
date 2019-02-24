@@ -126,7 +126,12 @@
         <div class="panoPanelBottom">
             <div class="panoList">
                 <ul>
-                    <li>
+                    <li v-for="(pano,index) in panos">
+                            <img class="panoThumb" @click="panoTexChange(index)" :src="panoThumbPath+pano.imgThumb" />
+                            <p class="panoTitle">{{pano.desc}}</p>
+                    </li>
+
+                    <!-- <li>
                         <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
                         <p class="panoTitle">Hola</p>
                     </li>
@@ -141,7 +146,7 @@
                     <li>
                         <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
                         <p class="panoTitle">Hola</p>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
 
@@ -159,35 +164,8 @@
 
     <script src="./pano_array.js"></script>
     <script>
-        //请求全屏
-        // var fullScreenStatus = false;
-        // function fullScreen() {
-        //     if (!fullScreenStatus) {
-        //         document.body.requestFullscreen();
-        //         fullScreenStatus = true
-        //     } else {
-        //         document.exitFullscreen();
-        //         fullScreenStatus = false
-        //     }
-        // }
 
-        var panoApp = new Vue({
-            el: '#app',
-            data: {
-                fullScreenStatus: false
-            },
-            methods: {
-                fullScreen: function () {
-                    if (!this.fullScreenStatus) {
-                        document.body.requestFullscreen();
-                        this.fullScreenStatus = true
-                    } else {
-                        document.exitFullscreen();
-                        this.fullScreenStatus = false
-                    }
-                }
-            }
-        });
+
 
         //rem
         (function (doc, win) {
@@ -213,6 +191,48 @@
         var panoBasePath = "./pano_images/",
             panoThumbPath = "./pano_thumb/";
 
+                    //请求全屏
+        // var fullScreenStatus = false;
+        // function fullScreen() {
+        //     if (!fullScreenStatus) {
+        //         document.body.requestFullscreen();
+        //         fullScreenStatus = true
+        //     } else {
+        //         document.exitFullscreen();
+        //         fullScreenStatus = false
+        //     }
+        // }
+
+        var panoApp = new Vue({
+            el: '#app',
+            data: {
+                fullScreenStatus: false,
+
+                panos:panos,
+                currentIndex:1,
+
+                //配置全景图文件夹基地址
+                panoBasePath : panoBasePath,
+                panoThumbPath : panoThumbPath
+            },
+            methods: {
+                fullScreen: function () {
+                    if (!this.fullScreenStatus) {
+                        document.body.requestFullscreen();
+                        this.fullScreenStatus = true
+                    } else {
+                        document.exitFullscreen();
+                        this.fullScreenStatus = false
+                    }
+                },
+                panoTexChange:function(listNum){
+                    panoImgTex.needsUpdate=true;
+                    panoImgTex.image.src=panoBasePath+panos[listNum].imgName;
+                    panoImgTex.needsUpdate=false;
+                }
+            }
+        });
+
         //THREEJS场景部分
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -228,6 +248,7 @@
 
 
         var panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[4].imgName);
+
 
         panoImgTex.anisotropy = 8;
 

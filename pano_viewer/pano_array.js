@@ -1,31 +1,31 @@
 var panos=[
     {
         imgName:"pano.jpg",
-        imgThumb:"thumb.jpg",
+        imgThumb:"thumb.png",
         desc:"建水·天柱塔",
         like:100
     },
     {
         imgName:"20170101_010102_panorama2.jpg",
-        imgThumb:"thumb.jpg",
+        imgThumb:"20170101_010102_thumb.png",
         desc:"行知楼后，夕阳西下",
         like:100
     },
     {
         imgName:"img_20170101_010102_panorama.jpg",
-        imgThumb:"thumb.jpg",
+        imgThumb:"img_20170101_010102_thumb.png",
         desc:"梦溪湖之夜",
         like:40
     },
     {
         imgName:"img_20180424_180753_panorama22.jpg",
-        imgThumb:"thumb.jpg",
+        imgThumb:"img_20180424_180753_thumb.png",
         desc:"梦溪湖上空100米",
         like:20
     },
     {
         imgName:"img_20180702_194917_panorama22.jpg",
-        imgThumb:"thumb.jpg",
+        imgThumb:"img_20180702_194917_thumb.png",
         desc:"二食堂前",
         like:16
     }
