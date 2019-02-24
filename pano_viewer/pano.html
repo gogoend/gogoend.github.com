@@ -227,8 +227,14 @@
                 },
                 panoTexChange:function(listNum){
                     panoImgTex.needsUpdate=true;
-                    panoImgTex.image.src=panoBasePath+panos[listNum].imgName;
-                    panoImgTex.needsUpdate=false;
+                    panoImgTex.dispose();
+                    panoImgTex=new THREE.TextureLoader().load(panoBasePath+panos[listNum].imgName,function(e){
+                        console.log(e);
+                        panoPhotoMaterial.map=e
+                    })
+
+                    // panoImgTex.image.src=panoBasePath+panos[listNum].imgName;
+                    // panoImgTex.needsUpdate=false;
                 }
             }
         });
