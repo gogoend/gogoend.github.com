@@ -32,7 +32,10 @@
 
 <body>
     <button onclick="fullScreen()" class="fullScreenBtn">全屏</button>
+    <script src="./pano_array.js"></script>
     <script>
+        //配置全景图文件夹基地址
+        var panoBasePath="./pano_images/"
 
         //THREEJS场景部分
         var scene = new THREE.Scene();
@@ -45,9 +48,10 @@
 
         var panoGeometry = new THREE.SphereGeometry(1, 36, 36);
         //直接将x设为-1，使得所有面朝向内测
-        panoGeometry.scale(-1, 1, 1)
+        panoGeometry.scale(-1, 1, 1);
 
-        var panoImgTex = new THREE.TextureLoader().load('./pano.jpg');
+
+        var panoImgTex = new THREE.TextureLoader().load(panoBasePath+panos[2].imgName);
 
         panoImgTex.anisotropy = 8;
 
@@ -81,6 +85,7 @@
             鼠标滚轮：向前放大，向后缩小
         */
         var lookAroundDeg = 0;
+
         //第一个值为半径，第二个值为上下旋转角，第三个值为平面极坐标的旋转角
         var sphereCood = new THREE.Spherical(10, util.degToRad(225), 0);
         cameraTarget.position.setFromSpherical(sphereCood);
@@ -164,8 +169,8 @@
                         console.log(util.radToDeg(sphereCood.phi))
 
                         var phi = mouseData.offsetY * 0.005 + mouseData.originPhi;
-                        //来自THREEJS
-                        sphereCood.phi = util.clamp(phi, util.degToRad(189), util.degToRad(359))
+                        //限制上下俯仰角度，以防万向锁。来自THREEJS
+                        sphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359))
 
                         console.log(sphereCood.theta + ' ' + sphereCood.phi)
 
