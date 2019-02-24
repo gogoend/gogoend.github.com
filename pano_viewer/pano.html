@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html>
+<html style="font-size:100px">
 
 <head>
     <meta charset="utf-8" />
@@ -10,32 +10,208 @@
     <script src="../control_stick/stick.js"></script>
     <style>
         html,
-        body {
+        body,
+        #app {
             padding: 0;
             margin: 0;
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            min-height: 100vh;
         }
 
-        .fullScreenBtn {
+        body {
+            font-family: sans-serif;
+            line-height: 1em;
+            font-size: 0.16rem;
+        }
+
+        button {
+            font-size: 0.16rem;
+            font-family: sans-serif;
+        }
+
+        div {
+            box-sizing: border-box;
+        }
+
+        ul,
+        li {
+            list-style: none;
+            margin: 0;
+            padding: 0
+        }
+
+        p {
+            margin: 0;
+        }
+
+        #app {
+            position: relative;
+        }
+
+        .panoControls {
             position: absolute;
-            right: 20px;
-            bottom: 10px;
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            align-items: center;
+            top: -0.64rem;
+            padding: 0 0.2rem;
+        }
+
+        .panoControls>button,
+        .panoControls>div,
+        .panoControls>a,
+        .panoControls>input {
+            pointer-events: all;
+        }
+
+        .panoControls button.fullScreenBtn {
             border: #62d128 solid 2px;
             background: #1c1c1c;
             color: #62d128;
-            padding: 10px 20px
+            padding: 0.1rem 0.2rem;
+            display: block
+        }
+
+        .panoPanelBottom {
+            position: absolute;
+            height: 1.6rem;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            bottom: 0;
+            transition: 0.4s ease bottom
+        }
+
+        .panoPanelBottom.fold {
+            bottom: -1.6rem;
+        }
+
+
+        .panoList {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .panoList>ul {
+            display: flex;
+            color: #fff;
+            margin: 0 auto;
+        }
+
+        .panoList>ul li {
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            justify-content: center;
+            margin: 0 10px;
+        }
+
+        .panoList>ul li>img.panoThumb {
+            width: 2rem;
+        }
+
+        .panoList>ul li>p.panoTitle {
+            line-height: 1.5em;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
-    <button onclick="fullScreen()" class="fullScreenBtn">全屏</button>
+    <div id="app">
+        <div class="panoPanelBottom">
+            <div class="panoList">
+                <ul>
+                    <li>
+                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
+                        <p class="panoTitle">Hola</p>
+                    </li>
+                    <li>
+                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
+                        <p class="panoTitle">Hola</p>
+                    </li>
+                    <li>
+                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
+                        <p class="panoTitle">Hola</p>
+                    </li>
+                    <li>
+                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
+                        <p class="panoTitle">Hola</p>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panoControls">
+
+                <!-- <button onclick="fullScreen" class="fullScreenBtn">全屏</button> -->
+
+                <button v-if="!fullScreenStatus" v-on:click="fullScreen" class="fullScreenBtn">全屏</button>
+                <button v-else v-on:click="fullScreen" class="fullScreenBtn">退出全屏</button>
+
+            </div>
+        </div>
+    </div>
+
+
     <script src="./pano_array.js"></script>
     <script>
+        //请求全屏
+        // var fullScreenStatus = false;
+        // function fullScreen() {
+        //     if (!fullScreenStatus) {
+        //         document.body.requestFullscreen();
+        //         fullScreenStatus = true
+        //     } else {
+        //         document.exitFullscreen();
+        //         fullScreenStatus = false
+        //     }
+        // }
+
+        var panoApp = new Vue({
+            el: '#app',
+            data: {
+                fullScreenStatus: false
+            },
+            methods: {
+                fullScreen: function () {
+                    if (!this.fullScreenStatus) {
+                        document.body.requestFullscreen();
+                        this.fullScreenStatus = true
+                    } else {
+                        document.exitFullscreen();
+                        this.fullScreenStatus = false
+                    }
+                }
+            }
+        });
+
+        //rem
+        (function (doc, win) {
+            var docEl = doc.documentElement,
+                resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+                recalc = function () {
+                    var clientWidth = docEl.clientWidth;
+                    if (!clientWidth) return;
+                    if (clientWidth >= 750) {
+                        docEl.style.fontSize = '100px';
+                    } else {
+                        docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+                    }
+                };
+
+            if (!doc.addEventListener) return;
+            win.addEventListener(resizeEvt, recalc, false);
+            doc.addEventListener('DOMContentLoaded', recalc, false);
+        })(document, window);
+
+
         //配置全景图文件夹基地址
-        var panoBasePath="./pano_images/"
+        var panoBasePath = "./pano_images/",
+            panoThumbPath = "./pano_thumb/";
 
         //THREEJS场景部分
         var scene = new THREE.Scene();
@@ -44,14 +220,14 @@
             "antialias": true
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
+        document.getElementById('app').appendChild(renderer.domElement);
 
         var panoGeometry = new THREE.SphereGeometry(1, 36, 36);
         //直接将x设为-1，使得所有面朝向内测
         panoGeometry.scale(-1, 1, 1);
 
 
-        var panoImgTex = new THREE.TextureLoader().load(panoBasePath+panos[2].imgName);
+        var panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[4].imgName);
 
         panoImgTex.anisotropy = 8;
 
@@ -206,26 +382,21 @@
         document.addEventListener("mousedown", pointHandler, false);
         document.addEventListener("mousewheel", mouseScrollHandler, false);
 
-        //请求全屏
-        var fullScreenStatus = false;
-        function fullScreen() {
-            if (!fullScreenStatus) {
-                document.body.requestFullscreen();
-                fullScreenStatus = true
-            } else {
-                document.exitFullscreen();
-                fullScreenStatus = false
-            }
-        }
+
 
         //页面管理
         var hash = location.hash;
         // console.log(hash);
         window.addEventListener("hashchange", function (e) {
             console.log(e);
-        }, false)
+        }, false);
 
-        
+
+
+
+
+
+
 
     </script>
 </body>

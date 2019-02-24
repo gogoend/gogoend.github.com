@@ -1,31 +1,31 @@
 var panos=[
     {
         imgName:"pano.jpg",
-        imgThumb:"",
-        desc:"云南·高山之上",
+        imgThumb:"thumb.jpg",
+        desc:"建水·天柱塔",
         like:100
     },
     {
         imgName:"20170101_010102_panorama2.jpg",
-        imgThumb:"",
+        imgThumb:"thumb.jpg",
         desc:"行知楼后，夕阳西下",
         like:100
     },
     {
         imgName:"img_20170101_010102_panorama.jpg",
-        imgThumb:"",
+        imgThumb:"thumb.jpg",
         desc:"梦溪湖之夜",
         like:40
     },
     {
         imgName:"img_20180424_180753_panorama22.jpg",
-        imgThumb:"",
-        desc:"梦溪湖，桥上100米",
+        imgThumb:"thumb.jpg",
+        desc:"梦溪湖上空100米",
         like:20
     },
     {
         imgName:"img_20180702_194917_panorama22.jpg",
-        imgThumb:"",
+        imgThumb:"thumb.jpg",
         desc:"二食堂前",
         like:16
     }
