@@ -127,8 +127,9 @@
             <div class="panoList">
                 <ul>
                     <li v-for="(pano,index) in panos">
-                            <img class="panoThumb" @click="panoTexChange(index)" :src="panoThumbPath+pano.imgThumb" />
-                            <p class="panoTitle">{{pano.desc}}</p>
+                        <img class="panoThumb" @click="panoTexChange(index)" @tap="panoTexChange(index)"
+                            :src="panoThumbPath+pano.imgThumb" />
+                        <p class="panoTitle">{{pano.desc}}</p>
                     </li>
 
                     <!-- <li>
@@ -191,7 +192,7 @@
         var panoBasePath = "./pano_images/",
             panoThumbPath = "./pano_thumb/";
 
-                    //请求全屏
+        //请求全屏
         // var fullScreenStatus = false;
         // function fullScreen() {
         //     if (!fullScreenStatus) {
@@ -208,12 +209,12 @@
             data: {
                 fullScreenStatus: false,
 
-                panos:panos,
-                currentIndex:1,
+                panos: panos,
+                currentIndex: 1,
 
                 //配置全景图文件夹基地址
-                panoBasePath : panoBasePath,
-                panoThumbPath : panoThumbPath
+                panoBasePath: panoBasePath,
+                panoThumbPath: panoThumbPath
             },
             methods: {
                 fullScreen: function () {
@@ -225,14 +226,16 @@
                         this.fullScreenStatus = false
                     }
                 },
-                panoTexChange:function(listNum){
-                    panoImgTex.needsUpdate=true;
-                    panoImgTex.dispose();
-                    panoImgTex=new THREE.TextureLoader().load(panoBasePath+panos[listNum].imgName,function(e){
-                        console.log(e);
-                        panoPhotoMaterial.map=e
-                    })
-
+                panoTexChange: function (listNum) {
+                    panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[listNum].imgName,
+                        function (e) {
+                            e.image.src = panoBasePath + panos[listNum].imgName;
+                            panoImgTex.needsUpdate = true;
+                            panoImgTex.dispose();
+                            panoPhotoMaterial.map = e;
+                            panoImgTex.anisotropy = 8;
+                            panoImgTex.needsUpdate = false;
+                        })
                     // panoImgTex.image.src=panoBasePath+panos[listNum].imgName;
                     // panoImgTex.needsUpdate=false;
                 }
@@ -248,14 +251,13 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('app').appendChild(renderer.domElement);
 
-        var panoGeometry = new THREE.SphereGeometry(1, 36, 36);
+        var panoGeometry = new THREE.SphereBufferGeometry(10, 36, 36);
         //直接将x设为-1，使得所有面朝向内测
         panoGeometry.scale(-1, 1, 1);
 
 
-        var panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[4].imgName);
-
-
+        //载入贴图
+        var panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[0].imgName);
         panoImgTex.anisotropy = 8;
 
         var panoPhotoMaterial = new THREE.MeshStandardMaterial({
@@ -393,8 +395,6 @@
 
                     document.removeEventListener("mousemove", pointHandler, false);
                     document.removeEventListener("touchmove", pointHandler, false);
-
-
                     break;
                 }
             }
@@ -409,7 +409,51 @@
         document.addEventListener("mousedown", pointHandler, false);
         document.addEventListener("mousewheel", mouseScrollHandler, false);
 
+        //光线投射部分
+        document.addEventListener('mousemove', rayCastHandler, false);
+        function rayCastHandler(event) {
+            var mouse = new THREE.Vector2();
 
+            // console.log(event);
+
+            raycaster = new THREE.Raycaster();
+
+            event.preventDefault();
+
+            //将浏览器坐标转换到Threejs坐标
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera( mouse, camera );
+
+            //一个数组，用于保存与射线相交叉的对象
+            //数组下标按照物体远近来进行排序，下标越大越远
+            var intersects = raycaster.intersectObjects( scene.children )
+            
+            //尝试把射线选中的除了全景球以外的元素删去
+            //似乎可以用.filter(function(obj3d){return ...});来替换？
+            var realIntersects=[];
+            for(var i=0;i<intersects.length;i++){
+                // console.log(intersects);
+                if(intersects[i].object.geometry instanceof THREE.SphereBufferGeometry){
+                    realIntersects.push(intersects[i]);
+                }
+            }
+            // console.log(realIntersects);
+            intersectPoint=realIntersects[0].point;
+
+            //在所点击点随便添加一个物体
+            var anyObject=new THREE.BoxBufferGeometry(0.4, 0.4, 0.4);
+            var anyMaterial=new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+            var anyMesh = new THREE.Mesh( anyObject, anyMaterial );
+
+            console.log(intersectPoint);
+            anyMesh.position.x=intersectPoint.x;
+            anyMesh.position.y=intersectPoint.y;
+            anyMesh.position.z=intersectPoint.z;
+            scene.add(anyMesh);
+
+        }
 
         //页面管理
         var hash = location.hash;
@@ -417,11 +461,6 @@
         window.addEventListener("hashchange", function (e) {
             console.log(e);
         }, false);
-
-
-
-
-
 
 
 
