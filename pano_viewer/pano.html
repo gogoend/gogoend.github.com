@@ -1,8 +1,9 @@
 <!DOCTYPE HTML>
-<html style="font-size:100px">
+<html lang="zh" style="font-size:100px">
 
 <head>
     <meta charset="utf-8" />
+    <title>2018年上半年飞过的地方 - Hello全视界</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <script src="../lib/three.js"></script>
     <script src="../lib/vue.js"></script>
@@ -64,10 +65,11 @@
             position: absolute;
             display: flex;
             justify-content: flex-end;
-            width: 100%;
+            /* width: 100%; */
             align-items: center;
-            top: -0.8rem;
+            top: -0.6rem;
             padding: 0 0.2rem;
+            right: 0px;
         }
 
         .panoControls>button,
@@ -89,7 +91,7 @@
             margin: 0 10px
         }
 
-        .panoList button.rollOutBtn {
+        .panoPanelBottom button.rollOutBtn {
             position: absolute;
             height: 2em;
             top: -2em;
@@ -97,7 +99,6 @@
 
         .panoPanelBottom {
             position: absolute;
-            height: 1.7rem;
             width: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             bottom: 0;
@@ -112,15 +113,14 @@
 
         .panoList {
             width: 100%;
-            height: 100%;
-            display: flex;
-            overflow-x: auto;
+            height: 1.7rem;
         }
 
         .panoList>ul {
             display: flex;
             color: #fff;
             margin: 0 auto;
+            margin-bottom: 1em;
         }
 
         .panoList>ul li {
@@ -148,6 +148,32 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .scrollBar {
+            width: 2rem;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            left: 20px;
+        }
+
+        .scrollBar>.stick {
+            position: absolute;
+            display: block;
+            width: 0.2rem;
+            height: 0.2rem;
+            background-color: #62d128;
+            border: #62d128 solid 2px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .scrollBar>.bar {
+            width: 100%;
+            display: block;
+            height: 2px;
+            background: #62d128;
+        }
     </style>
 </head>
 
@@ -155,42 +181,24 @@
     <div id="app">
         <div class="panoWrap"></div>
         <div class="panoPanelBottom" :class="{'fold':isPanoPanelBottomFold}">
-            <div class="panoList">
-                <button v-on:click="panoListRollToggle" class="rollOutBtn">展开收起</button>
+            <button v-on:click="panoListRollToggle" class="rollOutBtn">展开收起</button>
 
+            <div class="panoList">
                 <ul>
                     <li v-for="(pano,index) in panos">
                         <img class="panoThumb" @click="panoTexChange(index)" :src="panoThumbPath+pano.imgThumb" />
                         <p class="panoTitle">{{pano.desc}}</p>
                     </li>
-
-                    <!-- <li>
-                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
-                        <p class="panoTitle">Hola</p>
-                    </li>
-                    <li>
-                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
-                        <p class="panoTitle">Hola</p>
-                    </li>
-                    <li>
-                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
-                        <p class="panoTitle">Hola</p>
-                    </li>
-                    <li>
-                        <img class="panoThumb" src="./pano_thumb/thumb.jpg" />
-                        <p class="panoTitle">Hola</p>
-                    </li> -->
                 </ul>
+                <div class="scrollBar" data-role="miniScrollBar">
+                    <span class="stick"></span>
+                    <div class="bar"></div>
+                </div>
             </div>
 
-
             <div class="panoControls">
-
                 <!-- <button onclick="fullScreen" class="fullScreenBtn">全屏</button> -->
-
                 <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">全屏切换</button>
-
-
 
             </div>
         </div>
@@ -199,8 +207,6 @@
 
     <script src="./pano_array.js"></script>
     <script>
-
-
 
         //rem
         (function (doc, win) {
@@ -277,8 +283,6 @@
                             panoImgTex.anisotropy = 8;
                             panoImgTex.needsUpdate = false;
                         })
-                    // panoImgTex.image.src=panoBasePath+panos[listNum].imgName;
-                    // panoImgTex.needsUpdate=false;
                 }
             }
         });
@@ -289,7 +293,10 @@
         var renderer = new THREE.WebGLRenderer({
             "antialias": true
         });
+        //尝试将渲染尺寸乘以设备像素比，防止手机浏览器渲染时产生锯齿。
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
 
         var panoWrap = document.getElementById('app').querySelector('.panoWrap');
         panoWrap.appendChild(renderer.domElement);
@@ -318,11 +325,7 @@
         scene.add(g);
 
         //摄像机目标
-        var cameraTargetMesh = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
-        var cameraTargetMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00ffff
-        })
-        var cameraTarget = new THREE.Mesh(cameraTargetMesh, cameraTargetMaterial);
+        var cameraTarget = new THREE.Object3D();
         cameraTarget.name = "cameraTarget";
 
         /*交互方式：
@@ -525,6 +528,19 @@
         // console.log(hash);
         window.addEventListener("hashchange", function (e) {
             console.log(e);
+        }, false);
+
+        //微型水平滚动条
+        var miniScrollBar = document.querySelector('[data-role="miniScrollBar"]');
+        console.log(miniScrollBar);
+        miniScrollBar.addEventListener("mousemove", function (e) {
+
+            console.log(e.clientX);
+            if(e.target.classList.contains("stick")){
+                var stick=e.target;
+                stick.style.left=(e.clientX-parseInt(util.getStyle(stick).width))+'px';
+            }
+
         }, false);
 
     </script>
