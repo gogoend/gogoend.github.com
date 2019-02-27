@@ -1,9 +1,11 @@
 <html>
+
 <head>
-    <meta charset="utf-8" />
-    <title></title>
+    <meta charset="utf-8">
+    <title>rrr</title>
     <style>
-        body,html{
+        body,
+        html {
             padding: 0;
             margin: 0;
         }
@@ -11,26 +13,91 @@
 </head>
 
 <body>
-    <canvas id="myCanvas" width="1024" height="320"></canvas>
-
     <script>
-        //导入图标
-        var icon=new Image();
-        icon.src="./place.svg";
+        var positions = [
+            {
+                posName: "公共卫生间",
+                posDistance: "600m"
+            },
+            {
+                posName: "什么鬼超市",
+                posDistance: "1.2km"
+            },
+            {
+                posName: "张漂亮豆脑",
+                posDistance: "1.5km"
+            },
+            {
+                posName: "制杖鬼屋",
+                posDistance: "50m"
+            },
+            {
+                posName: "田记烤肉",
+                posDistance: "2.5km"
+            },
+            {
+                posName: "赛神仙KTV",
+                posDistance: "488m"
+            },
+            {
+                posName: "刘姐腌菜坊",
+                posDistance: "80m"
+            },
+            {
+                posName: "李好看咖啡",
+                posDistance: "512m"
+            },
+            {
+                posName: "王美丽发廊",
+                posDistance: "666m"
+            },
+            {
+                posName: "吴先生算命馆",
+                posDistance: "64m"
+            },
+            {
+                posName: "东施豆腐",
+                posDistance: "1.8km"
+            }
+        ]
 
-        //获得画布
-        var c = document.getElementById("myCanvas");
-        var ctx = c.getContext("2d");
-        ctx.fillStyle = "rgba(0,0,0,0.65)";
-        ctx.fillRect(0, 0, c.width, c.height);
+        var poiBoard = function (posName, posDistance) {
+            var icon = new Image();
+            icon.src = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDIwNC4xIDIwNC4xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyMDQuMSAyMDQuMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzQ3QjEzNCIgZD0iTTEwMiwyMDEuM2wtNTguMS01OC4xYy0zMi0zMi0zMi04NC4yLDAtMTE2LjJDNTkuNSwxMS40LDgwLjEsMi44LDEwMiwyLjhzNDIuNiw4LjUsNTguMSwyNC4xaDANCgljMzIsMzIsMzIsODQuMiwwLDExNi4yTDEwMiwyMDEuM3ogTTEwMiwxMC4yYy0yMCwwLTM4LjgsNy44LTUyLjksMjEuOUMyMCw2MS4zLDIwLDEwOC44LDQ5LjEsMTM3LjlsNTIuOSw1Mi45bDUyLjktNTIuOQ0KCWMyOS4yLTI5LjIsMjkuMi03Ni42LDAtMTA1LjhsMCwwQzE0MC44LDE4LDEyMiwxMC4yLDEwMiwxMC4yeiBNMTAyLjIsMTIwYy0xOS4zLDAtMzUuMS0xNS43LTM1LjEtMzUuMXMxNS43LTM1LjEsMzUuMS0zNS4xDQoJYzE5LjMsMCwzNS4xLDE1LjcsMzUuMSwzNS4xUzEyMS41LDEyMCwxMDIuMiwxMjB6IE0xMDIuMiw1Ny4yYy0xNS4zLDAtMjcuNywxMi40LTI3LjcsMjcuN3MxMi40LDI3LjcsMjcuNywyNy43DQoJczI3LjctMTIuNCwyNy43LTI3LjdTMTE3LjUsNTcuMiwxMDIuMiw1Ny4yeiIvPg0KPC9zdmc+DQo=";
+            // icon.id="icon";
+            // document.body.appendChild(icon);
+            var canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 320;
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "rgba(0,0,0,0.75)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ctx.fillRect(50, 60, 206, 206);
+            icon.addEventListener('load', function (e) {
+                ctx.drawImage(icon, 50, 50, 206, 206);
+            });
 
-        ctx.fillRect(50,60,206,206);
+            ctx.moveTo(300, 45);
+            ctx.lineTo(300, 272);
+            ctx.strokeStyle = "#00ce00";
+            ctx.lineWidth = 7;
+            ctx.stroke();
 
+            ctx.fillStyle = "#ffffff";
+            ctx.font = '80px sans-serif';
+            ctx.fillText(posName, 360, 150);
 
-        ctx.drawImage(icon,50,60,206,206);
-        console.log(23333)
-</script>
+            ctx.fillStyle = "#ffffff";
+            ctx.font = '54px sans-serif';
+            ctx.fillText(posDistance, 360, 220);
 
+            document.body.appendChild(canvas);
+        }
+
+        for (var i = 0; i < positions.length; i++) {
+            poiBoard(positions[i].posName, positions[i].posDistance);
+        }
+    </script>
 </body>
 
 </html>
