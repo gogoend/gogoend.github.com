@@ -1,0 +1,36 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <style>
+        body,html{
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1024" height="320"></canvas>
+
+    <script>
+        //导入图标
+        var icon=new Image();
+        icon.src="./place.svg";
+
+        //获得画布
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        ctx.fillRect(50,60,206,206);
+
+
+        ctx.drawImage(icon,50,60,206,206);
+        console.log(23333)
+</script>
+
+</body>
+
+</html>
