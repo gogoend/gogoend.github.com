@@ -220,6 +220,7 @@ var util = {
             values[i] = queryArray[i].split("=")[1];
 
             //为对象分配key-value对
+            //没法重复定义同一个key
             Object.defineProperty(paramObj, keys[i], {
                 value: values[i]
             })
