@@ -511,15 +511,21 @@
             intersectPoint = realIntersects[0].point;
 
             //在所点击点随便添加一个物体
-            var anyObject = new THREE.BoxBufferGeometry(0.4, 0.4, 0.4);
-            var anyMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-            var anyMesh = new THREE.Mesh(anyObject, anyMaterial);
+            var anyMap=new THREE.TextureLoader().load("./poi_res/poi_board.png");
+            //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
+            var anyMaterial = new THREE.SpriteMaterial({map:anyMap, color: 0xffffff,transparent:true,depthTest:false });
+            var anyObject = new THREE.Sprite(anyMaterial);
+            anyObject.center=new THREE.Vector2(0,0)
+            var poiboardSize=[1024,256];
+            anyObject.scale.set(poiboardSize[0]*0.003,poiboardSize[1]*0.003,1);
+            anyObject.lookAt(camera.position);
+            // var anyMesh = new THREE.Mesh(anyObject, anyMaterial);
 
             console.log(intersectPoint);
-            anyMesh.position.x = intersectPoint.x;
-            anyMesh.position.y = intersectPoint.y;
-            anyMesh.position.z = intersectPoint.z;
-            scene.add(anyMesh);
+            anyObject.position.x = intersectPoint.x;
+            anyObject.position.y = intersectPoint.y;
+            anyObject.position.z = intersectPoint.z;
+            scene.add(anyObject);
 
         }
 
