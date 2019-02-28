@@ -51,6 +51,17 @@
             position: relative;
         }
 
+        .logo{
+            position: absolute;
+            margin: 0.2rem 0 0 0.4rem;
+            z-index: 999;
+
+        }
+
+        .logo>img{
+            width: 2rem;
+        }
+
         .panoWrap {
             position: absolute;
             overflow: hidden;
@@ -179,6 +190,9 @@
 
 <body>
     <div id="app">
+        <div class="logo">
+            <img src="../logo.svg" />
+        </div>
         <div class="panoWrap"></div>
         <div class="panoPanelBottom" :class="{'fold':isPanoPanelBottomFold}">
             <button v-on:click="panoListRollToggle" class="rollOutBtn">展开收起</button>
@@ -511,21 +525,21 @@
             intersectPoint = realIntersects[0].point;
 
             //在所点击点随便添加一个物体
-            var anyMap=new THREE.TextureLoader().load("./poi_res/poi_board.png");
+            var poiMap=new THREE.TextureLoader().load("./poi_res/poi_board.png");
             //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
-            var anyMaterial = new THREE.SpriteMaterial({map:anyMap, color: 0xffffff,transparent:true,depthTest:false });
-            var anyObject = new THREE.Sprite(anyMaterial);
-            anyObject.center=new THREE.Vector2(0,0)
+            var poiMaterial = new THREE.SpriteMaterial({map:poiMap, color: 0xffffff,transparent:true,depthTest:false });
+            var poiObject = new THREE.Sprite(poiMaterial);
+            poiObject.center=new THREE.Vector2(0,0)
             var poiboardSize=[1024,256];
-            anyObject.scale.set(poiboardSize[0]*0.003,poiboardSize[1]*0.003,1);
-            anyObject.lookAt(camera.position);
+            poiObject.scale.set(poiboardSize[0]*0.004,poiboardSize[1]*0.004,1);
+            poiObject.lookAt(camera.position);
             // var anyMesh = new THREE.Mesh(anyObject, anyMaterial);
 
             console.log(intersectPoint);
-            anyObject.position.x = intersectPoint.x;
-            anyObject.position.y = intersectPoint.y;
-            anyObject.position.z = intersectPoint.z;
-            scene.add(anyObject);
+            poiObject.position.x = intersectPoint.x;
+            poiObject.position.y = intersectPoint.y;
+            poiObject.position.z = intersectPoint.z;
+            scene.add(poiObject);
 
         }
 
