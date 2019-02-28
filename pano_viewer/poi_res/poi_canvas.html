@@ -20,15 +20,15 @@
                 posDistance: "600m"
             },
             {
-                posName: "什么鬼超市",
+                posName: "超级巨大超市",
                 posDistance: "1.2km"
             },
             {
-                posName: "张漂亮豆脑",
+                posName: "张漂亮酸汤鸡脚",
                 posDistance: "1.5km"
             },
             {
-                posName: "制杖鬼屋",
+                posName: "老奶洋芋",
                 posDistance: "50m"
             },
             {
@@ -40,7 +40,7 @@
                 posDistance: "488m"
             },
             {
-                posName: "刘姐腌菜坊",
+                posName: "刘嬢腌菜",
                 posDistance: "80m"
             },
             {
@@ -52,11 +52,11 @@
                 posDistance: "666m"
             },
             {
-                posName: "吴先生算命馆",
+                posName: "吴师电脑算命",
                 posDistance: "64m"
             },
             {
-                posName: "东施豆腐",
+                posName: "东施臭豆腐",
                 posDistance: "1.8km"
             }
         ]
@@ -68,34 +68,34 @@
             // document.body.appendChild(icon);
             var canvas = document.createElement('canvas');
             canvas.width = 1024;
-            canvas.height = 320;
+            canvas.height = 256;
             var ctx = canvas.getContext("2d");
             ctx.fillStyle = "rgba(0,0,0,0.75)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             // ctx.fillRect(50, 60, 206, 206);
             icon.addEventListener('load', function (e) {
-                ctx.drawImage(icon, 50, 50, 206, 206);
+                ctx.drawImage(icon, 40, 40, 176, 176);
             });
 
-            ctx.moveTo(300, 45);
-            ctx.lineTo(300, 272);
+            ctx.moveTo(256, 33);
+            ctx.lineTo(256, 222);
             ctx.strokeStyle = "#00ce00";
             ctx.lineWidth = 7;
             ctx.stroke();
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = '80px sans-serif';
-            ctx.fillText(posName, 360, 150);
+            ctx.font = '72px sans-serif';
+            ctx.fillText(posName, 300, 128);
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = '54px sans-serif';
-            ctx.fillText(posDistance, 360, 220);
+            ctx.font = '48px sans-serif';
+            ctx.fillText(posDistance, 300, 192);
 
-            document.body.appendChild(canvas);
+            return canvas;
         }
 
         for (var i = 0; i < positions.length; i++) {
-            poiBoard(positions[i].posName, positions[i].posDistance);
+            document.body.appendChild(poiBoard(positions[i].posName, positions[i].posDistance));
         }
     </script>
 </body>
