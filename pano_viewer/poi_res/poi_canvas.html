@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>rrr</title>
+    <script src="../position_array.js"></script>
     <style>
         body,
         html {
@@ -14,108 +15,6 @@
 
 <body>
     <script>
-        var positions = [
-            {
-                type: 'place',
-                posName: "公共卫生间",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.565688,
-                    "lat": 45.876491
-                }
-            },
-            {
-                type: 'place',
-                posName: "超级巨大超市",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.565116,
-                    "lat": 45.875294
-                }
-            },
-            {
-                type: 'place',
-                posName: "张漂亮酸汤鸡脚",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.563549,
-                    "lat": 45.869033
-                }
-            },
-            {
-                type: 'place',
-                posName: "老奶洋芋",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.564755,
-                    "lat": 45.875585
-                }
-            },
-            {
-                type: 'place',
-                posName: "田记烤肉",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.566041,
-                    "lat": 45.86973
-                }
-            },
-            {
-                type: 'place',
-                posName: "赛神仙KTV",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.565265,
-                    "lat": 45.875536
-                }
-            },
-            {
-                type: 'place',
-                posName: "刘嬢腌菜",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.56618,
-                    "lat": 45.875941
-                }
-            },
-            {
-                type: 'place',
-                posName: "李好看咖啡",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.567973,
-                    "lat": 45.875637
-                }
-            },
-            {
-                type: 'place',
-                posName: "王美丽发廊",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.563785,
-                    "lat": 45.869142
-                }
-            },
-            {
-                type: 'place',
-                posName: "吴师电脑算命",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.568102,
-                    "lat": 45.871185
-                }
-            },
-            {
-                type: 'place',
-                posName: "东施臭豆腐",
-                posDistance: null,
-                geoCood: {
-                    "lng": 126.572702,
-                    "lat": 45.876018
-                }
-            }
-        ]
-
         var poiBoard = function (posName, posDistance) {
             var icon = new Image();
             icon.src = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDIwNC4xIDIwNC4xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyMDQuMSAyMDQuMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzQ3QjEzNCIgZD0iTTEwMiwyMDEuM2wtNTguMS01OC4xYy0zMi0zMi0zMi04NC4yLDAtMTE2LjJDNTkuNSwxMS40LDgwLjEsMi44LDEwMiwyLjhzNDIuNiw4LjUsNTguMSwyNC4xaDANCgljMzIsMzIsMzIsODQuMiwwLDExNi4yTDEwMiwyMDEuM3ogTTEwMiwxMC4yYy0yMCwwLTM4LjgsNy44LTUyLjksMjEuOUMyMCw2MS4zLDIwLDEwOC44LDQ5LjEsMTM3LjlsNTIuOSw1Mi45bDUyLjktNTIuOQ0KCWMyOS4yLTI5LjIsMjkuMi03Ni42LDAtMTA1LjhsMCwwQzE0MC44LDE4LDEyMiwxMC4yLDEwMiwxMC4yeiBNMTAyLjIsMTIwYy0xOS4zLDAtMzUuMS0xNS43LTM1LjEtMzUuMXMxNS43LTM1LjEsMzUuMS0zNS4xDQoJYzE5LjMsMCwzNS4xLDE1LjcsMzUuMSwzNS4xUzEyMS41LDEyMCwxMDIuMiwxMjB6IE0xMDIuMiw1Ny4yYy0xNS4zLDAtMjcuNywxMi40LTI3LjcsMjcuN3MxMi40LDI3LjcsMjcuNywyNy43DQoJczI3LjctMTIuNCwyNy43LTI3LjdTMTE3LjUsNTcuMiwxMDIuMiw1Ny4yeiIvPg0KPC9zdmc+DQo=";
