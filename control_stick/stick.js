@@ -272,6 +272,15 @@ Stick.prototype.getTransformMatrix = function (target) {
                 rotateMatrix4y[10] = Math.cos(result.rad);
             }
 
+
+            //！！！修复无人机左摇杆左右移动
+            if(conf.type === 'droneRCLeft'){
+                rotateMatrix4y[0] = Math.cos(result.rad);
+                rotateMatrix4y[2] = -Math.sin(result.rad);
+                rotateMatrix4y[8] = Math.sin(result.rad);
+                rotateMatrix4y[10] = Math.cos(result.rad);
+            }
+
             // console.log(rotateMatrix4y)
 
             //沿着z轴的旋转矩阵
@@ -308,7 +317,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             // console.log(this.type+'原始矩阵：' + rawMatrix);
             // console.log(this.type+'平移矩阵：' + translateMatrix4);
             // console.log(this.type+'旋转矩阵：' + rotateMatrix4);
-            console.log(this.type+'变换复合矩阵：' + transformMatrix4);
+            // console.log(this.type+'变换复合矩阵：' + transformMatrix4);
 
 
             //返回变换矩阵
@@ -396,12 +405,14 @@ Stick.prototype.eventTodo = function () {
             };
             case 'touchmove':
             case 'mousemove': {
+                //e.movementX和e.movementY是两次移动之间距离的差
+                console.log(e.movementX+' '+e.movementY);
                 var result = _this.getDirection(e);
                 // console.log(result);
                 e.preventDefault();
 
-                stick.style.left = result.stickLeft + 'px';
-                stick.style.top = result.stickTop + 'px';
+                stick.style.left = result.stickLeft+ 'px';
+                stick.style.top = result.stickTop+ 'px';
 
                 //...
                 // console.log(_this)
