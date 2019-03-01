@@ -241,6 +241,19 @@ var util = {
 
         return paramObjs;
 
+    },
+    //计算两个地理坐标（经纬度）间的距离
+    geoLength:function(origin,target){
+        var earthRadius=6371393;//地球半径，单位：米
+        var oLatRad=util.degToRad(origin.lat),
+            tLatRad=util.degToRad(target.lat);
+        var lngMinus=Math.abs(target.lng-origin.lng)>180 ? 360-Math.abs(target.lng-origin.lng) : Math.abs(target.lng-origin.lng)
+        
+        var lngMinusRad=util.degToRad(lngMinus);
+
+        var angle=Math.sin(oLatRad)*Math.sin(tLatRad)+Math.cos(oLatRad)*Math.cos(tLatRad)*Math.cos(lngMinusRad);
+        var length=Math.acos(angle)*earthRadius;
+        return length;
     }
 }
 // export {util};

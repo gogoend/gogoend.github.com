@@ -200,7 +200,7 @@
             <div class="panoList">
                 <ul>
                     <li v-for="(pano,index) in panos">
-                        <img class="panoThumb" @click="panoTexChange(index)" :src="panoThumbPath+pano.imgThumb" />
+                        <img class="panoThumb" @click="panoChange(index)" :src="panoThumbPath+pano.imgThumb" />
                         <p class="panoTitle">{{pano.desc}}</p>
                     </li>
                 </ul>
@@ -265,11 +265,13 @@
                 isPanoPanelBottomFold: false,
 
                 panos: panos,
-                currentIndex: 1,
+                currentIndex: 0,
 
                 //配置全景图文件夹基地址
                 panoBasePath: panoBasePath,
-                panoThumbPath: panoThumbPath
+                panoThumbPath: panoThumbPath,
+                
+                panoGeoCood:0
             },
             methods: {
                 panoListRollToggle: function () {
@@ -287,7 +289,7 @@
                         document.exitFullscreen();
                     }
                 },
-                panoTexChange: function (listNum) {
+                panoChange: function (listNum) {
                     panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[listNum].imgName,
                         function (e) {
                             e.image.src = panoBasePath + panos[listNum].imgName;
@@ -302,6 +304,14 @@
         });
 
         //THREEJS场景部分
+        function ThreeScene(){
+            var sceneInit=()=>{};
+            var panoInit=()=>{};
+            var userInteract=()=>{};
+            var pointHandler=(e)=>{};
+            var mouseScrollHandler=(e)=>{};
+            var rayCastHandler=()=>{};
+        }
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         var renderer = new THREE.WebGLRenderer({
@@ -337,6 +347,10 @@
         var g = new THREE.Group();
         g.add(camera);
         scene.add(g);
+
+        var spriteGroup=new THREE.Group();
+        spriteGroup.name="spriteGroup";
+        scene.add(spriteGroup);
 
         //摄像机目标
         var cameraTarget = new THREE.Object3D();
@@ -539,7 +553,7 @@
             poiObject.position.x = intersectPoint.x;
             poiObject.position.y = intersectPoint.y;
             poiObject.position.z = intersectPoint.z;
-            scene.add(poiObject);
+            spriteGroup.add(poiObject);
 
         }
 
