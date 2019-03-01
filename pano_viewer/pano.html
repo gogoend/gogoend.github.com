@@ -51,14 +51,14 @@
             position: relative;
         }
 
-        .logo{
+        .logo {
             position: absolute;
             margin: 0.2rem 0 0 0.4rem;
             z-index: 999;
 
         }
 
-        .logo>img{
+        .logo>img {
             width: 2rem;
         }
 
@@ -189,7 +189,7 @@
 </head>
 
 <body>
-    <div id="app">
+    <div id="app" v-cloak>
         <div class="logo">
             <img src="../logo.svg" />
         </div>
@@ -221,6 +221,7 @@
 
     <script src="./pano_array.js"></script>
     <script>
+        // Vue.component('scrollBar')
 
         //rem
         (function (doc, win) {
@@ -270,10 +271,14 @@
                 //配置全景图文件夹基地址
                 panoBasePath: panoBasePath,
                 panoThumbPath: panoThumbPath,
-                
-                panoGeoCood:0
+
+                panoGeoCood: 0
             },
             methods: {
+                mounted:function(){
+                    
+                },
+
                 panoListRollToggle: function () {
                     if (this.isPanoPanelBottomFold) {
                         this.isPanoPanelBottomFold = false
@@ -290,27 +295,35 @@
                     }
                 },
                 panoChange: function (listNum) {
+                    console.log(this.currentIndex+' '+listNum)
+
                     panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[listNum].imgName,
                         function (e) {
                             e.image.src = panoBasePath + panos[listNum].imgName;
-                            panoImgTex.needsUpdate = true;
-                            panoImgTex.dispose();
-                            panoPhotoMaterial.map = e;
-                            panoImgTex.anisotropy = 8;
-                            panoImgTex.needsUpdate = false;
+                            if (listNum == this.currentIndex) {
+                                return
+                            } else {
+                                this.currentIndex=listNum;
+                                panoImgTex.needsUpdate = true;
+                                spriteGroup.children = [];//在切换之前把当前全景上所有的sprite poi清空
+                                panoImgTex.dispose();
+                                panoPhotoMaterial.map = e;
+                                panoImgTex.anisotropy = 8;
+                                panoImgTex.needsUpdate = false;
+                            }
                         })
                 }
             }
         });
 
         //THREEJS场景部分
-        function ThreeScene(){
-            var sceneInit=()=>{};
-            var panoInit=()=>{};
-            var userInteract=()=>{};
-            var pointHandler=(e)=>{};
-            var mouseScrollHandler=(e)=>{};
-            var rayCastHandler=()=>{};
+        function ThreeScene() {
+            var sceneInit = () => { };
+            var panoInit = () => { };
+            var userInteract = () => { };
+            var pointHandler = (e) => { };
+            var mouseScrollHandler = (e) => { };
+            var rayCastHandler = () => { };
         }
         var scene = new THREE.Scene();
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -348,8 +361,8 @@
         g.add(camera);
         scene.add(g);
 
-        var spriteGroup=new THREE.Group();
-        spriteGroup.name="spriteGroup";
+        var spriteGroup = new THREE.Group();
+        spriteGroup.name = "spriteGroup";
         scene.add(spriteGroup);
 
         //摄像机目标
@@ -539,13 +552,13 @@
             intersectPoint = realIntersects[0].point;
 
             //在所点击点随便添加一个物体
-            var poiMap=new THREE.TextureLoader().load("./poi_res/poi_board.png");
+            var poiMap = new THREE.TextureLoader().load("./poi_res/poi_board.png");
             //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
-            var poiMaterial = new THREE.SpriteMaterial({map:poiMap, color: 0xffffff,transparent:true,depthTest:false });
+            var poiMaterial = new THREE.SpriteMaterial({ map: poiMap, color: 0xffffff, transparent: true, depthTest: false });
             var poiObject = new THREE.Sprite(poiMaterial);
-            poiObject.center=new THREE.Vector2(0,0)
-            var poiboardSize=[1024,256];
-            poiObject.scale.set(poiboardSize[0]*0.004,poiboardSize[1]*0.004,1);
+            poiObject.center = new THREE.Vector2(0, 0)
+            var poiboardSize = [1024, 256];
+            poiObject.scale.set(poiboardSize[0] * 0.004, poiboardSize[1] * 0.004, 1);
             poiObject.lookAt(camera.position);
             // var anyMesh = new THREE.Mesh(anyObject, anyMaterial);
 
@@ -565,7 +578,7 @@
         }, false);
 
         //微型水平滚动条
-        var ScrollBar=function() {
+        var ScrollBar = function () {
             var _this = this;
             _this.scrollBarData = {
                 progress: 0
@@ -580,8 +593,8 @@
 
         ScrollBar.prototype.miniScrollBarHandler = function (e) {
             console.log(1111);
-            var miniScrollBar=this.miniScrollBar;
-            var scrollBarData=this.scrollBarData;
+            var miniScrollBar = this.miniScrollBar;
+            var scrollBarData = this.scrollBarData;
             var stick = miniScrollBar.querySelector(".stick");
             switch (e.type) {
                 case 'mousedown':
