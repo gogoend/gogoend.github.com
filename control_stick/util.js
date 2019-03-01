@@ -245,15 +245,45 @@ var util = {
     //计算两个地理坐标（经纬度）间的距离
     geoLength:function(origin,target){
         var earthRadius=6371393;//地球半径，单位：米
+
         var oLatRad=util.degToRad(origin.lat),
             tLatRad=util.degToRad(target.lat);
+
         var lngMinus=Math.abs(target.lng-origin.lng)>180 ? 360-Math.abs(target.lng-origin.lng) : Math.abs(target.lng-origin.lng)
         
         var lngMinusRad=util.degToRad(lngMinus);
-
+        //Question：angle指的是什么。。。
         var angle=Math.sin(oLatRad)*Math.sin(tLatRad)+Math.cos(oLatRad)*Math.cos(tLatRad)*Math.cos(lngMinusRad);
         var length=Math.acos(angle)*earthRadius;
-        return length;
+        //精确到两位小数
+        return parseFloat(length.toFixed(2));
+    },
+    //计算经纬度之间的偏转角（大致计算，相对于将地球看成平面；仅用于计算中国大陆范围内的经纬度：East、North为正）
+    geoAngle:function(origin,target){
+
+        var minusLat=util.geoLength({
+            lat:target.lat,
+            lng:0
+        },{
+            lat:origin.lat,
+            lng:0
+        });
+
+        var minusLng=util.geoLength({
+            lat:0,
+            lng:target.lat
+        },{
+            lat:0,
+            lng:origin.lat
+        });
+
+        var length=util.geoLength(origin,target);
+        console.log(length);
+
+        return util.radToDeg(Math.asin(minusLat/length));
+
+
+
     }
 }
 // export {util};
