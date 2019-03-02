@@ -220,7 +220,7 @@
 
 
     <script src="./pano_array.js"></script>
-    <script src="./position3_array.js"></script>
+    <script src="./position2_array.js"></script>
 
     <script>
         // Vue.component('scrollBar')
@@ -368,6 +368,9 @@
 
         var spriteGroup = new THREE.Group();
         spriteGroup.name = "spriteGroup";
+        spriteGroup.scale.x=-1;
+        spriteGroup.scale.z=-1;
+        spriteGroup.rotation.y=util.degToRad(90)
         scene.add(spriteGroup);
 
         //摄像机目标
@@ -675,7 +678,7 @@
             var poiObject = new THREE.Sprite(poiMaterial);
             poiObject.center = new THREE.Vector2(0, 0)
             var poiboardSize = [1024, 256];
-            poiObject.scale.set(poiboardSize[0] * 0.005, poiboardSize[1] * 0.005, 1);
+            poiObject.scale.set(poiboardSize[0] * 0.006, poiboardSize[1] * 0.006, 1);
 
             return poiObject;
 
@@ -708,14 +711,16 @@
             console.log(poiObj);
 
             //有了角度、有了距离，算球坐标
-
-            var poiSpherical=new THREE.Spherical(15,util.degToRad(positions[i].poiInfo.distance)*util.clamp(0.1,0.01,0.5),util.degToRad(positions[i].poiInfo.angle));
+            //俯仰角根据poi距离来确定，角度值在90~180之间
+            var poiSpherical=new THREE.Spherical(15,util.degToRad(90,90,180),util.degToRad(positions[i].poiInfo.angle));
 
             var poiCood=new THREE.Vector3().setFromSpherical(poiSpherical);
             console.log(poiCood);
             poiObj.position.x=poiCood.x;
             poiObj.position.y=poiCood.y;
             poiObj.position.z=poiCood.z;
+
+            
 
             spriteGroup.add(poiObj);
 

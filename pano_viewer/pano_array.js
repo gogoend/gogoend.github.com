@@ -1,14 +1,14 @@
 var panos=[
-    {
-        imgName:"img_20180508_163510_panorama.jpg",
-        imgThumb:"img_20180508_163510_thumb.jpg",
-        desc:"假装是北京",
-        geoCood:{
-            lng:116.313365,
-            lat:39.925286
-        },
-        like:16
-    },
+    // {
+    //     imgName:"img_20180508_163510_panorama.jpg",
+    //     imgThumb:"img_20180508_163510_thumb.jpg",
+    //     desc:"假装是北京",
+    //     geoCood:{
+    //         lng:116.313364,
+    //         lat:39.925286
+    //     },
+    //     like:16
+    // },
     {
         imgName:"20170101_010102_panorama2.jpg",
         imgThumb:"20170101_010102_thumb.png",

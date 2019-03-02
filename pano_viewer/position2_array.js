@@ -1,19 +1,19 @@
 var positions = [
-    {
-        "title": "Beijing",
-        "uid": "f446091845bfb417b11e36f7",
-        "point": {
-            "lng":10,
-            "lat": 80
-        },
-        "url": "https://gsp0.baidu.com/80MWsjip0QIZ8tyhnq/?s=inf%26uid%3Df446091845bfb417b11e36f7%26c%3D48&i=0&sr=1",
-        "detailUrl": "http://api.map.baidu.com/place/detail?uid=f446091845bfb417b11e36f7&output=html&source=jsapi",
-        "address": "哈尔滨市呼兰区利民经济技术开发区师大南路1号",
-        "city": "哈尔滨市",
-        "province": "黑龙江省",
-        "type": 0,
-        "isAccurate": false
-    },
+    // {
+    //     "title": "Beijing",
+    //     "uid": "f446091845bfb417b11e36f7",
+    //     "point": {
+    //         lng:116.313365,
+    //         lat:39.925286
+    //     },
+    //     "url": "https://gsp0.baidu.com/80MWsjip0QIZ8tyhnq/?s=inf%26uid%3Df446091845bfb417b11e36f7%26c%3D48&i=0&sr=1",
+    //     "detailUrl": "http://api.map.baidu.com/place/detail?uid=f446091845bfb417b11e36f7&output=html&source=jsapi",
+    //     "address": "哈尔滨市呼兰区利民经济技术开发区师大南路1号",
+    //     "city": "哈尔滨市",
+    //     "province": "黑龙江省",
+    //     "type": 0,
+    //     "isAccurate": false
+    // },
     {
         "title": "哈尔滨师范大学(松北校区)",
         "uid": "f446091845bfb417b11e36f7",
