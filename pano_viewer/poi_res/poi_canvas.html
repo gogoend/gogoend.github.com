@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8">
     <title>rrr</title>
-    <script src="../position_array.js"></script>
+    <!-- <script src="../position_array.js"></script> -->
+    <script src="../position3_array.js"></script>
     <style>
         body,
         html {
@@ -15,6 +16,8 @@
 
 <body>
     <script>
+        
+
         var poiBoard = function (posName, posDistance) {
             var icon = new Image();
             icon.src = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDIwNC4xIDIwNC4xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyMDQuMSAyMDQuMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzQ3QjEzNCIgZD0iTTEwMiwyMDEuM2wtNTguMS01OC4xYy0zMi0zMi0zMi04NC4yLDAtMTE2LjJDNTkuNSwxMS40LDgwLjEsMi44LDEwMiwyLjhzNDIuNiw4LjUsNTguMSwyNC4xaDANCgljMzIsMzIsMzIsODQuMiwwLDExNi4yTDEwMiwyMDEuM3ogTTEwMiwxMC4yYy0yMCwwLTM4LjgsNy44LTUyLjksMjEuOUMyMCw2MS4zLDIwLDEwOC44LDQ5LjEsMTM3LjlsNTIuOSw1Mi45bDUyLjktNTIuOQ0KCWMyOS4yLTI5LjIsMjkuMi03Ni42LDAtMTA1LjhsMCwwQzE0MC44LDE4LDEyMiwxMC4yLDEwMiwxMC4yeiBNMTAyLjIsMTIwYy0xOS4zLDAtMzUuMS0xNS43LTM1LjEtMzUuMXMxNS43LTM1LjEsMzUuMS0zNS4xDQoJYzE5LjMsMCwzNS4xLDE1LjcsMzUuMSwzNS4xUzEyMS41LDEyMCwxMDIuMiwxMjB6IE0xMDIuMiw1Ny4yYy0xNS4zLDAtMjcuNywxMi40LTI3LjcsMjcuN3MxMi40LDI3LjcsMjcuNywyNy43DQoJczI3LjctMTIuNCwyNy43LTI3LjdTMTE3LjUsNTcuMiwxMDIuMiw1Ny4yeiIvPg0KPC9zdmc+DQo=";
@@ -38,18 +41,24 @@
             ctx.stroke();
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = '72px sans-serif';
-            ctx.fillText(posName, 300, 128);
+            ctx.font = '54px sans-serif';
+            ctx.fillText(posName, 300, 110);
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = '48px sans-serif';
-            ctx.fillText(posDistance, 300, 192);
+            ctx.font = '36px sans-serif';
+            ctx.fillText(posDistance, 300, 180);
 
             return canvas;
         }
 
         for (var i = 0; i < positions.length; i++) {
-            document.body.appendChild(poiBoard(positions[i].posName, positions[i].posDistance));
+            if(positions[i].title.length>12){
+                var finalTitle=positions[i].title.slice(0,12)+'...';
+            }
+            else{
+                var finalTitle=positions[i].title;
+            }
+            document.body.appendChild(poiBoard(finalTitle, positions[i].province));
         }
     </script>
 </body>

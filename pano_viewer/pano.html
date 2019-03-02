@@ -220,6 +220,8 @@
 
 
     <script src="./pano_array.js"></script>
+    <script src="./position3_array.js"></script>
+
     <script>
         // Vue.component('scrollBar')
 
@@ -306,6 +308,9 @@
                                 this.currentIndex=listNum;
                                 panoImgTex.needsUpdate = true;
                                 spriteGroup.children = [];//在切换之前把当前全景上所有的sprite poi清空
+
+                                //切换之后，读取相关数据，将sprite加入场景
+
                                 panoImgTex.dispose();
                                 panoPhotoMaterial.map = e;
                                 panoImgTex.anisotropy = 8;
@@ -344,7 +349,7 @@
 
 
         //载入贴图
-        var panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[0].imgName);
+        var panoImgTex = new THREE.TextureLoader().load(panoBasePath + panos[panoApp.currentIndex].imgName);
         panoImgTex.anisotropy = 8;
 
         var panoPhotoMaterial = new THREE.MeshStandardMaterial({
@@ -622,6 +627,23 @@
         }
 
         ScrollBar();
+
+        //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
+        var poiCalc=function(coodA,coodB){
+            var poiInfo={
+                distance:util.geoLength(coodA,coodB),
+                angle:util.geoAngle(coodA,coodB)
+            }
+            return poiInfo;
+        }
+
+        var originP=panos[panoApp.currentIndex].geoCood;
+        for(var i=0;i<positions.length;i++){
+            positions[i].poiInfo=poiCalc(originP,positions[i].point);
+            console.log(positions[i].poiInfo)
+        }
+        
+
 
     </script>
 </body>
