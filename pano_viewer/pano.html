@@ -213,7 +213,7 @@
             <div class="panoControls">
                 <!-- <button onclick="fullScreen" class="fullScreenBtn">全屏</button> -->
                 <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">全屏</button>
-                <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">VR</button>
+                <button onclick="vrHandler()" class="fullScreenBtn holaGreen">VR</button>
                 <!-- <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">陀螺仪</button> -->
 
             </div>
@@ -333,6 +333,7 @@
             var rayCastHandler = () => { };
         }
         var scene = new THREE.Scene();
+        //fov,aspect,near,far
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         var renderer = new THREE.WebGLRenderer({
             "antialias": true
@@ -366,9 +367,9 @@
         var light = new THREE.AmbientLight(0xffffff, 2);
         scene.add(light);
 
-        var g = new THREE.Group();
-        g.add(camera);
-        scene.add(g);
+        var cameraGroup = new THREE.Group();
+        cameraGroup.add(camera);
+        scene.add(cameraGroup);
 
         var spriteGroup2 = new THREE.Group();
 
@@ -483,12 +484,12 @@
                         mouseData.offsetY = e.clientY - mouseData.originY;
 
                         //
-                        sphereCood.theta = mouseData.offsetX * 0.005 + mouseData.originTheta;
+                        sphereCood.theta = -mouseData.offsetX * 0.005 + mouseData.originTheta;
                         // console.log(util.radToDeg(sphereCood.phi))
 
-                        var phi = mouseData.offsetY * 0.005 + mouseData.originPhi;
+                        var phi = -mouseData.offsetY * 0.005 + mouseData.originPhi;
                         //限制上下俯仰角度，以防万向锁。来自THREEJS
-                        sphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359))
+                        sphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359));
 
                         // console.log(sphereCood.theta + ' ' + sphereCood.phi)
 
@@ -568,22 +569,7 @@
             // console.log(realIntersects);
             intersectPoint = realIntersects[0].point;
 
-            //在所点击点随便添加一个物体
-            var poiMap = new THREE.TextureLoader().load("./poi_res/poi_board.png");
-            //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
-            var poiMaterial = new THREE.SpriteMaterial({ map: poiMap, color: 0xffffff, transparent: true, depthTest: false });
-            var poiObject = new THREE.Sprite(poiMaterial);
-            poiObject.center = new THREE.Vector2(0, 0)
-            var poiboardSize = [1024, 256];
-            poiObject.scale.set(poiboardSize[0], poiboardSize[1], 1);
-            // var anyMesh = new THREE.Mesh(anyObject, anyMaterial);
-
             console.log(intersectPoint);
-            poiObject.position.x = intersectPoint.x;
-            poiObject.position.y = intersectPoint.y;
-            poiObject.position.z = intersectPoint.z;
-            spriteGroup.add(poiObject);
-
         }
 
         //页面管理
@@ -738,6 +724,40 @@
 
             spriteGroup.add(poiObj);
 
+        }
+
+        //VR按钮
+
+        var vrHandler=function(){
+
+            //设置左眼右眼
+            var rightCamera=new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+            var leftCamera=new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+
+
+            leftCamera.bounds=new THREE.Vector4(0,0,0.5,1);
+            rightCamera.bounds=new THREE.Vector4(0.5,0,0.5,1);
+
+
+            leftCamera.position.x=-5;
+            rightCamera.position.x=5;
+
+
+            // rightCamera.lookAt(cameraTarget);
+            // leftCamera.lookAt(cameraTarget);
+
+            // rightCamera.bounds=new THREE.Vector4(window.innerWidth/2,window.innerHeight/2,window.innerWidth/2,window.innerHeight/2);
+
+            var hmdGlasses=new THREE.ArrayCamera([leftCamera,rightCamera]);
+
+            hmdGlasses.lookAt(cameraTarget);
+
+            scene.add(hmdGlasses);
+
+            camera=hmdGlasses;
+
+            renderer.render(scene,camera);
+            
         }
 
 
