@@ -261,6 +261,36 @@ var util = {
     //计算经纬度之间的偏转角（大致计算，相对于将地球看成平面；仅用于计算中国大陆范围内的经纬度：East、North为正）
     geoAngle:function(origin,target){
 
+        //来自https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points/53063704#53063704
+        var p1 = {
+            x: origin.lat,
+            y: origin.lng
+        };
+    
+        var p2 = {
+            x: target.lat,
+            y: target.lng
+        };
+        // angle in radians
+        var angleRadians = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        // angle in degrees
+        var angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+        console.log(angleDeg);
+        return angleDeg;
+
+        /*2--------------------------------------
+        var oLat=origin.lat,
+            tLat=target.lat,
+            oLng=origin.lng,
+            tLng=target.lng;
+        //什么鬼？
+        var cosAngleC=Math.cos(90-tLat)*Math.cos(90-oLat)+Math.sin(90-tLat)*Math.sin(90-oLat)*Math.cos(tLng-oLng);
+        Math.asin(
+            Math.sin(90-tLat)*Math.sin(tLng-oLng)/cosAngleC
+        )
+        ----------------------------------------*/
+       
+        /*1--------------------------------------
         var minusLat=util.geoLength({
             lat:target.lat,
             lng:0
@@ -269,19 +299,20 @@ var util = {
             lng:0
         });
 
-        var minusLng=util.geoLength({
-            lat:0,
-            lng:target.lat
-        },{
-            lat:0,
-            lng:origin.lat
-        });
+        //没用用到经度差。
+        // var minusLng=util.geoLength({
+        //     lat:0,
+        //     lng:target.lat
+        // },{
+        //     lat:0,
+        //     lng:origin.lat
+        // });
 
         var length=util.geoLength(origin,target);
-        console.log(length);
 
         return util.radToDeg(Math.asin(minusLat/length));
 
+        ----------------------------------------*/
 
 
     }
