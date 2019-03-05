@@ -211,9 +211,11 @@
             </div>
 
             <div class="panoControls">
-                <!-- <button onclick="fullScreen" class="fullScreenBtn">全屏</button> -->
+                <!-- <button onclick="fullScreen" class="fullScreenBtn">全屏</button> -->                
+                <!-- <button onclick="vrHandler()" class="fullScreenBtn holaGreen">VR</button>
+                <button onclick="panoShot()" class="fullScreenBtn holaGreen">保存全景</button> -->
+
                 <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">全屏</button>
-                <button onclick="vrHandler()" class="fullScreenBtn holaGreen">VR</button>
                 <!-- <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">陀螺仪</button> -->
 
             </div>
@@ -324,14 +326,16 @@
         });
 
         //THREEJS场景部分
-        function ThreeScene() {
-            var sceneInit = () => { };
-            var panoInit = () => { };
-            var userInteract = () => { };
-            var pointHandler = (e) => { };
-            var mouseScrollHandler = (e) => { };
-            var rayCastHandler = () => { };
+        function threeScene() {
+
         }
+        // var sceneInit = function()  { };
+        // var panoInit = function()  { };
+        // var userInteract = function()  { };
+        // var pointHandler = function(e)  { };
+        // var mouseScrollHandler = function(e)  { };
+        // var rayCastHandler = function()  { };
+        
         var scene = new THREE.Scene();
         //fov,aspect,near,far
         var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -484,10 +488,10 @@
                         mouseData.offsetY = e.clientY - mouseData.originY;
 
                         //
-                        sphereCood.theta = -mouseData.offsetX * 0.005 + mouseData.originTheta;
+                        sphereCood.theta = mouseData.offsetX * 0.005 + mouseData.originTheta;
                         // console.log(util.radToDeg(sphereCood.phi))
 
-                        var phi = -mouseData.offsetY * 0.005 + mouseData.originPhi;
+                        var phi = mouseData.offsetY * 0.005 + mouseData.originPhi;
                         //限制上下俯仰角度，以防万向锁。来自THREEJS
                         sphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359));
 
@@ -572,58 +576,9 @@
             console.log(intersectPoint);
         }
 
-        //页面管理
-        var hash = location.hash;
-        // console.log(hash);
-        window.addEventListener("hashchange", function (e) {
-            console.log(e);
-        }, false);
 
-        //微型水平滚动条
-        var ScrollBar = function () {
-            var _this = this;
-            _this.scrollBarData = {
-                progress: 0
-            };
 
-            _this.miniScrollBar = document.querySelector('[data-role="miniScrollBar"]');
-            console.log(_this.miniScrollBar);
-            _this.miniScrollBar.addEventListener("click", _this.miniScrollBarHandler, false);
-            _this.miniScrollBar.addEventListener("mousedown", _this.miniScrollBarHandler, false);
-
-        }
-
-        ScrollBar.prototype.miniScrollBarHandler = function (e) {
-            console.log(1111);
-            var miniScrollBar = this.miniScrollBar;
-            var scrollBarData = this.scrollBarData;
-            var stick = miniScrollBar.querySelector(".stick");
-            switch (e.type) {
-                case 'mousedown':
-                    {
-                        if (e.target.classList.contains("stick")) {
-                            stick.addEventListener("mousemove", this.miniScrollBarHandler, false)
-                            stick.addEventListener("mouseup", this.miniScrollBarHandler, false)
-                        }
-                        break;
-                    };
-                case 'click':
-                case 'mousemove':
-                    {
-                        stick.style.left = (e.clientX - parseInt(util.getStyle(stick).width) / 2 - parseInt(util.getStyle(stick).width)) + 'px';
-                        scrollBarData.progress = parseInt(stick.style.left) / parseInt(util.getStyle(miniScrollBar).width)
-                        break;
-                    };
-                case 'mouseup':
-                    {
-                        stick.removeEventListener("mousemove", this.miniScrollBarHandler, false);
-                        stick.removeEventListener("mouseup", this.miniScrollBarHandler, false);
-                        break;
-                    };
-            }
-        }
-
-        ScrollBar();
+        
 
         //poiBoard生成器
         var poiBoardGenerator = function (posName, posDistance) {
@@ -761,6 +716,10 @@
         }
 
 
+        //全景截图
+        var panoShot=function(){
+
+        }
 
     </script>
 </body>
