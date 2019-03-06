@@ -325,7 +325,6 @@
 
         //THREEJS场景部分
         var ThreeStage = function () {
-
             // this.bind(threeStage);
             var _this = this;
             console.log(this);
@@ -349,16 +348,27 @@
             //当前全景图索引，未来试图通过Ajax来获得首次载入时的索引
             _this.currentIndex = 0;
 
+            //当前的鼠标坐标
+            _this.pointData = {
+                originX: 0,
+                originY: 0,
+                offsetX: 0,
+                offsetY: 0,
+                originTheta: 0,
+                originPhi: 0
+            }
+
             _this.sceneInit();
             _this.panoInit(_this.currentIndex);
 
 
         }
+        //基本场景初始化
         ThreeStage.prototype.sceneInit = function () {
 
             var scene = new THREE.Scene();
 
-            //用于将scene暴露到全局
+            //用于将scene暴露到全局，仅在调试时使用
             window.scene = scene;
 
             //默认相机为位于原点的透视相机
@@ -397,7 +407,8 @@
 
             scene.add(cameraTarget);
 
-
+            //添加窗口缩放事件
+            window.addEventListener('resize', this.resizeHandler.bind(this), false);
 
             this.scene = scene;
             this.camera = defaultCamera;
@@ -406,12 +417,12 @@
             this.panoWrap = panoWrap;
             this.light = light;
             this.cameraTarget = cameraTarget;
-
-            this.targetSphereCood=targetSphereCood;
+            this.targetSphereCood = targetSphereCood;
 
             console.log(this.targetSphereCood);
 
         };
+        //全景球初始化
         ThreeStage.prototype.panoInit = function (panoIndex) {
             //全景球半径为10
             var panoGeometry = new THREE.SphereBufferGeometry(10, 36, 36);
@@ -441,15 +452,26 @@
 
             this.panoRotationAnimate();
 
-        };
+            //事件处理函数中this指向的是addEventListener的元素，因此需要bind
+            this.panoWrap.addEventListener("mousedown", this.pointHandler.bind(this), false);
+            this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
+            this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
+            this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
+            window.addEventListener("deviceorientation", this.mouseScrollHandler.bind(this), false);
 
+            //阻止默认的鼠标右键菜单弹出
+            this.panoWrap.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            }, false);
+
+        };
+        //全景球旋转动画    //setInterval(animate,100);
         ThreeStage.prototype.panoRotationAnimate = function () {
 
             //交互部分
             //判断是否存在用户交互
-            console.log(this);
+            // console.log(this);
             if (!this.userInteract) {
-                console.log(this.targetSphereCood)
                 this.targetSphereCood.theta += util.degToRad(0.1);
                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                 this.camera.lookAt(this.cameraTarget.position);
@@ -460,71 +482,17 @@
             //注意this指向，在定时器中this指向window
             requestAnimationFrame(this.panoRotationAnimate.bind(this));
         }
-        // setInterval(animate,100);
-
-
-
-
-        // var userInteract = function()  { };
-        // var pointHandler = function(e)  { };
-        // var mouseScrollHandler = function(e)  { };
-        // var rayCastHandler = function()  { };
-
-
-
-
-        //处理窗口大小变化的情况
-        window.onresize = function () {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-        }
-
-
-
-
-
-
-        var spriteGroup2 = new THREE.Group();
-
-        var spriteGroup = new THREE.Group();
-        spriteGroup.name = "spriteGroup";
-        spriteGroup.scale.x = -1;
-        spriteGroup.scale.y = -1;
-        spriteGroup.rotation.y = util.degToRad(-90)
-        spriteGroup2.add(spriteGroup);
-
-        scene.add(spriteGroup2);
-
-
-
-        /*交互方式：
-        改变全景照片的方向
+        /*
+            交互方式：
+            改变全景照片的方向
             鼠标/触摸：在屏幕上上下滑动改变上下旋转角，左右滑动更改平面旋转角；
             设备朝向：移动设备改变摄像机目标的位置
-        改变摄像机的FOV
+            改变摄像机的FOV
             鼠标滚轮：向前放大，向后缩小
         */
-        var lookAroundDeg = 0;
-
-
-
-
-
-        // document.addEventListener("deviceorientation",function(e){
-        //     console.log(e)
-        // },false)
-
-        var mouseData = {
-            originX: 0,
-            originY: 0,
-            offsetX: 0,
-            offsetY: 0,
-            originTheta: 0,
-            originPhi: 0
-        }
-        function pointHandler(e) {
-
+        //处理鼠标或者触摸屏事件
+        ThreeStage.prototype.pointHandler = function (e) {
+            //鼠标拖动全景球事件由鼠标左键来触发
             if (e.type.match('mouse') || e.type == 'click') {
                 if (e.button != 0) {
                     return;
@@ -540,47 +508,51 @@
                 e = e.touches[0];
             }
 
+            //事件处理函数中this指向的是addEventListener的元素
+            console.log(this);
+
             switch (evtType) {
                 case "touchstart":
                 case "mousedown": {
-                    userInteract = true;
+                    this.userInteract = true;
                     //得到鼠标点击位置
-                    mouseData.originX = e.clientX;
-                    mouseData.originY = e.clientY;
+                    this.pointData.originX = e.clientX;
+                    this.pointData.originY = e.clientY;
 
                     //
-                    mouseData.originTheta = sphereCood.theta;
-                    mouseData.originPhi = sphereCood.phi;
+                    this.pointData.originTheta = this.targetSphereCood.theta;
+                    this.pointData.originPhi = this.targetSphereCood.phi;
                     //
 
-                    panoWrap.addEventListener("mousemove", pointHandler, false);
-                    panoWrap.addEventListener("mouseup", pointHandler, false);
+                    this.panoWrap.addEventListener("mousemove", this.pointHandler.bind(this), false);
+                    this.panoWrap.addEventListener("mouseup", this.pointHandler.bind(this), false);
 
-                    panoWrap.addEventListener("touchmove", pointHandler, false);
-                    panoWrap.addEventListener("touchend", pointHandler, false);
+                    this.panoWrap.addEventListener("touchmove", this.pointHandler.bind(this), false);
+                    this.panoWrap.addEventListener("touchend", this.pointHandler.bind(this), false);
 
                     break;
                 }
                 case "touchmove":
                 case "mousemove": {
-                    if (userInteract) {
+                    console.log(this.pointData);
+                    if (this.userInteract) {
 
                         //鼠标移动时计算鼠标的偏移量
-                        mouseData.offsetX = e.clientX - mouseData.originX;
-                        mouseData.offsetY = e.clientY - mouseData.originY;
+                        this.pointData.offsetX = e.clientX - this.pointData.originX;
+                        this.pointData.offsetY = e.clientY - this.pointData.originY;
 
                         //
-                        sphereCood.theta = mouseData.offsetX * 0.005 + mouseData.originTheta;
+                        this.targetSphereCood.theta = this.pointData.offsetX * 0.005 + this.pointData.originTheta;
                         // console.log(util.radToDeg(sphereCood.phi))
 
-                        var phi = mouseData.offsetY * 0.005 + mouseData.originPhi;
+                        var phi = this.pointData.offsetY * 0.005 + this.pointData.originPhi;
                         //限制上下俯仰角度，以防万向锁。来自THREEJS
-                        sphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359));
+                        this.targetSphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359));
 
                         // console.log(sphereCood.theta + ' ' + sphereCood.phi)
 
-                        cameraTarget.position.setFromSpherical(sphereCood);
-                        camera.lookAt(cameraTarget.position);
+                        this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
+                        this.camera.lookAt(this.cameraTarget.position);
 
                     }
                     break;
@@ -588,40 +560,30 @@
 
                 case "touchend":
                 case "mouseup": {
-                    userInteract = false;
+                    this.userInteract = false;
 
-                    document.removeEventListener("mouseup", pointHandler, false);
-                    document.removeEventListener("touchend", pointHandler, false);
+                    this.panoWrap.removeEventListener("mouseup", this.pointHandler.bind(this), false);
+                    this.panoWrap.removeEventListener("touchend", this.pointHandler.bind(this), false);
 
-                    document.removeEventListener("mousemove", pointHandler, false);
-                    document.removeEventListener("touchmove", pointHandler, false);
+                    this.panoWrap.removeEventListener("mousemove", this.pointHandler.bind(this), false);
+                    this.panoWrap.removeEventListener("touchmove", this.pointHandler.bind(this), false);
                     break;
                 }
             }
 
         }
-
-        function mouseScrollHandler(e) {
-            console.log(e)
+        //处理窗口大小改变时三维场景的变化
+        ThreeStage.prototype.resizeHandler = function (e) {
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
         }
 
-        //全局阻止鼠标右键菜单
-        document.body.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
-
-        panoWrap.addEventListener('touchstart', pointHandler, false);
-        panoWrap.addEventListener("mousedown", pointHandler, false);
-        panoWrap.addEventListener("mousewheel", mouseScrollHandler, false);
-
-
-        //光线投射部分
-        panoWrap.addEventListener('mousedown', rayCastHandler, false);
-        function rayCastHandler(event) {
-
-            if (event.type.match('mouse') || event.type == 'click') {
+        //处理光线投射
+        ThreeStage.prototype.rayCastHandler = function (e) {
+            if (e.type.match('mouse') || e.type == 'click') {
                 //如果按下的按键为鼠标左键则不进行光线投射
-                if (event.button == 0) {
+                if (e.button == 0) {
                     return;
                 }
             }
@@ -630,15 +592,15 @@
 
             // console.log(event);
 
-            raycaster = new THREE.Raycaster();
+            var raycaster = new THREE.Raycaster();
 
-            event.preventDefault();
+            e.preventDefault();
 
             //将浏览器坐标转换到Threejs坐标
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
 
-            raycaster.setFromCamera(mouse, camera);
+            raycaster.setFromCamera(mouse, this.camera);
 
             //一个数组，用于保存与射线相交叉的对象
             //数组下标按照物体远近来进行排序，下标越大越远
@@ -654,17 +616,45 @@
                 }
             }
             // console.log(realIntersects);
-            intersectPoint = realIntersects[0].point;
-
+            var intersectPoint = realIntersects[0].point;
             console.log(intersectPoint);
+        };
+
+        //处理鼠标滚轮
+        ThreeStage.prototype.mouseScrollHandler = function (e) {
+            console.log(e)
+        };
+
+        //处理设备方向
+        ThreeStage.prototype.deviceOrientationHandler = function (e) {
+            console.log(e)
+        };
+
+
+
+
+        
+        //场景中Sprite处理
+        ThreeStage.prototype.spriteInit=function(){
+            var spriteOutterGroup = new THREE.Group();
+            spriteOutterGroup.name="spriteOutterGroup";
+            var spriteGroup = new THREE.Group();
+
+            spriteGroup.name = "spriteGroup";
+
+            spriteGroup.scale.x = -1;
+            spriteGroup.scale.y = -1;
+            spriteGroup.rotation.y = util.degToRad(-90);
+
+            spriteOutterGroup.add(spriteGroup);
+            scene.add(spriteOutterGroup);
+
+            this.spriteOutterGroup=spriteOutterGroup;
         }
 
 
-
-
-
         //poiBoard生成器
-        var poiBoardGenerator = function (posName, posDistance) {
+        ThreeStage.prototype.poiBoardGenerator = function (posName, posDistance) {
             var icon = new Image();
             icon.src = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDIwNC4xIDIwNC4xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyMDQuMSAyMDQuMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzQ3QjEzNCIgZD0iTTEwMiwyMDEuM2wtNTguMS01OC4xYy0zMi0zMi0zMi04NC4yLDAtMTE2LjJDNTkuNSwxMS40LDgwLjEsMi44LDEwMiwyLjhzNDIuNiw4LjUsNTguMSwyNC4xaDANCgljMzIsMzIsMzIsODQuMiwwLDExNi4yTDEwMiwyMDEuM3ogTTEwMiwxMC4yYy0yMCwwLTM4LjgsNy44LTUyLjksMjEuOUMyMCw2MS4zLDIwLDEwOC44LDQ5LjEsMTM3LjlsNTIuOSw1Mi45bDUyLjktNTIuOQ0KCWMyOS4yLTI5LjIsMjkuMi03Ni42LDAtMTA1LjhsMCwwQzE0MC44LDE4LDEyMiwxMC4yLDEwMiwxMC4yeiBNMTAyLjIsMTIwYy0xOS4zLDAtMzUuMS0xNS43LTM1LjEtMzUuMXMxNS43LTM1LjEsMzUuMS0zNS4xDQoJYzE5LjMsMCwzNS4xLDE1LjcsMzUuMSwzNS4xUzEyMS41LDEyMCwxMDIuMiwxMjB6IE0xMDIuMiw1Ny4yYy0xNS4zLDAtMjcuNywxMi40LTI3LjcsMjcuN3MxMi40LDI3LjcsMjcuNywyNy43DQoJczI3LjctMTIuNCwyNy43LTI3LjdTMTE3LjUsNTcuMiwxMDIuMiw1Ny4yeiIvPg0KPC9zdmc+DQo=";
             // icon.id="icon";
@@ -700,12 +690,10 @@
 
             return canvas;
         }
-
-        var poiSpriteGenerator = function (canvas) {
-
+        ThreeStage.prototype.poiSpriteGenerator = function (canvas) {
             //在所点击点随便添加一个物体
             var poiMap = new THREE.CanvasTexture(canvas);
-            // poiMap.needsUpdate=false;
+            poiMap.needsUpdate=false;
             //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
             var poiMaterial = new THREE.SpriteMaterial({ map: poiMap, color: 0xffffff, transparent: true, depthTest: false });
             var poiObject = new THREE.Sprite(poiMaterial);
@@ -714,95 +702,94 @@
             poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
 
             return poiObject;
-
         }
 
-        //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
-        var calcPoi = function (coodA, coodB) {
-            var poiInfo = {
-                distance: util.geoLength(coodA, coodB),
-                angle: util.geoAngle(coodA, coodB)
-            };
-            return poiInfo;
-        }
+        // //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
+        // var calcPoi = function (coodA, coodB) {
+        //     var poiInfo = {
+        //         distance: util.geoLength(coodA, coodB),
+        //         angle: util.geoAngle(coodA, coodB)
+        //     };
+        //     return poiInfo;
+        // }
 
 
-        var originP = panos[panoApp.currentIndex].geoCood;
-        for (var i = 0; i < positions.length; i++) {
-            positions[i].poiInfo = calcPoi(originP, positions[i].point);//算出poi与全景照片拍摄点的距离和角度
-            var distanceText;
-            if (positions[i].poiInfo.distance > 1000) {
-                distanceText = (positions[i].poiInfo.distance / 1000).toFixed(1) + ' km';
-            } else {
-                distanceText = positions[i].poiInfo.distance.toFixed(0) + ' m';
-            }
+        // var originP = panos[panoApp.currentIndex].geoCood;
+        // for (var i = 0; i < positions.length; i++) {
+        //     positions[i].poiInfo = calcPoi(originP, positions[i].point);//算出poi与全景照片拍摄点的距离和角度
+        //     var distanceText;
+        //     if (positions[i].poiInfo.distance > 1000) {
+        //         distanceText = (positions[i].poiInfo.distance / 1000).toFixed(1) + ' km';
+        //     } else {
+        //         distanceText = positions[i].poiInfo.distance.toFixed(0) + ' m';
+        //     }
 
-            //生成poiBoard
-            var poiCanvas = poiBoardGenerator(positions[i].title, distanceText);
-            //生成sprite
-            var poiObj = poiSpriteGenerator(poiCanvas);
-            console.log(poiObj);
+        //     //生成poiBoard
+        //     var poiCanvas = poiBoardGenerator(positions[i].title, distanceText);
+        //     //生成sprite
+        //     var poiObj = poiSpriteGenerator(poiCanvas);
+        //     console.log(poiObj);
 
-            //有了角度、有了距离，算球坐标
-            //俯仰角根据poi距离来确定，角度值在90~180之间
-            console.log(positions[i].poiInfo.distance / 2000 * 180);
-            var lengthVal = util.clamp(positions[i].poiInfo.distance / 2000 * panoSphereRadius, 0.2 * panoSphereRadius, panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
-            // var lengthVal=panoSphereRadius;//poi半径长度，poi越远值越大，但限制在给定范围内
-            var pitchVal = util.degToRad(util.clamp(positions[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
-            var azimuthVal = util.degToRad(positions[i].poiInfo.angle);//poi球坐标的方位角
+        //     //有了角度、有了距离，算球坐标
+        //     //俯仰角根据poi距离来确定，角度值在90~180之间
+        //     console.log(positions[i].poiInfo.distance / 2000 * 180);
+        //     var lengthVal = util.clamp(positions[i].poiInfo.distance / 2000 * panoSphereRadius, 0.2 * panoSphereRadius, panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
+        //     // var lengthVal=panoSphereRadius;//poi半径长度，poi越远值越大，但限制在给定范围内
+        //     var pitchVal = util.degToRad(util.clamp(positions[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
+        //     var azimuthVal = util.degToRad(positions[i].poiInfo.angle);//poi球坐标的方位角
 
-            console.log(lengthVal)
-            var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
+        //     console.log(lengthVal)
+        //     var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
 
-            var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
-            console.log(poiCood);
-            poiObj.position.x = poiCood.x;
-            poiObj.position.y = poiCood.y;
-            poiObj.position.z = poiCood.z;
+        //     var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
+        //     console.log(poiCood);
+        //     poiObj.position.x = poiCood.x;
+        //     poiObj.position.y = poiCood.y;
+        //     poiObj.position.z = poiCood.z;
 
-            spriteGroup.add(poiObj);
+        //     spriteGroup.add(poiObj);
 
-        }
+        // }
 
-        //VR按钮
+        // //VR按钮
 
-        var vrHandler = function () {
+        // var vrHandler = function () {
 
-            //设置左眼右眼
-            var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-            var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-
-
-            leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
-            rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
+        //     //设置左眼右眼
+        //     var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+        //     var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
 
 
-            leftCamera.position.x = -5;
-            rightCamera.position.x = 5;
+        //     leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
+        //     rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
 
 
-            // rightCamera.lookAt(cameraTarget);
-            // leftCamera.lookAt(cameraTarget);
-
-            // rightCamera.bounds=new THREE.Vector4(window.innerWidth/2,window.innerHeight/2,window.innerWidth/2,window.innerHeight/2);
-
-            var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
-
-            hmdGlasses.lookAt(cameraTarget);
-
-            scene.add(hmdGlasses);
-
-            camera = hmdGlasses;
-
-            renderer.render(scene, camera);
-
-        }
+        //     leftCamera.position.x = -5;
+        //     rightCamera.position.x = 5;
 
 
-        //全景截图
-        var panoShot = function () {
+        //     // rightCamera.lookAt(cameraTarget);
+        //     // leftCamera.lookAt(cameraTarget);
 
-        }
+        //     // rightCamera.bounds=new THREE.Vector4(window.innerWidth/2,window.innerHeight/2,window.innerWidth/2,window.innerHeight/2);
+
+        //     var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
+
+        //     hmdGlasses.lookAt(cameraTarget);
+
+        //     scene.add(hmdGlasses);
+
+        //     camera = hmdGlasses;
+
+        //     renderer.render(scene, camera);
+
+        // }
+
+
+        // //全景截图
+        // var panoShot = function () {
+
+        // }
 
 
 
