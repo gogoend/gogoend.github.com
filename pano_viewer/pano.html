@@ -447,7 +447,7 @@
 
             //交互部分
             //判断是否存在用户交互
-            console.log(this)
+            console.log(this);
             if (!this.userInteract) {
                 console.log(this.targetSphereCood)
                 this.targetSphereCood.theta += util.degToRad(0.1);
@@ -458,7 +458,7 @@
             this.renderer.render(this.scene, this.camera);
 
             //注意this指向，在定时器中this指向window
-            requestAnimationFrame(this.panoRotationAnimate);
+            requestAnimationFrame(this.panoRotationAnimate.bind(this));
         }
         // setInterval(animate,100);
 
