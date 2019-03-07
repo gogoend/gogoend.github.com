@@ -377,7 +377,7 @@
             defaultCamera.name = "defaultCamera";
 
             var cameraGroup = new THREE.Group();
-            cameraGroup.name = "cameGroup"
+            cameraGroup.name = "cameraGroup"
             cameraGroup.add(defaultCamera);
             scene.add(cameraGroup);
 
@@ -474,10 +474,18 @@
             if (!this.userInteract) {
                 this.targetSphereCood.theta += util.degToRad(0.1);
                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
-                this.camera.lookAt(this.cameraTarget.position);
+                //判断当前相机是否为相机阵列，如果是的话在请求动画时需要更新子相机
+                if(this.camera instanceof THREE.ArrayCamera===false) {
+                    this.camera.lookAt(this.cameraTarget.position);
+                }else{
+                    for(var i=0;i<this.camera.cameras.length;i++){
+                        this.camera.cameras[i].lookAt(this.cameraTarget.position);
+                    }
+                }
             }
 
             this.renderer.render(this.scene, this.camera);
+            // console.log(this.renderer)
 
             //注意this指向，在定时器中this指向window
             requestAnimationFrame(this.panoRotationAnimate.bind(this));
@@ -630,14 +638,10 @@
             console.log(e)
         };
 
-
-
-
-        
         //场景中Sprite处理
-        ThreeStage.prototype.spriteInit=function(){
+        ThreeStage.prototype.spriteInit = function () {
             var spriteOutterGroup = new THREE.Group();
-            spriteOutterGroup.name="spriteOutterGroup";
+            spriteOutterGroup.name = "spriteOutterGroup";
             var spriteGroup = new THREE.Group();
 
             spriteGroup.name = "spriteGroup";
@@ -649,12 +653,46 @@
             spriteOutterGroup.add(spriteGroup);
             scene.add(spriteOutterGroup);
 
-            this.spriteOutterGroup=spriteOutterGroup;
+            this.spriteOutterGroup = spriteOutterGroup;
         }
 
+        //切换到VR
+        //目前切换到双眼后，一片黑屏，不会主动渲染场景
+        ThreeStage.prototype.vrHandler = function () {
 
+            //设置左眼右眼
+            var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+            rightCamera.name="rightCamera";
+            var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+            leftCamera.name="leftCamera";
+
+            leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
+            rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
+
+            leftCamera.position.x = -0.75;
+            rightCamera.position.x = 0.75;
+
+            // leftCamera.lookAt(this.cameraTarget);
+            // rightCamera.lookAt(this.cameraTarget);
+
+            var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
+
+            hmdGlasses.name="hmdGlasses";
+
+            // hmdGlasses.lookAt(this.cameraTarget);
+
+            hmdGlasses.add(leftCamera);
+            hmdGlasses.add(rightCamera);
+
+            this.cameraGroup.add(hmdGlasses);
+
+            this.camera = hmdGlasses;
+
+        }
+
+        //poiBoard是独立组件，可在毕业设计其它场景（全景照片展示、完全虚拟场景、增强现实场景）中复用。
         //poiBoard生成器
-        ThreeStage.prototype.poiBoardGenerator = function (posName, posDistance) {
+        var poiBoardGenerator = function (posName, posDistance) {
             var icon = new Image();
             icon.src = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCINCgkgdmlld0JveD0iMCAwIDIwNC4xIDIwNC4xIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyMDQuMSAyMDQuMTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHBhdGggc3R5bGU9ImZpbGw6IzQ3QjEzNCIgZD0iTTEwMiwyMDEuM2wtNTguMS01OC4xYy0zMi0zMi0zMi04NC4yLDAtMTE2LjJDNTkuNSwxMS40LDgwLjEsMi44LDEwMiwyLjhzNDIuNiw4LjUsNTguMSwyNC4xaDANCgljMzIsMzIsMzIsODQuMiwwLDExNi4yTDEwMiwyMDEuM3ogTTEwMiwxMC4yYy0yMCwwLTM4LjgsNy44LTUyLjksMjEuOUMyMCw2MS4zLDIwLDEwOC44LDQ5LjEsMTM3LjlsNTIuOSw1Mi45bDUyLjktNTIuOQ0KCWMyOS4yLTI5LjIsMjkuMi03Ni42LDAtMTA1LjhsMCwwQzE0MC44LDE4LDEyMiwxMC4yLDEwMiwxMC4yeiBNMTAyLjIsMTIwYy0xOS4zLDAtMzUuMS0xNS43LTM1LjEtMzUuMXMxNS43LTM1LjEsMzUuMS0zNS4xDQoJYzE5LjMsMCwzNS4xLDE1LjcsMzUuMSwzNS4xUzEyMS41LDEyMCwxMDIuMiwxMjB6IE0xMDIuMiw1Ny4yYy0xNS4zLDAtMjcuNywxMi40LTI3LjcsMjcuN3MxMi40LDI3LjcsMjcuNywyNy43DQoJczI3LjctMTIuNCwyNy43LTI3LjdTMTE3LjUsNTcuMiwxMDIuMiw1Ny4yeiIvPg0KPC9zdmc+DQo=";
             // icon.id="icon";
@@ -690,10 +728,10 @@
 
             return canvas;
         }
-        ThreeStage.prototype.poiSpriteGenerator = function (canvas) {
+        var poiSpriteGenerator = function (canvas) {
             //在所点击点随便添加一个物体
             var poiMap = new THREE.CanvasTexture(canvas);
-            poiMap.needsUpdate=false;
+            poiMap.needsUpdate = false;
             //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
             var poiMaterial = new THREE.SpriteMaterial({ map: poiMap, color: 0xffffff, transparent: true, depthTest: false });
             var poiObject = new THREE.Sprite(poiMaterial);
@@ -703,15 +741,14 @@
 
             return poiObject;
         }
-
-        // //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
-        // var calcPoi = function (coodA, coodB) {
-        //     var poiInfo = {
-        //         distance: util.geoLength(coodA, coodB),
-        //         angle: util.geoAngle(coodA, coodB)
-        //     };
-        //     return poiInfo;
-        // }
+        //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
+        var calcPoi = function (coodA, coodB) {
+            var poiInfo = {
+                distance: util.geoLength(coodA, coodB),
+                angle: util.geoAngle(coodA, coodB)
+            };
+            return poiInfo;
+        }
 
 
         // var originP = panos[panoApp.currentIndex].geoCood;
@@ -751,39 +788,7 @@
 
         // }
 
-        // //VR按钮
 
-        // var vrHandler = function () {
-
-        //     //设置左眼右眼
-        //     var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-        //     var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-
-
-        //     leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
-        //     rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
-
-
-        //     leftCamera.position.x = -5;
-        //     rightCamera.position.x = 5;
-
-
-        //     // rightCamera.lookAt(cameraTarget);
-        //     // leftCamera.lookAt(cameraTarget);
-
-        //     // rightCamera.bounds=new THREE.Vector4(window.innerWidth/2,window.innerHeight/2,window.innerWidth/2,window.innerHeight/2);
-
-        //     var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
-
-        //     hmdGlasses.lookAt(cameraTarget);
-
-        //     scene.add(hmdGlasses);
-
-        //     camera = hmdGlasses;
-
-        //     renderer.render(scene, camera);
-
-        // }
 
 
         // //全景截图
