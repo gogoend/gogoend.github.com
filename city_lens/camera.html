@@ -1,0 +1,67 @@
+<html>
+
+<head>
+    <style>
+    html,body{
+        padding: 0;
+        margin: 0
+    }
+    #video{
+        width: 100vw;
+        height: 100vh;
+
+    }
+    </style>
+</head>
+
+<body>
+    <video id='video'></video>
+    <script>
+        var video = document.getElementById('video');
+        //获得用户媒体
+        var cameraOptions = {
+            video: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                facingMode: { exact: "environment" }
+            }
+        }
+        function getUserMedia(constraints, success, error) {
+            if (navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);//最新版本
+            } else if (navigator.webkitGetUserMeida) {
+                navigator.webkitGetUserMedia(constraints, success, error);
+            } else if (navigator.mozGetUserMedia) {
+                navigator.mozGetUserMedia(constraints, success, error);
+            } else if (navigator.getUserMedia) {
+                navigator.getUserMedia(constraints, success, error);//这一版本已被标准所抛弃，尽可能使用最新版本来替代
+            }
+        }
+
+        function cameraHandler(stream) {
+            video.srcObject = stream;
+            video.onloadedmetadata = function (e) {
+                video.play();
+            }
+        }
+
+        function cameraError(e) {
+            console.log(e);
+            if(e.constraint=="facingMode"&&e.name=="OverconstrainedError"){
+                cameraOptions.video.facingMode="user";
+                getUserMedia(cameraOptions, cameraHandler, cameraError);
+            }else{
+                return false;
+            }
+        }
+
+        if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+            getUserMedia(cameraOptions, cameraHandler, cameraError);
+        } else {
+            alert('浏览器不支持。')
+        }
+    </script>
+</body>
+
+
+</html>
