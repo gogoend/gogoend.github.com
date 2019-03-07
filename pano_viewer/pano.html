@@ -222,7 +222,6 @@
         </div>
     </div>
 
-
     <script src="./pano_array.js"></script>
     <script src="./position2_array.js"></script>
 
@@ -247,9 +246,6 @@
             win.addEventListener(resizeEvt, recalc, false);
             doc.addEventListener('DOMContentLoaded', recalc, false);
         };
-
-
-
 
         //请求全屏
         // var fullScreenStatus = false;
@@ -359,7 +355,10 @@
             }
 
             _this.sceneInit();
+            //传入全景图索引值，来确定应当以哪一张全景图来开场
             _this.panoInit(_this.currentIndex);
+
+            _this.spriteGroupInit();
 
 
         }
@@ -418,6 +417,7 @@
             this.light = light;
             this.cameraTarget = cameraTarget;
             this.targetSphereCood = targetSphereCood;
+            this.panoSphereRadius=panoSphereRadius;
 
             console.log(this.targetSphereCood);
 
@@ -475,10 +475,10 @@
                 this.targetSphereCood.theta += util.degToRad(0.1);
                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                 //判断当前相机是否为相机阵列，如果是的话在请求动画时需要更新子相机
-                if(this.camera instanceof THREE.ArrayCamera===false) {
+                if (this.camera instanceof THREE.ArrayCamera === false) {
                     this.camera.lookAt(this.cameraTarget.position);
-                }else{
-                    for(var i=0;i<this.camera.cameras.length;i++){
+                } else {
+                    for (var i = 0; i < this.camera.cameras.length; i++) {
                         this.camera.cameras[i].lookAt(this.cameraTarget.position);
                     }
                 }
@@ -517,7 +517,7 @@
             }
 
             //事件处理函数中this指向的是addEventListener的元素
-            console.log(this);
+            // console.log(this);
 
             switch (evtType) {
                 case "touchstart":
@@ -542,7 +542,6 @@
                 }
                 case "touchmove":
                 case "mousemove": {
-                    console.log(this.pointData);
                     if (this.userInteract) {
 
                         //鼠标移动时计算鼠标的偏移量
@@ -638,8 +637,8 @@
             console.log(e)
         };
 
-        //场景中Sprite处理
-        ThreeStage.prototype.spriteInit = function () {
+        //场景中Sprite组（染器）处理
+        ThreeStage.prototype.spriteGroupInit = function () {
             var spriteOutterGroup = new THREE.Group();
             spriteOutterGroup.name = "spriteOutterGroup";
             var spriteGroup = new THREE.Group();
@@ -653,22 +652,24 @@
             spriteOutterGroup.add(spriteGroup);
             scene.add(spriteOutterGroup);
 
-            this.spriteOutterGroup = spriteOutterGroup;
+            this.spriteGroup = spriteGroup;
         }
 
         //切换到VR
-        //目前切换到双眼后，一片黑屏，不会主动渲染场景
         ThreeStage.prototype.vrHandler = function () {
 
             //设置左眼右眼
             var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-            rightCamera.name="rightCamera";
+            rightCamera.name = "rightCamera";
             var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-            leftCamera.name="leftCamera";
+            leftCamera.name = "leftCamera";
 
+            //设置相机的边界
             leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
             rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
 
+
+            //瞳距
             leftCamera.position.x = -0.75;
             rightCamera.position.x = 0.75;
 
@@ -677,7 +678,7 @@
 
             var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
 
-            hmdGlasses.name="hmdGlasses";
+            hmdGlasses.name = "hmdGlasses";
 
             // hmdGlasses.lookAt(this.cameraTarget);
 
@@ -742,7 +743,7 @@
             return poiObject;
         }
         //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
-        var calcPoi = function (coodA, coodB) {
+        var poiCalc = function (coodA, coodB) {
             var poiInfo = {
                 distance: util.geoLength(coodA, coodB),
                 angle: util.geoAngle(coodA, coodB)
@@ -750,51 +751,52 @@
             return poiInfo;
         }
 
-
-        // var originP = panos[panoApp.currentIndex].geoCood;
-        // for (var i = 0; i < positions.length; i++) {
-        //     positions[i].poiInfo = calcPoi(originP, positions[i].point);//算出poi与全景照片拍摄点的距离和角度
-        //     var distanceText;
-        //     if (positions[i].poiInfo.distance > 1000) {
-        //         distanceText = (positions[i].poiInfo.distance / 1000).toFixed(1) + ' km';
-        //     } else {
-        //         distanceText = positions[i].poiInfo.distance.toFixed(0) + ' m';
-        //     }
-
-        //     //生成poiBoard
-        //     var poiCanvas = poiBoardGenerator(positions[i].title, distanceText);
-        //     //生成sprite
-        //     var poiObj = poiSpriteGenerator(poiCanvas);
-        //     console.log(poiObj);
-
-        //     //有了角度、有了距离，算球坐标
-        //     //俯仰角根据poi距离来确定，角度值在90~180之间
-        //     console.log(positions[i].poiInfo.distance / 2000 * 180);
-        //     var lengthVal = util.clamp(positions[i].poiInfo.distance / 2000 * panoSphereRadius, 0.2 * panoSphereRadius, panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
-        //     // var lengthVal=panoSphereRadius;//poi半径长度，poi越远值越大，但限制在给定范围内
-        //     var pitchVal = util.degToRad(util.clamp(positions[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
-        //     var azimuthVal = util.degToRad(positions[i].poiInfo.angle);//poi球坐标的方位角
-
-        //     console.log(lengthVal)
-        //     var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
-
-        //     var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
-        //     console.log(poiCood);
-        //     poiObj.position.x = poiCood.x;
-        //     poiObj.position.y = poiCood.y;
-        //     poiObj.position.z = poiCood.z;
-
-        //     spriteGroup.add(poiObj);
-
-        // }
+        //将poiBoard加入到场景中
+        ThreeStage.prototype.addPoi = function () {
+            var originP = this.panosList[this.currentIndex].geoCood;
 
 
+            for (var i = 0; i < this.neighborList.length; i++) {
+                this.neighborList[i].poiInfo = poiCalc(originP, this.neighborList[i].point);//算出poi与全景照片拍摄点的距离和角度
+                console.log(this.neighborList[i].poiInfo);
+                var distanceText;
+                if (this.neighborList[i].poiInfo.distance > 1000) {
+                    distanceText = (this.neighborList[i].poiInfo.distance / 1000).toFixed(1) + ' km';
+                } else {
+                    distanceText = this.neighborList[i].poiInfo.distance.toFixed(0) + ' m';
+                }
 
+                //生成poiBoard
+                var poiCanvas = poiBoardGenerator(this.neighborList[i].title, distanceText);
+                //生成sprite
+                var poiObj = poiSpriteGenerator(poiCanvas);
+                // console.log(poiObj);
 
-        // //全景截图
-        // var panoShot = function () {
+                //有了角度、有了距离，算球坐标
+                //俯仰角根据poi距离来确定，角度值在90~180之间
+                console.log(this.neighborList[i].poiInfo.distance / 2000 * 180);
+                var lengthVal = util.clamp(this.neighborList[i].poiInfo.distance / 2000 * this.panoSphereRadius, 0.2 * this.panoSphereRadius, this.panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
+                var pitchVal = util.degToRad(util.clamp(this.neighborList[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
+                var azimuthVal = util.degToRad(this.neighborList[i].poiInfo.angle);//poi球坐标的方位角
 
-        // }
+                // console.log(lengthVal)
+                var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
+
+                var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
+                // console.log(poiCood);
+                poiObj.position.x = poiCood.x;
+                poiObj.position.y = poiCood.y;
+                poiObj.position.z = poiCood.z;
+
+                this.spriteGroup.add(poiObj);
+
+            }
+        }
+
+        // //全景截图，Canvas截取图片
+        var panoShot = function () {
+
+        }
 
 
 
