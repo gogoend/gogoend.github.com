@@ -227,37 +227,15 @@
 
     <script>
         'use strict';
-        // Vue.component('scrollBar')
-
-        //rem
-        var rem = function (doc, win) {
-            var docEl = doc.documentElement,
-                resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
-                recalc = function () {
-                    var clientWidth = docEl.clientWidth;
-                    if (!clientWidth) return;
-                    if (clientWidth >= 750) {
-                        docEl.style.fontSize = '100px';
-                    } else {
-                        docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
-                    }
-                };
-            if (!doc.addEventListener) return;
-            win.addEventListener(resizeEvt, recalc, false);
-            doc.addEventListener('DOMContentLoaded', recalc, false);
-        };
 
         //请求全屏
-        // var fullScreenStatus = false;
-        // function fullScreen() {
-        //     if (!fullScreenStatus) {
-        //         document.body.requestFullscreen();
-        //         fullScreenStatus = true
-        //     } else {
-        //         document.exitFullscreen();
-        //         fullScreenStatus = false
-        //     }
-        // }
+        function fullScreen(element) {
+            if (!document.fullscreenElement) {
+                element.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
 
         // var panoApp = new Vue({
         //     el: '#app',
@@ -328,6 +306,9 @@
             //检测是否存在用户交互
             _this.userInteract = false;
 
+            //标识是否暂停旋转动画
+            _this.pauseRotete = false;
+
             //配置全景图文件夹基地址
             _this.panoBasePath = "./pano_images/";
             _this.panoThumbPath = "./pano_thumb/";
@@ -359,6 +340,8 @@
             _this.panoInit(_this.currentIndex);
 
             _this.spriteGroupInit();
+
+            _this.addPoi();
 
 
         }
@@ -417,7 +400,7 @@
             this.light = light;
             this.cameraTarget = cameraTarget;
             this.targetSphereCood = targetSphereCood;
-            this.panoSphereRadius=panoSphereRadius;
+            this.panoSphereRadius = panoSphereRadius;
 
             console.log(this.targetSphereCood);
 
@@ -457,7 +440,7 @@
             this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
             this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
             this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
-            window.addEventListener("deviceorientation", this.mouseScrollHandler.bind(this), false);
+            window.addEventListener("deviceorientation", this.deviceOrientationHandler.bind(this), false);
 
             //阻止默认的鼠标右键菜单弹出
             this.panoWrap.addEventListener('contextmenu', function (e) {
@@ -471,8 +454,8 @@
             //交互部分
             //判断是否存在用户交互
             // console.log(this);
-            if (!this.userInteract) {
-                this.targetSphereCood.theta += util.degToRad(0.1);
+            if (!this.userInteract&&!this.pauseRotete) {
+                this.targetSphereCood.theta += util.degToRad(0.075);
                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                 //判断当前相机是否为相机阵列，如果是的话在请求动画时需要更新子相机
                 if (this.camera instanceof THREE.ArrayCamera === false) {
@@ -629,15 +612,16 @@
 
         //处理鼠标滚轮
         ThreeStage.prototype.mouseScrollHandler = function (e) {
-            console.log(e)
+
         };
 
         //处理设备方向
         ThreeStage.prototype.deviceOrientationHandler = function (e) {
-            console.log(e)
+            this.pauseRotete=true;
+            console.log(e.gamma)
         };
 
-        //场景中Sprite组（染器）处理
+        //场景中Sprite组初始化
         ThreeStage.prototype.spriteGroupInit = function () {
             var spriteOutterGroup = new THREE.Group();
             spriteOutterGroup.name = "spriteOutterGroup";
@@ -705,6 +689,7 @@
             ctx.fillStyle = "rgba(0,0,0,0.75)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             // ctx.fillRect(50, 60, 206, 206);
+            //某些poi icon没画出来
             icon.addEventListener('load', function (e) {
                 ctx.drawImage(icon, 40, 40, 176, 176);
             });
@@ -754,7 +739,6 @@
         //将poiBoard加入到场景中
         ThreeStage.prototype.addPoi = function () {
             var originP = this.panosList[this.currentIndex].geoCood;
-
 
             for (var i = 0; i < this.neighborList.length; i++) {
                 this.neighborList[i].poiInfo = poiCalc(originP, this.neighborList[i].point);//算出poi与全景照片拍摄点的距离和角度
