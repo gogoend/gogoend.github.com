@@ -436,10 +436,10 @@
             this.panoRotationAnimate();
 
             //事件处理函数中this指向的是addEventListener的元素，因此需要bind
-            this.panoWrap.addEventListener("mousedown", this.pointHandler.bind(this), false);
-            this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
-            this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
-            this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
+            // this.panoWrap.addEventListener("mousedown", this.pointHandler.bind(this), false);
+            // this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
+            // this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
+            // this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
             window.addEventListener("deviceorientation", this.deviceOrientationHandler.bind(this), false);
 
             //阻止默认的鼠标右键菜单弹出
@@ -453,13 +453,14 @@
 
             //交互部分
             //判断是否存在用户交互
-            // console.log(this);
+            //无交互、且无暂停
             if (!this.userInteract&&!this.pauseRotete) {
                 this.targetSphereCood.theta += util.degToRad(0.075);
                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                 //判断当前相机是否为相机阵列，如果是的话在请求动画时需要更新子相机
                 if (this.camera instanceof THREE.ArrayCamera === false) {
                     this.camera.lookAt(this.cameraTarget.position);
+                    console.log(this.cameraTarget.position);
                 } else {
                     for (var i = 0; i < this.camera.cameras.length; i++) {
                         this.camera.cameras[i].lookAt(this.cameraTarget.position);
@@ -495,7 +496,6 @@
             // e.preventDefault();
 
             if (e.type.match('touch')) {
-                console.log('触摸事件');
                 e = e.touches[0];
             }
 
@@ -591,6 +591,7 @@
             mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
 
             raycaster.setFromCamera(mouse, this.camera);
+            console.log(this.camera);
 
             //一个数组，用于保存与射线相交叉的对象
             //数组下标按照物体远近来进行排序，下标越大越远
@@ -618,7 +619,22 @@
         //处理设备方向
         ThreeStage.prototype.deviceOrientationHandler = function (e) {
             this.pauseRotete=true;
-            console.log(e.gamma)
+            var targetOriginSphericalCood=new THREE.Spherical().setFromVector3(this.cameraTarget.position);
+            targetOriginSphericalCood.phi=util.degToRad(-e.beta);
+
+            targetOriginSphericalCood.theta=util.degToRad(e.alpha);
+
+            console.log(targetOriginSphericalCood.phi);
+
+            var targetNewPosition=new THREE.Vector3().setFromSpherical(targetOriginSphericalCood);
+
+            this.cameraTarget.position.x = targetNewPosition.x
+            this.cameraTarget.position.y = targetNewPosition.y
+            this.cameraTarget.position.z = targetNewPosition.z
+
+            this.camera.lookAt(this.cameraTarget.position);
+
+            console.log(this.cameraTarget.position)
         };
 
         //场景中Sprite组初始化
@@ -654,8 +670,8 @@
 
 
             //瞳距
-            leftCamera.position.x = -0.75;
-            rightCamera.position.x = 0.75;
+            leftCamera.position.x = -0.1;
+            rightCamera.position.x = 0.1;
 
             // leftCamera.lookAt(this.cameraTarget);
             // rightCamera.lookAt(this.cameraTarget);
@@ -691,6 +707,7 @@
             // ctx.fillRect(50, 60, 206, 206);
             //某些poi icon没画出来
             icon.addEventListener('load', function (e) {
+                console.log(e);
                 ctx.drawImage(icon, 40, 40, 176, 176);
             });
 
@@ -712,12 +729,13 @@
             ctx.font = '36px sans-serif';
             ctx.fillText(posDistance, 300, 180);
 
+            document.body.appendChild(canvas);
             return canvas;
         }
         var poiSpriteGenerator = function (canvas) {
             //在所点击点随便添加一个物体
             var poiMap = new THREE.CanvasTexture(canvas);
-            poiMap.needsUpdate = false;
+            // poiMap.needsUpdate = false;
             //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
             var poiMaterial = new THREE.SpriteMaterial({ map: poiMap, color: 0xffffff, transparent: true, depthTest: false });
             var poiObject = new THREE.Sprite(poiMaterial);
