@@ -9,6 +9,9 @@
     <!-- <script src="../lib/vue.js"></script> -->
     <script src="../control_stick/util.js"></script>
     <script src="../control_stick/stick.js"></script>
+
+    <script src="./js/DeviceOrientationControls.js"></script>
+    
     <style>
         html,
         body,
@@ -560,7 +563,6 @@
                     break;
                 }
             }
-
         }
         //处理窗口大小改变时三维场景的变化
         ThreeStage.prototype.resizeHandler = function (e) {
@@ -619,22 +621,37 @@
         //处理设备方向
         ThreeStage.prototype.deviceOrientationHandler = function (e) {
             this.pauseRotete=true;
-            var targetOriginSphericalCood=new THREE.Spherical().setFromVector3(this.cameraTarget.position);
-            targetOriginSphericalCood.phi=util.degToRad(-e.beta);
+            console.log(e)
 
+            function orientationChangeHandler(e){
+                console.log(e);
+            }
+            window.addEventListener( 'orientationchange', orientationChangeHandler, false );
+
+            var euler=new THREE.Euler();
+            
+            euler.set(e.beta,e.alpha,-e.gamma,'YXZ');
+
+            /*
+            //尝试直接把旋转值对应坐标赋给cameraTarget，失败
+            var targetOriginSphericalCood=new THREE.Spherical().setFromVector3(this.cameraTarget.position);
+
+            //beta: 1~179deg
+            targetOriginSphericalCood.phi=util.degToRad(util.clamp(-e.beta,-179,-1));
             targetOriginSphericalCood.theta=util.degToRad(e.alpha);
 
-            console.log(targetOriginSphericalCood.phi);
+            // console.log(targetOriginSphericalCood.phi);
 
             var targetNewPosition=new THREE.Vector3().setFromSpherical(targetOriginSphericalCood);
 
-            this.cameraTarget.position.x = targetNewPosition.x
-            this.cameraTarget.position.y = targetNewPosition.y
-            this.cameraTarget.position.z = targetNewPosition.z
+            this.cameraTarget.position.x = targetNewPosition.x;
+            this.cameraTarget.position.y = targetNewPosition.y;
+            this.cameraTarget.position.z = targetNewPosition.z;
 
             this.camera.lookAt(this.cameraTarget.position);
 
-            console.log(this.cameraTarget.position)
+            // console.log(this.cameraTarget.position)
+            */
         };
 
         //场景中Sprite组初始化
