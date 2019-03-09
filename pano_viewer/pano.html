@@ -621,15 +621,16 @@
         //处理设备方向
         ThreeStage.prototype.deviceOrientationHandler = function (e) {
             this.pauseRotete=true;
-            console.log(e)
+            window.addEventListener( 'orientationchange', orientationChangeHandler, false );
+
+            // console.log(e)
 
             function orientationChangeHandler(e){
                 console.log(e);
             }
-            window.addEventListener( 'orientationchange', orientationChangeHandler, false );
 
             var euler=new THREE.Euler();
-            
+
             euler.set(e.beta,e.alpha,-e.gamma,'YXZ');
 
             /*
