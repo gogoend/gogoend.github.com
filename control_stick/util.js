@@ -2,20 +2,20 @@
 //范围内随机数产生器
 var util = {
     //字符串乱序（类似php同名函数）
-    // var strShuffle=function(str){
-    //     var strArray=[];
-    //     strArray.length=str.length;
-    //     for(var i=0;i<strArray.length;i++){
-    //         var index=rand(0,strArray.length-1,true)
-    //         var char=str.substring(i,i+1);
-    //         while(strArray[index]===undefined){
-    //             index=rand(0,strArray.length-1,true)
-    //             strArray[index]=char;
-    //             console.log(strArray);
-    //         }
-    //     }
-    //     console.log(strArray.join());
-    // },
+    strShuffle: function(str){
+        var strArray=str.split('');//拆分字符串到数组
+        var strResultArray=[];//保存乱序结果
+        var length=strArray.length;
+        for(var i=0;i<length;i++){
+            //index为原数组索引，根据该随机生成的索引从原数组中访问元素
+            var index=util.rand(0,strArray.length-1,true);
+            //访问到的元素压入保存乱序结果的数组中
+            strResultArray[i]=strArray[index];
+            //位于索引index处的数组元素已被压入结果数组中，将其删除，并继续循环
+            strArray.splice(index,1)
+        }
+        return strResultArray.join('');
+    },
     //范围内取随机数
     rand: function (min, max, ifInt) {
         if (ifInt == true) {
@@ -27,13 +27,17 @@ var util = {
     //UUID生成器
     uuid: function () {
         var charPool = '0123456789abcdef';
-        var digit = '';
-        var point;
+        var finalUuid = '';
+        var pointer;
         for (var i = 0; i < 32; i++) {
-            point = util.rand(0, charPool.length, true);
-            digit += charPool.charAt(point);
+            //pointer为字符池的索引，即从字符第pointer个元素取一个字符串
+            pointer = util.rand(0, charPool.length, true);
+            finalUuid += charPool.charAt(pointer);
+            if(finalUuid.length==8||finalUuid.length==13||finalUuid.length==18||finalUuid.length==23){
+                finalUuid+='-';
+            }
         }
-        return digit;
+        return finalUuid;
     },
 
     //获得节点已算出的样式
