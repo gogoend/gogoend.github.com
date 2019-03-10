@@ -11,7 +11,7 @@
     <script src="../control_stick/stick.js"></script>
 
     <script src="./js/DeviceOrientationControls.js"></script>
-    
+
     <style>
         html,
         body,
@@ -392,6 +392,8 @@
 
             scene.add(cameraTarget);
 
+            
+
             //添加窗口缩放事件
             window.addEventListener('resize', this.resizeHandler.bind(this), false);
 
@@ -444,6 +446,8 @@
             // this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
             // this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
             window.addEventListener("deviceorientation", this.deviceOrientationHandler.bind(this), false);
+            // window.addEventListener('orientationchange', this.orientationChangeHandler.bind(this), false);
+
 
             //阻止默认的鼠标右键菜单弹出
             this.panoWrap.addEventListener('contextmenu', function (e) {
@@ -457,18 +461,19 @@
             //交互部分
             //判断是否存在用户交互
             //无交互、且无暂停
-            if (!this.userInteract&&!this.pauseRotete) {
+            if (!this.userInteract) {
+                if(!this.pauseRotete){
                 this.targetSphereCood.theta += util.degToRad(0.075);
                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                 //判断当前相机是否为相机阵列，如果是的话在请求动画时需要更新子相机
                 if (this.camera instanceof THREE.ArrayCamera === false) {
                     this.camera.lookAt(this.cameraTarget.position);
-                    console.log(this.cameraTarget.position);
+                    //console.log(this.cameraTarget.position);
                 } else {
                     for (var i = 0; i < this.camera.cameras.length; i++) {
                         this.camera.cameras[i].lookAt(this.cameraTarget.position);
                     }
-                }
+                }}
             }
 
             this.renderer.render(this.scene, this.camera);
@@ -619,19 +624,40 @@
         };
 
         //处理设备方向
+        // ThreeStage.prototype.orientationChangeHandler = function (e) {
+        //     //console.log(e);
+        // }
         ThreeStage.prototype.deviceOrientationHandler = function (e) {
-            this.pauseRotete=true;
-            window.addEventListener( 'orientationchange', orientationChangeHandler, false );
+            this.pauseRotete = true;
 
-            // console.log(e)
+            //这个值表示屏幕朝向，当屏幕朝向变的时候改变这个值
+            //+-------+   +------------+   +------------+
+            //|       |   |            |   |            |
+            //|       |   |    +90   < |   | >   -90    |
+            //|   0   |   |            |   |            |
+            //|       |   +------------+   +------------+
+            //|   ^   |                                  
+            //+-------+                                  
+            var screenOrientation=window.orientation || 0;
 
-            function orientationChangeHandler(e){
-                console.log(e);
-            }
+            //代码来自threejs
+            var euler = new THREE.Euler();
 
-            var euler=new THREE.Euler();
+            euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma), 'YXZ');
 
-            euler.set(e.beta,e.alpha,-e.gamma,'YXZ');
+            
+            var q0 = new THREE.Quaternion();
+
+            var q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
+
+            var qn = new THREE.Quaternion().setFromEuler(euler);
+            qn.multiply(q1);
+            qn.multiply(q0.setFromAxisAngle(new THREE.Vector3( 0, 0, 1 ),-window.orientation));
+
+
+            this.camera.setRotationFromQuaternion(qn)
+            // this.cameraTarget.quaternion=qn;
+            console.log(this.camera.quaternion)
 
             /*
             //尝试直接把旋转值对应坐标赋给cameraTarget，失败
@@ -720,7 +746,7 @@
             canvas.width = 1024;
             canvas.height = 256;
             var ctx = canvas.getContext("2d");
-            ctx.fillStyle = "rgba(0,0,0,0.75)";
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             // ctx.fillRect(50, 60, 206, 206);
             //某些poi icon没画出来
