@@ -214,12 +214,12 @@
             </div>
 
             <div class="panoControls">
-                <!-- <button onclick="fullScreen" class="fullScreenBtn">全屏</button> -->
-                <!-- <button onclick="vrHandler()" class="fullScreenBtn holaGreen">VR</button>
-                <button onclick="panoShot()" class="fullScreenBtn holaGreen">保存全景</button> -->
+                <button role-btn="" class="fullScreenBtn">全屏</button>
+                <button role-btn="" class="fullScreenBtn holaGreen">VR</button>
+                <button role-btn="" class="fullScreenBtn holaGreen">保存全景</button>
 
-                <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">全屏</button>
-                <!-- <button v-on:click="fullScreen" class="fullScreenBtn holaGreen">陀螺仪</button> -->
+                <button role-btn="" class="fullScreenBtn holaGreen">全屏</button>
+                <button role-btn="" class="fullScreenBtn holaGreen">陀螺仪</button>
 
             </div>
         </div>
@@ -230,15 +230,6 @@
 
     <script>
         'use strict';
-
-        //请求全屏
-        function fullScreen(element) {
-            if (!document.fullscreenElement) {
-                element.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
 
         // var panoApp = new Vue({
         //     el: '#app',
@@ -392,7 +383,7 @@
 
             scene.add(cameraTarget);
 
-            
+
 
             //添加窗口缩放事件
             window.addEventListener('resize', this.resizeHandler.bind(this), false);
@@ -440,21 +431,47 @@
 
             this.panoRotationAnimate();
 
-            //事件处理函数中this指向的是addEventListener的元素，因此需要bind
-            // this.panoWrap.addEventListener("mousedown", this.pointHandler.bind(this), false);
-            // this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
-            // this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
-            // this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
-            window.addEventListener("deviceorientation", this.deviceOrientationHandler.bind(this), false);
-            // window.addEventListener('orientationchange', this.orientationChangeHandler.bind(this), false);
-
-
             //阻止默认的鼠标右键菜单弹出
             this.panoWrap.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
             }, false);
 
         };
+
+        //与事件相关的各种UI逻辑
+        //全景交互
+        ThreeStage.prototype.attachEvent = function (eventType) {
+            //事件处理函数中this指向的是addEventListener的元素，因此需要bind
+            switch (eventType) {
+                case 'mouse':
+                case 'touch': {
+                    this.panoWrap.addEventListener("mousedown", this.pointHandler.bind(this), false);
+                    this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
+                    this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
+                    this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
+                    break;
+                };
+
+                case 'orientation': {
+                    window.addEventListener("deviceorientation", this.deviceOrientationHandler.bind(this), false);
+                    window.addEventListener('orientationchange', this.orientationChangeHandler.bind(this), false);
+                    break;
+                }
+            }
+        };
+        //DOM控件交互
+        //画面控制
+        ThreeStage.prototype.itemFun=function(){
+            document.querySelector('.panoControls').addEventListener('click',function(e){
+                switch(e.target.dataset.roleTodo){
+                    case 'toggleFullScreen':{};
+                    case 'toggleVR':{};
+                    case 'toggleOrient':{};
+                    case 'shot':{}
+                }
+            },false)
+        }
+
         //全景球旋转动画    //setInterval(animate,100);
         ThreeStage.prototype.panoRotationAnimate = function () {
 
@@ -462,18 +479,19 @@
             //判断是否存在用户交互
             //无交互、且无暂停
             if (!this.userInteract) {
-                if(!this.pauseRotete){
-                this.targetSphereCood.theta += util.degToRad(0.075);
-                this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
-                //判断当前相机是否为相机阵列，如果是的话在请求动画时需要更新子相机
-                if (this.camera instanceof THREE.ArrayCamera === false) {
-                    this.camera.lookAt(this.cameraTarget.position);
-                    //console.log(this.cameraTarget.position);
-                } else {
-                    for (var i = 0; i < this.camera.cameras.length; i++) {
-                        this.camera.cameras[i].lookAt(this.cameraTarget.position);
+                if (!this.pauseRotete) {
+                    this.targetSphereCood.theta += util.degToRad(0.075);
+                    this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
+                    //判断当前相机是否为相机阵列，如果是的话在请求动画时需要遍历更新子相机
+                    if (this.camera instanceof THREE.ArrayCamera === false) {
+                        this.camera.lookAt(this.cameraTarget.position);
+                        //console.log(this.cameraTarget.position);
+                    } else {
+                        for (var i = 0; i < this.camera.cameras.length; i++) {
+                            this.camera.cameras[i].lookAt(this.cameraTarget.position);
+                        }
                     }
-                }}
+                }
             }
 
             this.renderer.render(this.scene, this.camera);
@@ -638,21 +656,17 @@
             //|       |   +------------+   +------------+
             //|   ^   |                                  
             //+-------+                                  
-            var screenOrientation=window.orientation || 0;
+            var screenOrientation = window.orientation || 0;//桌面端似乎不存在window.orientation
 
             //代码来自threejs
             var euler = new THREE.Euler();
+            euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma), 'YXZ');//从传感器新建一个欧拉角
 
-            euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma), 'YXZ');
-
-            
             var q0 = new THREE.Quaternion();
-
             var q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
-
             var qn = new THREE.Quaternion().setFromEuler(euler);
             qn.multiply(q1);
-            qn.multiply(q0.setFromAxisAngle(new THREE.Vector3( 0, 0, 1 ),-window.orientation));
+            qn.multiply(q0.setFromAxisAngle(new THREE.Vector3(0, 0, 1), -screenOrientation));
 
 
             this.camera.setRotationFromQuaternion(qn)
@@ -839,9 +853,38 @@
             }
         }
 
-        // //全景截图，Canvas截取图片
-        var panoShot = function () {
+        //全景截图，Canvas截取图片
+        ThreeStage.prototype.shot = function (canvas) {
+            //如果没有传入canvas元素或者传入的不是canvas元素，就默认将canvas参数设为获得的第一个canvas元素
+            if (!(canvas instanceof HTMLCanvasElement)) {
+                if (document.getElementsByTagName('canvas').length !== 0) {
+                    canvas = document.getElementsByTagName('canvas')[0];
+                } else {
+                    return;
+                }
+            }
 
+            this.renderer.render(this.scene, this.camera);
+            console.log(this.renderer.domElement.toDataURL('image/jpeg', 0.92));
+
+
+            // canvas.toBlob(
+            //     function (blob) {
+            //         console.log(blob)
+            //     },
+            //     'image/jpeg',
+            //     0.92
+            // );
+
+        }
+
+        //请求全屏
+        function fullScreen(element) {
+            if (!document.fullscreenElement) {
+                element.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
         }
 
 
