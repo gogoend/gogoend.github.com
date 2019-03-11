@@ -216,6 +216,7 @@
                 <button data-role="btn" data-todo="toggleVR" class="fullScreenBtn holaGreen">VR</button>
                 <button data-role="btn" data-todo="toggleFullScreen" class="fullScreenBtn holaGreen">全屏</button>
                 <button data-role="btn" data-todo="toggleOrient" class="fullScreenBtn holaGreen">陀螺仪</button>
+                <button data-role="btn" data-todo="togglePointer" class="fullScreenBtn holaGreen">鼠标</button>
 
             </div>
         </div>
@@ -492,10 +493,21 @@
                         fullScreen(document.querySelector('body'));
                         break;
                     };
-                    case 'toggleVR': { };
-                    case 'toggleOrient': { };
+                    case 'toggleVR': {
+                        _this.vrHandler();
+                        break;
+                    };
+                    case 'toggleOrient': {
+                        _this.attachController('orient');
+                        break;
+                    };
+                    case 'togglePointer':{
+                        _this.attachController('mouse')
+                        break;
+                    }
                     case 'shot': {
                         _this.shot(document.querySelector('.panoWrap').getElementsByTagName('canvas')[0]);
+                        break;
                     }
                 }
             }, false)
@@ -667,7 +679,7 @@
 
         //处理鼠标滚轮
         ThreeStage.prototype.mouseScrollHandler = function (e) {
-
+            //主要是更改场景中相机的fov
         };
 
         //处理设备方向
@@ -746,6 +758,9 @@
         //切换到VR
         ThreeStage.prototype.vrHandler = function () {
 
+            fullScreen(document.querySelector('.panoWrap'),false);
+            this.attachController('orient');
+
             //设置左眼右眼
             var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
             rightCamera.name = "rightCamera";
@@ -758,8 +773,8 @@
 
 
             //瞳距
-            leftCamera.position.x = -0.1;
-            rightCamera.position.x = 0.1;
+            leftCamera.position.x = -0.2;
+            rightCamera.position.x = 0.2;
 
             // leftCamera.lookAt(this.cameraTarget);
             // rightCamera.lookAt(this.cameraTarget);
@@ -829,7 +844,7 @@
             var poiObject = new THREE.Sprite(poiMaterial);
             poiObject.center = new THREE.Vector2(0, 0)
             var poiboardSize = [1024, 256];
-            poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
+            poiObject.scale.set(poiboardSize[0] * 0.0012, poiboardSize[1] * 0.0012, 1);
 
             return poiObject;
         }
