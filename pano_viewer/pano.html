@@ -10,8 +10,6 @@
     <script src="../control_stick/util.js"></script>
     <script src="../control_stick/stick.js"></script>
 
-    <script src="./js/DeviceOrientationControls.js"></script>
-
     <style>
         html,
         body,
@@ -214,12 +212,10 @@
             </div>
 
             <div class="panoControls">
-                <button role-btn="" class="fullScreenBtn">全屏</button>
-                <button role-btn="" class="fullScreenBtn holaGreen">VR</button>
-                <button role-btn="" class="fullScreenBtn holaGreen">保存全景</button>
-
-                <button role-btn="" class="fullScreenBtn holaGreen">全屏</button>
-                <button role-btn="" class="fullScreenBtn holaGreen">陀螺仪</button>
+                <button data-role="btn" data-todo="shot" class="fullScreenBtn holaGreen">截屏</button>
+                <button data-role="btn" data-todo="toggleVR" class="fullScreenBtn holaGreen">VR</button>
+                <button data-role="btn" data-todo="toggleFullScreen" class="fullScreenBtn holaGreen">全屏</button>
+                <button data-role="btn" data-todo="toggleOrient" class="fullScreenBtn holaGreen">陀螺仪</button>
 
             </div>
         </div>
@@ -329,13 +325,24 @@
                 originPhi: 0
             }
 
+            //将事件中的this进行bind
+            _this.eventHandlerBind();
+
+            //初始化场景1
             _this.sceneInit();
+
+            //加入鼠标事件
+            _this.attachController('mouse');
+            // _this.attachController('orient');
+
             //传入全景图索引值，来确定应当以哪一张全景图来开场
             _this.panoInit(_this.currentIndex);
 
+            //初始化sprite
             _this.spriteGroupInit();
-
             _this.addPoi();
+
+            _this.btnTodoHandler();
 
 
         }
@@ -439,37 +446,59 @@
         };
 
         //与事件相关的各种UI逻辑
-        //全景交互
-        ThreeStage.prototype.attachEvent = function (eventType) {
+        ThreeStage.prototype.eventHandlerBind = function () {
+            this.eventBind = {};
             //事件处理函数中this指向的是addEventListener的元素，因此需要bind
+            //但使用bind会生成一个新的函数，没法removeEventListener，在此先将函数预先bind
+            this.eventBind.deviceOrientationHandler = this.deviceOrientationHandler.bind(this);
+            this.eventBind.orientationChangeHandler = this.orientationChangeHandler.bind(this);
+            this.eventBind.pointHandler = this.pointHandler.bind(this);
+            this.eventBind.pointRayHandler = this.pointRayHandler.bind(this);
+            this.eventBind.mouseScrollHandler = this.mouseScrollHandler.bind(this);
+        }
+        //全景交互
+        ThreeStage.prototype.attachController = function (eventType) {
             switch (eventType) {
+                //陀螺仪和鼠标之间暂时没想到并存的办法。
                 case 'mouse':
                 case 'touch': {
-                    this.panoWrap.addEventListener("mousedown", this.pointHandler.bind(this), false);
-                    this.panoWrap.addEventListener('touchstart', this.pointHandler.bind(this), false);
-                    this.panoWrap.addEventListener("mousedown", this.rayCastHandler.bind(this), false);
-                    this.panoWrap.addEventListener("mousewheel", this.mouseScrollHandler.bind(this), false);
+                    this.pauseRotete = false;
+                    window.removeEventListener("deviceorientation", this.eventBind.deviceOrientationHandler, false);
+                    window.removeEventListener('orientationchange', this.eventBind.orientationChangeHandler, false);
+                    this.panoWrap.addEventListener("mousedown", this.eventBind.pointHandler, false);
+                    this.panoWrap.addEventListener('touchstart', this.eventBind.pointHandler, false);
+                    this.panoWrap.addEventListener("mousedown", this.eventBind.pointRayHandler, false);
+                    this.panoWrap.addEventListener("mousewheel", this.eventBind.mouseScrollHandler, false);
                     break;
                 };
-
-                case 'orientation': {
-                    window.addEventListener("deviceorientation", this.deviceOrientationHandler.bind(this), false);
-                    window.addEventListener('orientationchange', this.orientationChangeHandler.bind(this), false);
+                case 'orient': {
+                    this.panoWrap.removeEventListener("mousedown", this.eventBind.pointHandler, false);
+                    this.panoWrap.removeEventListener('touchstart', this.eventBind.pointHandler, false);
+                    this.panoWrap.removeEventListener("mousedown", this.eventBind.pointRayHandler, false);
+                    this.panoWrap.removeEventListener("mousewheel", this.eventBind.mouseScrollHandler, false);
+                    window.addEventListener("deviceorientation", this.eventBind.deviceOrientationHandler, false);
+                    window.addEventListener('orientationchange', this.eventBind.orientationChangeHandler, false);
                     break;
-                }
+                };
             }
         };
         //DOM控件交互
         //画面控制
-        ThreeStage.prototype.itemFun=function(){
-            document.querySelector('.panoControls').addEventListener('click',function(e){
-                switch(e.target.dataset.roleTodo){
-                    case 'toggleFullScreen':{};
-                    case 'toggleVR':{};
-                    case 'toggleOrient':{};
-                    case 'shot':{}
+        ThreeStage.prototype.btnTodoHandler = function () {
+            var _this=this;
+            document.querySelector('.panoControls').addEventListener('click', function (e) {
+                switch (e.target.dataset.todo) {
+                    case 'toggleFullScreen': {
+                        fullScreen(document.querySelector('body'));
+                        break;
+                    };
+                    case 'toggleVR': { };
+                    case 'toggleOrient': { };
+                    case 'shot': {
+                        _this.shot(document.querySelector('.panoWrap').getElementsByTagName('canvas')[0]);
+                    }
                 }
-            },false)
+            }, false)
         }
 
         //全景球旋转动画    //setInterval(animate,100);
@@ -595,7 +624,7 @@
         }
 
         //处理光线投射
-        ThreeStage.prototype.rayCastHandler = function (e) {
+        ThreeStage.prototype.pointRayHandler = function (e) {
             if (e.type.match('mouse') || e.type == 'click') {
                 //如果按下的按键为鼠标左键则不进行光线投射
                 if (e.button == 0) {
@@ -642,23 +671,24 @@
         };
 
         //处理设备方向
-        // ThreeStage.prototype.orientationChangeHandler = function (e) {
-        //     //console.log(e);
-        // }
+        ThreeStage.prototype.orientationChangeHandler = function (e) {
+            //console.log(e);
+        }
         ThreeStage.prototype.deviceOrientationHandler = function (e) {
+
             this.pauseRotete = true;
 
             //这个值表示屏幕朝向，当屏幕朝向变的时候改变这个值
-            //+-------+   +------------+   +------------+
-            //|       |   |            |   |            |
-            //|       |   |    +90   < |   | >   -90    |
-            //|   0   |   |            |   |            |
-            //|       |   +------------+   +------------+
+            //+-------+   +---------------+   +---------------+
+            //|       |   |               |   |               |
+            //|       |   |      +90    < |   | >     -90     |
+            //|   0   |   |               |   |               |
+            //|       |   +---------------+   +---------------+
             //|   ^   |                                  
             //+-------+                                  
             var screenOrientation = window.orientation || 0;//桌面端似乎不存在window.orientation
 
-            //代码来自threejs
+            //代码来自threejs  //
             var euler = new THREE.Euler();
             euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma), 'YXZ');//从传感器新建一个欧拉角
 
@@ -853,7 +883,7 @@
             }
         }
 
-        //全景截图，Canvas截取图片
+        //全景截图，相当于Canvas截取图片
         ThreeStage.prototype.shot = function (canvas) {
             //如果没有传入canvas元素或者传入的不是canvas元素，就默认将canvas参数设为获得的第一个canvas元素
             if (!(canvas instanceof HTMLCanvasElement)) {
@@ -864,9 +894,10 @@
                 }
             }
 
+
+            //现渲染现截图，若不渲染就截图，会导致截到全黑画面
             this.renderer.render(this.scene, this.camera);
             console.log(this.renderer.domElement.toDataURL('image/jpeg', 0.92));
-
 
             // canvas.toBlob(
             //     function (blob) {
@@ -879,15 +910,20 @@
         }
 
         //请求全屏
-        function fullScreen(element) {
+        //element：要进入全屏幕的元素
+        //toggle：是否进行全屏幕切换，不传入就不切换
+        function fullScreen(element, noToggle) {
             if (!document.fullscreenElement) {
                 element.requestFullscreen();
+            } else if (noToggle) {
+                //如果传入了noToggle，就不要切换
+                return;
             } else {
                 document.exitFullscreen();
             }
         }
 
-
+        var a = new ThreeStage;
 
     </script>
 </body>
