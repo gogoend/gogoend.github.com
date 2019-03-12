@@ -2,64 +2,76 @@
 
 <head>
     <style>
-    html,body{
-        padding: 0;
-        margin: 0
-    }
-    #video{
-        width: 100vw;
-        height: 100vh;
+        html,
+        body {
+            padding: 0;
+            margin: 0
+        }
 
-    }
+        video.fromCamera {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+
+        }
     </style>
 </head>
 
 <body>
-    <video id='video'></video>
+    <video class="fromCamera" id='video'></video>
     <script>
-        var video = document.getElementById('video');
-        //获得用户媒体
-        var cameraOptions = {
-            video: {
-                width: window.innerWidth,
-                height: window.innerHeight,
-                facingMode: { exact: "environment" }
-            }
-        }
         function getUserMedia(constraints, success, error) {
-            if (navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);//最新版本
-            } else if (navigator.webkitGetUserMeida) {
-                navigator.webkitGetUserMedia(constraints, success, error);
-            } else if (navigator.mozGetUserMedia) {
-                navigator.mozGetUserMedia(constraints, success, error);
-            } else if (navigator.getUserMedia) {
-                navigator.getUserMedia(constraints, success, error);//这一版本已被标准所抛弃，尽可能使用最新版本来替代
+            if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+                if (navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);//最新版本
+                } else if (navigator.webkitGetUserMeida) {
+                    navigator.webkitGetUserMedia(constraints, success, error);
+                } else if (navigator.mozGetUserMedia) {
+                    navigator.mozGetUserMedia(constraints, success, error);
+                } else if (navigator.getUserMedia) {
+                    navigator.getUserMedia(constraints, success, error);//这一版本已被标准所抛弃，尽可能使用最新版本来替代
+                }
+            } else {
+                console.error('当前浏览器不支持获取用户媒体。')
+                return;
+            }
+        }
+        var CityLens = function () {
+            var _this = this;
+            _this.video = document.querySelector('video.fromCamera');
+            //获得用户媒体相关选项
+            _this.cameraOptions = {
+                video: {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    facingMode: { exact: "environment" }
+                }
+            }
+            getUserMedia(_this.cameraOptions, _this.cameraHandler.bind(this), _this.cameraError.bind(this));
+        };
+
+        CityLens.prototype.cameraHandler = function (stream) {
+            var _this=this;
+            this.video.srcObject = stream;
+            this.video.onloadedmetadata = function (e) {
+                _this.video.play();
             }
         }
 
-        function cameraHandler(stream) {
-            video.srcObject = stream;
-            video.onloadedmetadata = function (e) {
-                video.play();
-            }
-        }
-
-        function cameraError(e) {
+        CityLens.prototype.cameraError = function (e) {
             console.log(e);
-            if(e.constraint=="facingMode"&&e.name=="OverconstrainedError"){
-                cameraOptions.video.facingMode="user";
-                getUserMedia(cameraOptions, cameraHandler, cameraError);
-            }else{
+            if (e.constraint == "facingMode" && e.name == "OverconstrainedError") {
+                this.cameraOptions.video.facingMode = "user";
+                getUserMedia(this.cameraOptions, this.cameraHandler, this.cameraError);
+            } else {
                 return false;
             }
         }
 
-        if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
-            getUserMedia(cameraOptions, cameraHandler, cameraError);
-        } else {
-            alert('浏览器不支持。')
-        }
+
+
+
+
     </script>
 </body>
 
