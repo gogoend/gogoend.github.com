@@ -17,3 +17,21 @@ function fullScreen(element, noToggle) {
         document.exitFullscreen();
     }
 }
+
+//对获取用户媒体进行兼容性处理
+function getUserMedia(constraints, success, error) {
+    if (navigator.mediaDevices.getUserMedia || navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia) {
+        if (navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia(constraints).then(success).catch(error);//最新版本
+        } else if (navigator.webkitGetUserMeida) {
+            navigator.webkitGetUserMedia(constraints, success, error);
+        } else if (navigator.mozGetUserMedia) {
+            navigator.mozGetUserMedia(constraints, success, error);
+        } else if (navigator.getUserMedia) {
+            navigator.getUserMedia(constraints, success, error);//这一版本已被标准所抛弃，尽可能使用最新版本来替代
+        }
+    } else {
+        console.error('当前浏览器不支持获取用户媒体。')
+        return;
+    }
+}
