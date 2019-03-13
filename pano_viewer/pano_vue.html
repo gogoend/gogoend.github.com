@@ -366,7 +366,7 @@
                 //全景球初始化
                 panoInit: function (panoIndex) {
                     //全景球半径为10
-                    var panoGeometry = new THREE.SphereBufferGeometry(10, 36, 36);
+                    var panoGeometry = new THREE.SphereBufferGeometry(this.panoSphereRadius, 36, 36);
                     //直接将x设为-1，使得所有面朝向内测
                     panoGeometry.scale(-1, 1, 1);
 
@@ -395,7 +395,6 @@
                     this.panoWrap.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
                     }, false);
-
                 },
 
                 //根据对应的panosList索引来载入对应全景照片。
@@ -403,19 +402,23 @@
                     var _this = this;
                     this.panoImgTex = new THREE.TextureLoader().load(this.panoBasePath + this.panosList[index].imgName,
                         function (e) {
+                            _this.panoImgTex.anisotropy = 8;
+
                             e.image.src = _this.panoBasePath + _this.panosList[index].imgName;
                             if (index == _this.currentIndex) {
                                 return
                             } else {
                                 _this.currentIndex = index;
+                                _this.panoImgTex.dispose();
+
+                                _this.panoPhotoMaterial.map = e;
+
                                 _this.panoImgTex.needsUpdate = true;
                                 _this.spriteGroup.children = [];//在切换之前把当前全景上所有的sprite poi清空
 
                                 //切换之后，读取相关数据，重新将sprite加入场景
 
-                                _this.panoImgTex.dispose();
-                                _this.panoPhotoMaterial.map = e;
-                                _this.panoImgTex.anisotropy = 8;
+
                                 _this.panoImgTex.needsUpdate = false;
                             }
                         })
