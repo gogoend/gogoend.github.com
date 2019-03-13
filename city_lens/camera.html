@@ -26,46 +26,68 @@
             overflow: hidden;
         }
 
-        video.fromCamera {
+        div.cameraContainer {
             width: 100vw;
             height: 100vh;
+        }
+
+        video.fromCamera {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
+        }
+
+        div.canvasWrap {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <video class="fromCamera" id='video'></video>
-        <div class="canvasWrap">
-
+        <div class="cameraContainer">
+            <video class="fromCamera"></video>
+            <div class="canvasWrap"></div>
         </div>
     </div>
     <script>
 
         var cityLensApp = new Vue({
             el: '#app',
-            data: {},
+            data: {
+                cameraOptions: {},
+                GPSOptions: {},
+                videoEl: null
+            },
             mounted: function () {
-                var _this = this;
-                _this.video = document.querySelector('video.fromCamera');
                 //获得用户媒体相关选项
-                _this.cameraOptions = {
+                this.videoEl = document.querySelector('video.fromCamera');
+                this.cameraOptions = {
                     video: {
                         width: window.innerWidth,
                         height: window.innerHeight,
                         facingMode: { exact: "environment" }
                     }
                 }
-                getUserMedia(_this.cameraOptions, _this.cameraHandler.bind(this), _this.cameraError.bind(this));
+                getUserMedia(this.cameraOptions, this.cameraHandler.bind(this), this.cameraError.bind(this));
 
+                //获得GPS数据
+                this.GPSOptions = {
+                    enableHighAccuracy: true,
+                    maximumAge: 30000,
+                    timeout: 60000
+                }
+
+                navigator.geolocation.getCurrentPosition(this.positionHandler, this.errorHandler, this.GPSOptions);
             },
             methods: {
+                //相机相关函数
                 cameraHandler: function (stream) {
                     var _this = this;
-                    this.video.srcObject = stream;
-                    this.video.onloadedmetadata = function (e) {
-                        _this.video.play();
+                    this.videoEl.srcObject = stream;
+                    this.videoEl.onloadedmetadata = function (e) {
+                        _this.videoEl.play();
                     }
                 },
 
@@ -77,7 +99,32 @@
                     } else {
                         return false;
                     }
+                },
+
+                //GPS
+                positionHandler: function (pos) {
+                    locationData.curPos = {
+                        // lng: pos.coords.lng,
+                        // lat: pos.coords.lat,
+                        lng: 116.313408,
+                        lat: 39.925278,
+                        errCode: -1
+                    };
+                    console.log(locationData);
+                    // aMap('美食', 2000);
+                    // bMap("中央电视塔", 2000);
+                },
+                errorHandler: function (e) {
+                    console.log(e);
+                    this.curGPSCood = {
+                        errCode: 0
+                    };
+                    console.log('没获取到位置。')
                 }
+
+                //三维场景
+
+                //陀螺仪
 
             }
         })
