@@ -21,7 +21,8 @@ PoiBoard.prototype.poiBoardGenerator = function (posName, posDistance) {
     // ctx.fillRect(50, 60, 206, 206);
     //某些poi icon没画出来
     icon.addEventListener('load', function (e) {
-        console.log(e);
+        //console.log(e);
+        console.log(new Date().getTime())
         ctx.drawImage(icon, 40, 40, 176, 176);
     });
     ctx.moveTo(256, 33);
@@ -38,7 +39,9 @@ PoiBoard.prototype.poiBoardGenerator = function (posName, posDistance) {
     ctx.fillStyle = "#ffffff";
     ctx.font = '36px sans-serif';
     ctx.fillText(posDistance, 300, 180);
-    // document.body.appendChild(canvas);
+
+    document.body.appendChild(canvas);
+
     return canvas;
 };
 PoiBoard.prototype.poiSpriteGenerator = function (canvas) {
