@@ -1,9 +1,11 @@
-function BaiduMap(devLng,devLat) {
+function BaiduMap(devLng,devLat,keyWord,radius) {
     var _this=this;
+    _this.keyWord=keyWord;
+    _this.radius=radius
     //传入当前点经度纬度坐标
     var mapContainer = document.createElement("div");
     mapContainer.style.cssText = 'height: 100%;width:100%;';
-    document.body.append(mapContainer);
+    document.querySelector(".mapContainer").append(mapContainer);
 
     _this.devPoint=new BMap.Point(devLng, devLat);
     console.log(_this.devPoint)
@@ -28,11 +30,7 @@ BaiduMap.prototype.coodConvert = function () {
         //转换完成后的回调函数
         if(data.status===0){
             _this.bPoint=data.points[0];
-            console.log(_this.devPoint);
-            console.log(_this.bPoint);
-
-            _this.search(_this.bPoint,'厕所',2000)
-
+            _this.search(_this.bPoint,_this.keyWord,_this.radius)
         }
     })
 };
@@ -50,7 +48,8 @@ BaiduMap.prototype.search = function (bPoint, placeName, rad) {
     var marker = new BMap.Marker(mPoint, { size: 90 });  // 创建标注
     marker.addEventListener('click', function (e) { console.log(e) })
     _this.map.addOverlay(marker);
-    marker.setAnimation(BMAP_ANIMATION_BOUNCE)
+    marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+
     //这里添加了将搜索结果打印到控制台的函数
     var local = new BMap.LocalSearch(_this.map, {
         renderOptions: {
@@ -64,6 +63,46 @@ BaiduMap.prototype.search = function (bPoint, placeName, rad) {
         }
     });
     local.searchNearby(placeName, mPoint, rad);//要查找的地点名称、中心点、半径
-
     // console.log(local)
 };
+
+// //百度地图搜索 //啥Promise？
+// BaiduMap.prototype.search = function (bPoint, placeName, rad) {
+//     var _this = this;
+
+//     var searchProcess=new Promise(function (resolve, reject) {
+
+//         //当前搜索中心点
+//         var mPoint = bPoint;
+//         //创建圆
+//         var circle = new BMap.Circle(mPoint, rad, { fillColor: "red", fillOpacity: 0.1, strokeColor: "red", strokeWeight: 2, strokeOpacity: 0.3 });
+//         //增加圆
+//         _this.map.addOverlay(circle);
+//         //添加标注点
+//         var marker = new BMap.Marker(mPoint, { size: 90 });  // 创建标注
+//         marker.addEventListener('click', function (e) { console.log(e) })
+//         _this.map.addOverlay(marker);
+//         marker.setAnimation(BMAP_ANIMATION_BOUNCE);
+
+//         //这里添加了将搜索结果打印到控制台的函数
+//         var local = new BMap.LocalSearch(_this.map, {
+//             renderOptions: {
+//                 map: _this.map,
+//                 autoViewport: false
+//             },
+//             pageCapacity: 100,
+//             onSearchComplete: function (e) {
+//                 _this.resultList = local.vf;
+//                 console.log(_this.resultList);
+//                 resolve('ok')
+
+//             }
+//         });
+
+//         local.searchNearby(placeName, mPoint, rad);//要查找的地点名称、中心点、半径
+//     })
+
+
+
+//     // console.log(local)
+// };

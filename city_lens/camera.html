@@ -33,11 +33,14 @@
         div.cameraContainer {
             width: 100vw;
             height: 100vh;
+            position: relative;
         }
 
         video.fromCamera {
+            position: absolute;
             width: 100%;
             height: 100%;
+            z-index: -1;
             object-fit: cover;
         }
 
@@ -54,6 +57,7 @@
             <video class="fromCamera"></video>
             <div class="canvasWrap"></div>
         </div>
+        <div class="mapContainer"></div>
     </div>
     <script>
 
@@ -80,10 +84,15 @@
                 this.GPSOptions = {
                     enableHighAccuracy: true,
                     maximumAge: 30000,
-                    timeout: 60000
+                    timeout: 5000
                 }
 
                 navigator.geolocation.getCurrentPosition(this.positionHandler, this.errorHandler, this.GPSOptions);
+
+                this.sceneInit();
+                this.panoRotationAnimate();
+
+                // this.addPoi();
 
             },
             methods: {
@@ -98,7 +107,8 @@
 
                 cameraError: function (e) {
                     console.log(e);
-                    if (e.constraint == "facingMode" && e.name == "OverconstrainedError") {
+                    //（ Chrome浏览器 || Edge浏览器）
+                    if ((e.constraint == "facingMode" && e.name == "OverconstrainedError") || e.name == "NotFoundError") {
                         this.cameraOptions.video.facingMode = "user";
                         getUserMedia(this.cameraOptions, this.cameraHandler, this.cameraError);
                     } else {
@@ -108,6 +118,7 @@
 
                 //GPS
                 positionHandler: function (pos) {
+
                     console.log(pos);
                     this.curGPSCood = {
                         lng: pos.coords.longitude,
@@ -116,8 +127,26 @@
                         // lat: 39.925278,
                         errCode: -1
                     };
-                    
-                    new BaiduMap(this.curGPSCood.lng,this.curGPSCood.lat);
+
+                    var mapData = new BaiduMap(this.curGPSCood.lng, this.curGPSCood.lat, '美食', 2000);
+                    //异步问题：下方console.log会在mapData未得到以前执行，此时mapData.resultList中没有数据
+                    // console.log(mapData);
+
+                    var _this = this;
+                    let z = 0;
+                    _this.tmpTimer = setInterval(function () {
+                        if (mapData.resultList.length == 0) {
+                            if (z > 30) {
+                                console.log('TimeOut');
+                                clearInterval(_this.tmpTimer);
+                            } else {
+                                console.log('Loading');
+                                z++;
+                            }
+                        } else {
+                            clearInterval(_this.tmpTimer);
+                        }
+                    }, 300)
 
                     // this.bMapSearch("厕所", 2000);
                 },
@@ -132,14 +161,151 @@
                     console.log('没获取到位置。')
                 },
 
-
-
-
-
-
                 //三维场景
+                //基本场景初始化
+                sceneInit: function () {
+                    var scene = new THREE.Scene();
+                    //用于将scene暴露到全局，仅在调试时使用
+                    window.scene = scene;
+                    //默认相机为位于原点的透视相机
+                    //fov,aspect,near,far
+                    var defaultCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    defaultCamera.name = "defaultCamera";
+
+                    var cameraGroup = new THREE.Group();
+                    cameraGroup.name = "cameraGroup"
+                    cameraGroup.add(defaultCamera);
+                    scene.add(cameraGroup);
+
+                    var renderer = new THREE.WebGLRenderer({
+                        "antialias": true,
+                        "alpha": true
+                    });
+                    renderer.setClearColor(0xff0000, 0.1);
+
+                    //加光
+                    var light = new THREE.AmbientLight(0xffffff, 2);
+                    scene.add(light);
+
+                    //尝试将设置设备像素比，防止手机浏览器渲染时产生锯齿。
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    renderer.setPixelRatio(window.devicePixelRatio);
+
+                    //将渲染器 - Canvas元素插入到DOM中
+                    var panoWrap = document.getElementById('app').querySelector('.canvasWrap');
+                    panoWrap.appendChild(renderer.domElement);
+
+                    //摄像机目标
+                    var cameraTarget = new THREE.Object3D();
+                    cameraTarget.name = "cameraTarget";
+                    //第一个值为半径，第二个值为上下旋转角，第三个值为平面极坐标的旋转角
+                    var panoSphereRadius = 10;
+                    var targetSphereCood = new THREE.Spherical(panoSphereRadius, util.degToRad(225), 0);
+                    cameraTarget.position.setFromSpherical(targetSphereCood);
+
+                    scene.add(cameraTarget);
+
+                    // 添加窗口缩放事件
+                    window.addEventListener('resize', this.resizeHandler.bind(this), false);
+
+                    this.scene = scene;
+                    this.camera = defaultCamera;
+                    this.defaultCamera = defaultCamera;
+                    this.cameraGroup = cameraGroup;
+                    this.renderer = renderer;
+                    this.panoWrap = panoWrap;
+                    this.light = light;
+                    this.cameraTarget = cameraTarget;
+                    this.targetSphereCood = targetSphereCood;
+                    this.panoSphereRadius = panoSphereRadius;
+
+                    console.log(this.targetSphereCood);
+                },
+
+                //处理窗口大小改变时三维场景的变化
+                resizeHandler: function (e) {
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                },
+
+                //全景球旋转动画    //setInterval(animate,100);
+                panoRotationAnimate: function () {
+                    //交互部分
+                    //判断是否存在用户交互
+                    //无交互、且无暂停
+                    if (!this.userInteract) {
+                        if (!this.pauseRotete) {
+                            this.targetSphereCood.theta += util.degToRad(0.075);
+                            this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
+                            //判断当前相机是否为相机阵列，如果是的话在请求动画时需要遍历更新子相机
+                            if (this.camera instanceof THREE.ArrayCamera === false) {
+                                this.camera.lookAt(this.cameraTarget.position);
+                                //console.log(this.cameraTarget.position);
+                            } else {
+                                for (var i = 0; i < this.camera.cameras.length; i++) {
+                                    this.camera.cameras[i].lookAt(this.cameraTarget.position);
+                                }
+                            }
+                        }
+                    }
+
+                    this.renderer.render(this.scene, this.camera);
+                    // console.log(this.renderer)
+
+                    //注意this指向，在定时器中this指向window
+                    requestAnimationFrame(this.panoRotationAnimate.bind(this));
+                },
 
                 //陀螺仪
+
+                //POI相关
+                //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
+                poiCalc: function (coodA, coodB) {
+                    var poiInfo = {
+                        distance: util.geoLength(coodA, coodB),
+                        angle: util.geoAngle(coodA, coodB)
+                    };
+                    return poiInfo;
+                },
+
+                //将poiBoard加入到场景中
+                addPoi: function (originP) {
+
+                    for (var i = 0; i < this.neighborList.length; i++) {
+                        this.neighborList[i].poiInfo = this.poiCalc(originP, this.neighborList[i].point);//算出poi与全景照片拍摄点的距离和角度
+                        console.log(this.neighborList[i].poiInfo);
+                        var distanceText;
+                        if (this.neighborList[i].poiInfo.distance > 1000) {
+                            distanceText = (this.neighborList[i].poiInfo.distance / 1000).toFixed(1) + ' km';
+                        } else {
+                            distanceText = this.neighborList[i].poiInfo.distance.toFixed(0) + ' m';
+                        }
+
+                        //生成sprite
+                        var poiObj = new PoiBoard(this.neighborList[i].title, distanceText);
+                        console.log(poiObj);
+
+                        //有了角度、有了距离，算球坐标
+                        //俯仰角根据poi距离来确定，角度值在90~180之间
+                        console.log(this.neighborList[i].poiInfo.distance / 2000 * 180);
+                        var lengthVal = util.clamp(this.neighborList[i].poiInfo.distance / 2000 * this.panoSphereRadius, 0.2 * this.panoSphereRadius, this.panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
+                        var pitchVal = util.degToRad(util.clamp(this.neighborList[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
+                        var azimuthVal = util.degToRad(this.neighborList[i].poiInfo.angle);//poi球坐标的方位角
+
+                        // console.log(lengthVal)
+                        var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
+
+                        var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
+                        // console.log(poiCood);
+                        poiObj.position.x = poiCood.x;
+                        poiObj.position.y = poiCood.y;
+                        poiObj.position.z = poiCood.z;
+
+                        this.spriteGroup.add(poiObj);
+
+                    }
+                },
 
             }
         })
