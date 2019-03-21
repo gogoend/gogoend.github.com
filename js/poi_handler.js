@@ -59,15 +59,6 @@
 //     //document.body.appendChild(canvas);
 // };
 
-var PoiBoard = function (posName, posDistance) {
-    var _this = this
-    _this.posName = posName;
-    _this.posDistance = posDistance;
-    _this.poiCanvas = null;
-
-}
-
-// 设置画板
 var space = document.createElement('canvas');
 space.height = 480;
 space.width = 480;
@@ -76,14 +67,14 @@ ctx.scale(1, 1);
 
 // 设置各个粒子
 var particles = [];
-var particle_count = 200;//共生成多少粒子（数组长度）
+var particle_count = 50;//共生成多少粒子（数组长度）
 for (var i = 0; i < particle_count; i++) {
-    particles.push(new particle());//将生成的粒子推入数组
+    particles.push(new Particle());//将生成的粒子推入数组
 }
 var time = 0;
 // 设置画布宽高
-var canvasWidth = space.width;
 var canvasHeight = space.height;
+var canvasWidth = space.width;
 
 // 请求动画函数兼容
 window.requestAnimFrame = (function () {
@@ -96,23 +87,26 @@ window.requestAnimFrame = (function () {
 })();
 
 //粒子类
-class particle {
-    constructor() {
-        this.speed = {
-            x: -1 + Math.random() * 2,
-            y: -5 + Math.random() * 5
-        };
-        this.location = {
-            x: canvasWidth / 2,
-            y: (canvasHeight / 2) + 100
-        };
-        this.radius = 5 + Math.random() * 1;
-        this.life = 20 + Math.random() * 10;
-        this.death = this.life;
-        this.r = 255;
-        this.g = Math.round(Math.random() * 155);
-        this.b = 0;
-    }
+function Particle() {
+
+    var canvasHeight = space.height;
+    var canvasWidth = space.width;
+
+    this.speed = {
+        x: -1 + Math.random() * 2,
+        y: -5 + Math.random() * 5
+    };
+    this.location = {
+        x: canvasWidth / 2,
+        y: (canvasHeight / 2) + 100
+    };
+    this.radius = 5 + Math.random() * 1;
+    this.life = 20 + Math.random() * 10;
+    this.death = this.life;
+    this.r = 255;
+    this.g = Math.round(Math.random() * 155);
+    this.b = 0;
+
 }
 
 function ParticleAnimation() {
@@ -143,10 +137,20 @@ function ParticleAnimation() {
         //regenerate particles
         if (p.death < 0 || p.radius < 0) {
             //a brand new particle replacing the dead one
-            particles[i] = new particle();
+            particles[i] = new Particle();
         }
     }
     requestAnimFrame(ParticleAnimation);
+}
+
+var PoiBoard = function (posName, posDistance) {
+    var _this = this
+    _this.posName = posName;
+    _this.posDistance = posDistance;
+    _this.poiCanvas = space;
+    ParticleAnimation();
+    //...
+    return (_this.poiSpriteGenerator(_this.poiCanvas));
 }
 
 PoiBoard.prototype.poiSpriteGenerator = function (canvas) {
