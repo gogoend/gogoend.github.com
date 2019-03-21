@@ -67,7 +67,7 @@ ctx.scale(1, 1);
 
 // 设置各个粒子
 var particles = [];
-var particle_count = 50;//共生成多少粒子（数组长度）
+var particle_count = 30;//共生成多少粒子（数组长度）
 for (var i = 0; i < particle_count; i++) {
     particles.push(new Particle());//将生成的粒子推入数组
 }
@@ -143,14 +143,18 @@ function ParticleAnimation() {
     requestAnimFrame(ParticleAnimation);
 }
 
-var PoiBoard = function (posName, posDistance) {
+var PoiBoard = function (posName, posDistance,scene) {
     var _this = this
     _this.posName = posName;
     _this.posDistance = posDistance;
     _this.poiCanvas = space;
+    _this.scene=scene;
+    _this.poiObject=null;
     ParticleAnimation();
+    console.log(scene)
     //...
-    return (_this.poiSpriteGenerator(_this.poiCanvas));
+    _this.poiSpriteGenerator(_this.poiCanvas)
+    _this.scene.poiObjArr.push(_this.poiObject)
 }
 
 PoiBoard.prototype.poiSpriteGenerator = function (canvas) {
@@ -159,16 +163,37 @@ PoiBoard.prototype.poiSpriteGenerator = function (canvas) {
     //在所点击点随便添加一个物体
     var poiMap = new THREE.CanvasTexture(canvas);
     poiMap.needsUpdate = true;
-    //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
-    var poiMaterial = new THREE.SpriteMaterial({
+    poiMap.onUpdate=function(){
+        console.log(666)
+    }
+
+/** */
+    var poiMat=new THREE.MeshStandardMaterial({
         map: poiMap,
         color: 0xffffff,
         transparent: true,
-        // depthTest: false 
     });
-    var poiObject = new THREE.Sprite(poiMaterial);
-    poiObject.center = new THREE.Vector2(0, 0)
-    var poiboardSize = [1024, 256];
-    poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
-    return poiObject;
+    poiMat.needsUpdate=true;
+    var poiOb=new THREE.BoxBufferGeometry(0.2,0.2,0.2);
+    var poiCube=new THREE.Mesh(poiOb,poiMat);
+    this.poiObject=poiCube;
+
+/**/
+
+    //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
+    // var poiMaterial = new THREE.SpriteMaterial({
+    //     map: poiMap,
+    //     color: 0xffffff,
+    //     transparent: true,
+    //     // depthTest: false 
+    // });
+    // poiMaterial.needsUpdate=true;
+    // poiMaterial.onUpdate=function(){
+    //     console.log(222)
+    // }
+    // var poiObject = new THREE.Sprite(poiMaterial);
+    // poiObject.center = new THREE.Vector2(0, 0)
+    // var poiboardSize = [1024, 256];
+    // poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
+    // this.poiObject=poiObject;
 };

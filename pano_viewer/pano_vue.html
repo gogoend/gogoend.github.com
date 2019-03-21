@@ -282,7 +282,9 @@
                     offsetY: 0,
                     originTheta: 0,
                     originPhi: 0
-                }
+                },
+                //存储Poi对象的数组
+                poiObjArr:[]
             },
 
             mounted: function () {
@@ -782,8 +784,10 @@
                         }
 
                         //生成sprite
-                        var poiObj = new PoiBoard(this.neighborList[i].title,distanceText);
-                        console.log(poiObj);
+                        var poiObj = new PoiBoard(this.neighborList[i].title,distanceText,this);
+                        this.poiObjArr[i].material.needsUpdate=true;
+                        this.poiObjArr[i].material.map.needsUpdate=true;
+                        console.log(this.poiObjArr);
 
                         //有了角度、有了距离，算球坐标
                         //俯仰角根据poi距离来确定，角度值在90~180之间
@@ -797,11 +801,11 @@
 
                         var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
                         // console.log(poiCood);
-                        poiObj.position.x = poiCood.x;
-                        poiObj.position.y = poiCood.y;
-                        poiObj.position.z = poiCood.z;
+                        this.poiObjArr[i].position.x = poiCood.x;
+                        this.poiObjArr[i].position.y = poiCood.y;
+                        this.poiObjArr[i].position.z = poiCood.z;
 
-                        this.spriteGroup.add(poiObj);
+                        this.spriteGroup.add(this.poiObjArr[i]);
 
                     }
                 },
