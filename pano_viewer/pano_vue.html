@@ -284,7 +284,7 @@
                     originPhi: 0
                 },
                 //存储Poi对象的数组
-                poiObjArr:[]
+                poiObjArr: []
             },
 
             mounted: function () {
@@ -528,6 +528,10 @@
                         }
                     }
 
+                    for (var i = 0; i < this.poiObjArr.length; i++) {
+                        this.poiObjArr[i].material.needsUpdate = true;
+                        this.poiObjArr[i].material.map.needsUpdate = true;
+                    }
                     this.renderer.render(this.scene, this.camera);
                     // console.log(this.renderer)
 
@@ -784,9 +788,9 @@
                         }
 
                         //生成sprite
-                        var poiObj = new PoiBoard(this.neighborList[i].title,distanceText,this);
-                        this.poiObjArr[i].material.needsUpdate=true;
-                        this.poiObjArr[i].material.map.needsUpdate=true;
+                        var poiObj = new PoiBoard(this.neighborList[i].title, distanceText, this);
+                        this.poiObjArr[i].material.needsUpdate = true;
+                        this.poiObjArr[i].material.map.needsUpdate = true;
                         console.log(this.poiObjArr);
 
                         //有了角度、有了距离，算球坐标

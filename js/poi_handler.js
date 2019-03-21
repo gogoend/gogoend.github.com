@@ -67,7 +67,7 @@ ctx.scale(1, 1);
 
 // 设置各个粒子
 var particles = [];
-var particle_count = 30;//共生成多少粒子（数组长度）
+var particle_count = 1;//共生成多少粒子（数组长度）
 for (var i = 0; i < particle_count; i++) {
     particles.push(new Particle());//将生成的粒子推入数组
 }
@@ -162,38 +162,20 @@ PoiBoard.prototype.poiSpriteGenerator = function (canvas) {
 
     //在所点击点随便添加一个物体
     var poiMap = new THREE.CanvasTexture(canvas);
-    poiMap.needsUpdate = true;
-    poiMap.onUpdate=function(){
-        console.log(666)
-    }
 
-/** */
-    var poiMat=new THREE.MeshStandardMaterial({
+    //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
+    var poiMaterial = new THREE.SpriteMaterial({
         map: poiMap,
         color: 0xffffff,
         transparent: true,
+        // depthTest: false 
     });
-    poiMat.needsUpdate=true;
-    var poiOb=new THREE.BoxBufferGeometry(0.2,0.2,0.2);
-    var poiCube=new THREE.Mesh(poiOb,poiMat);
-    this.poiObject=poiCube;
-
-/**/
-
-    //要使得poi板朝向摄像机，必须使用SpriteMaterial材质
-    // var poiMaterial = new THREE.SpriteMaterial({
-    //     map: poiMap,
-    //     color: 0xffffff,
-    //     transparent: true,
-    //     // depthTest: false 
-    // });
-    // poiMaterial.needsUpdate=true;
-    // poiMaterial.onUpdate=function(){
-    //     console.log(222)
-    // }
-    // var poiObject = new THREE.Sprite(poiMaterial);
-    // poiObject.center = new THREE.Vector2(0, 0)
-    // var poiboardSize = [1024, 256];
-    // poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
-    // this.poiObject=poiObject;
+    poiMaterial.onUpdate=function(){
+        console.log(222)
+    }
+    var poiObject = new THREE.Sprite(poiMaterial);
+    poiObject.center = new THREE.Vector2(0, 0)
+    var poiboardSize = [1024, 256];
+    poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
+    this.poiObject=poiObject;
 };
