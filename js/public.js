@@ -35,3 +35,13 @@ function getUserMedia(constraints, success, error) {
         return;
     }
 }
+
+// 请求动画函数兼容 //参考自http://www.wjceo.com/blog/threejs/2018-05-10/162.html
+window.requestAnimFrame = (function () {
+    return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        function (callback) {
+            window.setTimeout(callback, 6000 / 60);
+        };
+})();

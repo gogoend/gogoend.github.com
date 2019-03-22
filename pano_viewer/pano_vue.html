@@ -393,7 +393,7 @@
 
                     this.renderer.render(this.scene, this.camera);
 
-                    this.panoRotationAnimate();
+                    this.animateHandler();
 
                     //阻止默认的鼠标右键菜单弹出
                     this.panoWrap.addEventListener('contextmenu', function (e) {
@@ -507,6 +507,7 @@
                     });
                 },
 
+                //动画处理
                 //全景球旋转动画    //setInterval(animate,100);
                 panoRotationAnimate: function () {
                     //交互部分
@@ -527,16 +528,24 @@
                             }
                         }
                     }
+                },
 
+                //sprite渲染动画
+                spriteInitRender: function () {
                     for (var i = 0; i < this.poiObjArr.length; i++) {
-                        this.poiObjArr[i].material.needsUpdate = true;
-                        this.poiObjArr[i].material.map.needsUpdate = true;
+                        // this.poiObjArr[i].poiObject.material.needsUpdate = true;
+                        this.poiObjArr[i].poiObject.material.map.needsUpdate = true;
                     }
+                },
+
+                //动画总控
+                animateHandler: function () {
+                    this.panoRotationAnimate();
+                    this.spriteInitRender();
                     this.renderer.render(this.scene, this.camera);
                     // console.log(this.renderer)
-
                     //注意this指向，在定时器中this指向window
-                    requestAnimationFrame(this.panoRotationAnimate.bind(this));
+                    requestAnimationFrame(this.animateHandler.bind(this));
                 },
                 /*
                 交互方式：
@@ -789,9 +798,10 @@
 
                         //生成sprite
                         var poiObj = new PoiBoard(this.neighborList[i].title, distanceText, this);
-                        this.poiObjArr[i].material.needsUpdate = true;
-                        this.poiObjArr[i].material.map.needsUpdate = true;
-                        console.log(this.poiObjArr);
+                        console.log(poiObj);
+                        poiObj.poiObject.material.needsUpdate = true;
+                        poiObj.poiObject.material.map.needsUpdate = true;
+                        this.poiObjArr.push(poiObj);
 
                         //有了角度、有了距离，算球坐标
                         //俯仰角根据poi距离来确定，角度值在90~180之间
@@ -805,11 +815,11 @@
 
                         var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
                         // console.log(poiCood);
-                        this.poiObjArr[i].position.x = poiCood.x;
-                        this.poiObjArr[i].position.y = poiCood.y;
-                        this.poiObjArr[i].position.z = poiCood.z;
+                        poiObj.poiObject.position.x = poiCood.x;
+                        poiObj.poiObject.position.y = poiCood.y;
+                        poiObj.poiObject.position.z = poiCood.z;
 
-                        this.spriteGroup.add(this.poiObjArr[i]);
+                        this.spriteGroup.add(poiObj.poiObject);
 
                     }
                 },
