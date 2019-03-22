@@ -66,7 +66,7 @@ PoiBoard.prototype.poiSpriteGenerator = function (canvas) {
     var poiObject = new THREE.Sprite(poiMaterial);
     poiObject.center = new THREE.Vector2(0, 0)
     var poiboardSize = [1024, 256];
-    poiObject.scale.set(poiboardSize[0] * 0.001, poiboardSize[1] * 0.001, 1);
+    poiObject.scale.set(poiboardSize[0] * 0.0007, poiboardSize[1] * 0.0007, 1);
     this.poiObject = poiObject;
 };
 
