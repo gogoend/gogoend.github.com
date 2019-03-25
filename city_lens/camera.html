@@ -132,22 +132,6 @@
                     //异步问题：下方console.log会在mapData未得到以前执行，此时mapData.resultList中没有数据
                     // console.log(mapData);
 
-                    var _this = this;
-                    let z = 0;
-                    _this.tmpTimer = setInterval(function () {
-                        if (mapData.resultList.length == 0) {
-                            if (z > 30) {
-                                console.log('TimeOut');
-                                clearInterval(_this.tmpTimer);
-                            } else {
-                                console.log('Loading');
-                                z++;
-                            }
-                        } else {
-                            clearInterval(_this.tmpTimer);
-                        }
-                    }, 300)
-
                     // this.bMapSearch("厕所", 2000);
                 },
                 errorHandler: function (e) {
