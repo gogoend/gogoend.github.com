@@ -8,7 +8,7 @@ function BaiduMap(devLng, devLat, keyWord, radius) {
 
     var mapContainer = document.createElement("div");
     mapContainer.style.cssText = 'height: 100%;width:100%;';
-    document.querySelector(".mapContainer").append(mapContainer);
+    // document.querySelector(".mapContainer").append(mapContainer);
 
     //传入当前点经度纬度坐标
     _this.devPoint = new BMap.Point(devLng, devLat);
@@ -53,7 +53,7 @@ function BaiduMap(devLng, devLat, keyWord, radius) {
             var times = 0;
             var a = setInterval(function () {
                 if (_this.resultList == null) {
-                    console.log(times++);
+                    // console.log(times++);
                     if (times > 50) {
                         clearInterval(a);
                         reject('没有数据');
