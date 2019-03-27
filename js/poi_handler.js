@@ -26,7 +26,6 @@ PoiBoard.prototype.poiBoardGenerator = function (posName, posDistance) {
     //某些poi icon没画出来
 
     icon.addEventListener('load', function (e) {
-        console.log(e);
         ctx.drawImage(icon, 40, 40, 176, 176);
     });
     ctx.moveTo(256, 33);

@@ -1,8 +1,12 @@
 //使用百度地图获得设备所在坐标范围内的地标
 //首先接入百度地图对设备坐标进行转换
 //之后使用转换后的坐标进行查询。
-function BaiduMap(devLng, devLat, keyWord, radius) {
+function BaiduMap(devLng, devLat, keyWord, radius, app) {
     var _this = this;
+
+    console.log(app)
+    _this.app=app;//用于接收值的app
+
     _this.keyWord = keyWord;
     _this.radius = radius;
 
@@ -18,7 +22,7 @@ function BaiduMap(devLng, devLat, keyWord, radius) {
     _this.map = new BMap.Map(mapContainer); // 创建Map实例
     _this.map.centerAndZoom(_this.devPoint, 15);// 初始化地图,设置中心点坐标和地图级别
     _this.map.enableScrollWheelZoom(true);//开启鼠标滚轮缩放
-    _this.resultList = null;;
+    _this.resultList = null;
     // map.setCurrentCity("哈尔滨");// 设置地图显示的城市 此项是必须设置的//貌似也可以不设置？
 
     //根据设备坐标找地点
@@ -112,7 +116,8 @@ BaiduMap.prototype.search = function (bPoint, placeName, rad) {
         pageCapacity: 100,
         onSearchComplete: function (e) {
             _this.resultList = e.Ar;
-            console.log(_this.resultList);
+            _this.app.neighborList=_this.resultList;
+            console.log(_this.app);
         }
     });
     local.searchNearby(placeName, mPoint, rad);//要查找的地点名称、中心点、半径

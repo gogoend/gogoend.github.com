@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <script src="../lib/three.js"></script>
     <script src="../lib/vue.js"></script>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa&s=1"></script>
+    <script type="text/javascript"
+        src="https://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa&s=1"></script>
 
     <script src="../control_stick/util.js"></script>
     <script src="../control_stick/stick.js"></script>
@@ -270,10 +271,10 @@
                 panoThumbPath: "./pano_thumb/",
                 //存储全景图列表，未来通过Ajax来获得。
                 //全景图列表中保存的经纬度：若来自用户的相机，在使用时应当首先接入百度地图来进行位置修正，返回百度地图中的坐标
-                panosList: [],
+                panosList: null,
                 // panosList: panos,
                 //存储百度地图地点列表，未来通过访问百度地图API来获得
-                neighborList: [],
+                neighborList: null,
                 // neighborList: positions,
                 //当前全景图索引，未来试图通过Ajax来获得首次载入时的索引
                 currentIndex: 0,
@@ -316,9 +317,9 @@
 
                 var times = 0;
                 var a = setInterval(function () {
-                    if (_this.panosList.length==0) {
+                    if (_this.panosList.length == 0) {
                         if (times < 30) {
-                            console.log('没数据');
+                            console.log('全景列表加载失败');
                             times++;
                             return;
                         }
@@ -328,13 +329,25 @@
                         //传入全景图索引值，来确定应当以哪一张全景图来开场
                         _this.panoInit(_this.currentIndex);
                         //搜索poi
-                        var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '美食', 2000);
+                        var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '美食', 2000, _this);
 
                         //初始化sprite
                         _this.spriteGroupInit();
                         //将Poi板添加到三维场景中
                         //异步问题：poi板上会在其中的icon（img）被加载前就被添加到三维场景，此时添加到三维场景中的poi板上不会显示icon；//解决方式：将poiboard材质下map的needsUpdate设为true
-                        _this.addPoi();
+                        var times = 0;
+                        a = setInterval(function () {
+                            if (this.neighborList == null) {
+                                if (times < 30) {
+                                    console.log('没有从百度地图查到数据');
+                                    times++;
+                                    return;
+                                } else {
+                                    clearInterval(a);
+                                    _this.addPoi();
+                                }
+                            }
+                        }, 20)
                     }
                 }, 100)
             },
@@ -812,8 +825,9 @@
 
                 //将poiBoard加入到场景中
                 addPoi: function () {
-                    var originP = this.panosList[this.currentIndex].geoCood;
+                    console.log(this.neighborList);
 
+                    var originP = this.panosList[this.currentIndex].geoCood;
                     for (var i = 0; i < this.neighborList.length; i++) {
                         this.neighborList[i].poiInfo = this.poiCalc(originP, this.neighborList[i].point);//算出poi与全景照片拍摄点的距离和角度
                         console.log(this.neighborList[i].poiInfo);
@@ -825,7 +839,7 @@
                         }
 
                         //生成sprite
-                        var poiObj = new PoiBoard(this.neighborList[i].title, distanceText, this);
+                        var poiObj = new PoiBoard(this.neighborList[i].title, distanceText);
                         console.log(poiObj);
                         poiObj.poiObject.material.needsUpdate = true;
                         poiObj.poiObject.material.map.needsUpdate = true;
