@@ -22,7 +22,7 @@
         #app {
             padding: 0;
             margin: 0;
-            /* overflow: hidden; */
+            overflow: hidden;
             width: 100vw;
             height: 100vh;
             min-height: 100vh;
@@ -291,6 +291,7 @@
                 poiObjArr: []
             },
             beforeCreate: function () {
+                //在vue实例创建之前，获得全景列表
                 var _this = this;
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', './pano_array.json');
@@ -298,9 +299,9 @@
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         _this.panosList = JSON.parse(xhr.responseText);
-                        console.log(_this.panosList)
+                        console.log(_this.panosList);
                     }
-                }
+                };
             },
             mounted: function () {
                 var _this = this;
@@ -315,41 +316,29 @@
                 //为页面中各个按钮增加事件
                 _this.btnTodoHandler();
 
+                //初始化sprite
+                _this.spriteGroupInit();
+
+
                 var times = 0;
                 var a = setInterval(function () {
-                    if (_this.panosList.length == 0) {
-                        if (times < 30) {
-                            console.log('全景列表加载失败');
-                            times++;
-                            return;
+                    if (_this.panosList === null) {
+                        times++;
+                        if (times >= 200) {
+                            clearInterval(a)
+                            console.log('未获得全景列表');
                         }
+                        return;
                     } else {
-                        console.log(_this.panosList)
-                        clearInterval(a);
                         //传入全景图索引值，来确定应当以哪一张全景图来开场
                         _this.panoInit(_this.currentIndex);
-                        //搜索poi
-                        var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '美食', 2000, _this);
+                        _this.loadMap();
 
-                        //初始化sprite
-                        _this.spriteGroupInit();
-                        //将Poi板添加到三维场景中
-                        //异步问题：poi板上会在其中的icon（img）被加载前就被添加到三维场景，此时添加到三维场景中的poi板上不会显示icon；//解决方式：将poiboard材质下map的needsUpdate设为true
-                        var times = 0;
-                        a = setInterval(function () {
-                            if (this.neighborList == null) {
-                                if (times < 30) {
-                                    console.log('没有从百度地图查到数据');
-                                    times++;
-                                    return;
-                                } else {
-                                    clearInterval(a);
-                                    _this.addPoi();
-                                }
-                            }
-                        }, 20)
+                        clearInterval(a);
                     }
-                }, 100)
+
+                }, 20)
+
             },
 
             methods: {
@@ -418,6 +407,7 @@
                     //直接将x设为-1，使得所有面朝向内测
                     panoGeometry.scale(-1, 1, 1);
 
+
                     //载入贴图
                     this.panoLoad(panoIndex);
 
@@ -433,11 +423,14 @@
                     this.panoPhotoMaterial = panoPhotoMaterial;
                     this.panoSphere = panoSphere;
 
-                    console.log(this.camera)
+                    console.log(this.camera);
+
 
                     this.renderer.render(this.scene, this.camera);
 
                     this.animateHandler();
+
+
 
                     //阻止默认的鼠标右键菜单弹出
                     this.panoWrap.addEventListener('contextmenu', function (e) {
@@ -447,14 +440,17 @@
 
                 //根据对应的panosList索引来载入对应全景照片。
                 panoLoad: function (index) {
+
                     var _this = this;
+
+
                     this.panoImgTex = new THREE.TextureLoader().load(this.panoBasePath + this.panosList[index].imgName,
                         function (e) {
                             _this.panoImgTex.anisotropy = 8;
 
                             e.image.src = _this.panoBasePath + _this.panosList[index].imgName;
                             if (index == _this.currentIndex) {
-                                return
+                                return;
                             } else {
                                 _this.currentIndex = index;
                                 _this.panoImgTex.dispose();
@@ -462,14 +458,27 @@
                                 _this.panoPhotoMaterial.map = e;
 
                                 _this.panoImgTex.needsUpdate = true;
+
+                                for (let i = 0; i < _this.spriteGroup.lenght; i++) {
+                                    _this.spriteGroup[i].dispose();//在切换之前把当前全景上所有的sprite poi清空
+                                }
                                 _this.spriteGroup.children = [];//在切换之前把当前全景上所有的sprite poi清空
 
+                                for (let i = 0; i < _this.poiObjArr.lenght; i++) {
+                                    _this.poiObjArr[i].dispose();
+                                    _this.poiObjArr[i].material.dispose();
+                                    _this.poiObjArr[i].material.map.needsUpdate=false;
+                                    _this.poiObjArr[i].material.map.dispose();
+                                }
+
                                 //切换之后，读取相关数据，重新将sprite加入场景
+                                // _this.panoImgTex.needsUpdate = false;
 
+                                _this.loadMap();
 
-                                _this.panoImgTex.needsUpdate = false;
                             }
-                        })
+                        });
+
                 },
 
                 //与事件相关的各种UI逻辑
@@ -823,9 +832,55 @@
                     return poiInfo;
                 },
 
+                //加载地图函数
+                loadMap: function () {
+                    var times = 0, _this = this;
+                    var a = setInterval(function () {
+                        if (_this.panosList.length == 0) {
+                            if (times < 30) {
+                                console.log('全景列表加载失败');
+                                times++;
+                                return;
+                            }
+                        } else {
+                            console.log(_this.panosList)
+                            clearInterval(a);
+
+                            //搜索poi
+                            var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '美食', 2000, _this);
+
+
+                            //将Poi板添加到三维场景中
+                            //异步问题：poi板上会在其中的icon（img）被加载前就被添加到三维场景，此时添加到三维场景中的poi板上不会显示icon；//解决方式：将poiboard材质下map的needsUpdate设为true
+                            var times = 0;
+                            a = setInterval(function () {
+                                if (this.neighborList == null) {
+                                    if (times < 30) {
+                                        console.log('没有从百度地图查到数据');
+                                        times++;
+                                        return;
+                                    } else {
+                                        clearInterval(a);
+                                        _this.addPoi();
+                                    }
+                                }
+                            }, 200)
+                        }
+                    }, 100)
+                },
+
+
+
                 //将poiBoard加入到场景中
                 addPoi: function () {
                     console.log(this.neighborList);
+
+                    if ((this.neighborList instanceof Array)) {
+                        for (let i = 0; i < this.neighborList.lenght; i++) {
+                            this.neighborList[i].dispose();
+                            this.neighborList.remove(this.neighborList[i]);
+                        }
+                    }
 
                     var originP = this.panosList[this.currentIndex].geoCood;
                     for (var i = 0; i < this.neighborList.length; i++) {
