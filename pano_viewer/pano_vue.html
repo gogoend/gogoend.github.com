@@ -467,7 +467,7 @@
                                 for (let i = 0; i < _this.poiObjArr.lenght; i++) {
                                     _this.poiObjArr[i].dispose();
                                     _this.poiObjArr[i].material.dispose();
-                                    _this.poiObjArr[i].material.map.needsUpdate=false;
+                                    _this.poiObjArr[i].material.map.needsUpdate = false;
                                     _this.poiObjArr[i].material.map.dispose();
                                 }
 
@@ -587,7 +587,9 @@
                 spriteInitRender: function () {
                     for (var i = 0; i < this.poiObjArr.length; i++) {
                         // this.poiObjArr[i].poiObject.material.needsUpdate = true;
-                        this.poiObjArr[i].poiObject.material.map.needsUpdate = true;
+                        if (this.poiObjArr[i].poiObject.material.map.version < 5) {
+                            this.poiObjArr[i].poiObject.material.map.needsUpdate = true
+                        };
                     }
                 },
 
@@ -847,7 +849,7 @@
                             clearInterval(a);
 
                             //搜索poi
-                            var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '美食', 2000, _this);
+                            var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '哈师大', 2000, _this);
 
 
                             //将Poi板添加到三维场景中
