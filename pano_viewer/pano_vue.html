@@ -737,16 +737,16 @@
                     //主要是更改场景中相机的fov以及相机y坐标
                     console.log(e);
                     console.log(this.camera.fov);
-                    console.log(this.camera.position.y);
+                    console.log(this.cameraGroup.position.y);
 
-                    //相机在y轴上位置范围：0~4，fov范围：80~160
+                    //相机在y轴上位置范围：0~8，fov范围：75~135
 
-                    // if (this.camera.fov <= 160 && this.camera.position.y<=4) {
-                        this.camera.fov += 0.008*e.deltaY;
-                        this.cameraGroup.position.y+=0.0004*e.deltaY;
+                    // if (this.camera.fov <= 160 && this.camera.position.y<=8) {
+                        this.camera.fov += 0.006*e.deltaY;
+                        this.cameraGroup.position.y+=0.0008*e.deltaY;
 
-                        this.camera.fov=util.clamp(this.camera.fov,80,160);
-                        this.cameraGroup.position.y=util.clamp(this.cameraGroup.position.y,0,4);
+                        this.camera.fov=util.clamp(this.camera.fov,75,135);
+                        this.cameraGroup.position.y=util.clamp(this.cameraGroup.position.y,0,8);
 
                         this.camera.updateProjectionMatrix();
                     // }
