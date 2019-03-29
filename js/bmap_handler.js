@@ -1,11 +1,11 @@
 //使用百度地图获得设备所在坐标范围内的地标
 //首先接入百度地图对设备坐标进行转换
 //之后使用转换后的坐标进行查询。
-function BaiduMap(devLng, devLat, keyWord, radius, app) {
+function BaiduMap(devLng, devLat, keyWord, radius, obj) {
     var _this = this;
 
-    console.log(app)
-    _this.app=app;//用于接收值的app
+    console.log(obj)
+    _this.obj=obj;//用于接收值的对象
 
     _this.keyWord = keyWord;
     _this.radius = radius;
@@ -27,7 +27,6 @@ function BaiduMap(devLng, devLat, keyWord, radius, app) {
 
     //根据设备坐标找地点
     // _this.search(_this.devPoint,_this.keyWord,_this.radius);
-
 
     var coodConvert = function () {
         return new Promise(function (resolve, reject) {
@@ -72,7 +71,12 @@ function BaiduMap(devLng, devLat, keyWord, radius, app) {
     };
 
     coodConvert()
-        .then(poiSearch);
+        .then(poiSearch)
+        .then(function(){
+            if(obj.length==0);
+            obj.push(..._this.resultList);
+            console.log(obj);
+        })
 };
 
 
@@ -116,8 +120,7 @@ BaiduMap.prototype.search = function (bPoint, placeName, rad) {
         pageCapacity: 100,
         onSearchComplete: function (e) {
             _this.resultList = e.Ar;
-            _this.app.neighborList=_this.resultList;
-            console.log(_this.app);
+
         }
     });
     local.searchNearby(placeName, mPoint, rad);//要查找的地点名称、中心点、半径

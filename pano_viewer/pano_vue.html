@@ -274,7 +274,8 @@
                 panosList: null,
                 // panosList: panos,
                 //存储百度地图地点列表，未来通过访问百度地图API来获得
-                neighborList: null,
+                neighborList: [],//尝试把neighborList加到panosList的作为子对象
+
                 // neighborList: positions,
                 //当前全景图索引，未来试图通过Ajax来获得首次载入时的索引
                 currentIndex: 0,
@@ -349,7 +350,7 @@
                     window.scene = scene;
                     //默认相机为位于原点的透视相机
                     //fov,aspect,near,far
-                    var defaultCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                    var defaultCamera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 1000);
                     defaultCamera.name = "defaultCamera";
 
                     var cameraGroup = new THREE.Group();
@@ -733,7 +734,23 @@
                 },
                 //处理鼠标滚轮
                 mouseScrollHandler: function (e) {
-                    //主要是更改场景中相机的fov
+                    //主要是更改场景中相机的fov以及相机y坐标
+                    console.log(e);
+                    console.log(this.camera.fov);
+                    console.log(this.camera.position.y);
+
+                    //相机在y轴上位置范围：0~4，fov范围：80~160
+
+                    // if (this.camera.fov <= 160 && this.camera.position.y<=4) {
+                        this.camera.fov += 0.008*e.deltaY;
+                        this.cameraGroup.position.y+=0.0004*e.deltaY;
+
+                        this.camera.fov=util.clamp(this.camera.fov,80,160);
+                        this.cameraGroup.position.y=util.clamp(this.cameraGroup.position.y,0,4);
+
+                        this.camera.updateProjectionMatrix();
+                    // }
+
                 },
                 //处理设备方向
                 orientationChangeHandler: function (e) {
@@ -849,14 +866,14 @@
                             clearInterval(a);
 
                             //搜索poi
-                            var mapData = new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '哈师大', 2000, _this);
-
+                            _this.neighborList[_this.currentIndex] = [];
+                            new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '哈师大', 2000, _this.neighborList[_this.currentIndex]);
 
                             //将Poi板添加到三维场景中
                             //异步问题：poi板上会在其中的icon（img）被加载前就被添加到三维场景，此时添加到三维场景中的poi板上不会显示icon；//解决方式：将poiboard材质下map的needsUpdate设为true
                             var times = 0;
                             a = setInterval(function () {
-                                if (this.neighborList == null) {
+                                if (!_this.neighborList[_this.currentIndex]) {
                                     if (times < 30) {
                                         console.log('没有从百度地图查到数据');
                                         times++;
@@ -871,32 +888,32 @@
                     }, 100)
                 },
 
-
-
                 //将poiBoard加入到场景中
                 addPoi: function () {
                     console.log(this.neighborList);
 
-                    if ((this.neighborList instanceof Array)) {
-                        for (let i = 0; i < this.neighborList.lenght; i++) {
-                            this.neighborList[i].dispose();
-                            this.neighborList.remove(this.neighborList[i]);
+                    console.log(this.neighborList[this.currentIndex]);
+
+                    if ((this.neighborList[this.currentIndex] instanceof Array)) {
+                        for (let i = 0; i < this.neighborList[this.currentIndex].lenght; i++) {
+                            this.neighborList[this.currentIndex][i].dispose();
+                            this.neighborList[this.currentIndex].remove(this.neighborList[this.currentIndex][i]);
                         }
                     }
 
                     var originP = this.panosList[this.currentIndex].geoCood;
-                    for (var i = 0; i < this.neighborList.length; i++) {
-                        this.neighborList[i].poiInfo = this.poiCalc(originP, this.neighborList[i].point);//算出poi与全景照片拍摄点的距离和角度
-                        console.log(this.neighborList[i].poiInfo);
+                    for (var i = 0; i < this.neighborList[this.currentIndex].length; i++) {
+                        this.neighborList[this.currentIndex][i].poiInfo = this.poiCalc(originP, this.neighborList[this.currentIndex][i].point);//算出poi与全景照片拍摄点的距离和角度
+                        console.log(this.neighborList[this.currentIndex][i].poiInfo);
                         var distanceText;
-                        if (this.neighborList[i].poiInfo.distance > 1000) {
-                            distanceText = (this.neighborList[i].poiInfo.distance / 1000).toFixed(1) + ' km';
+                        if (this.neighborList[this.currentIndex][i].poiInfo.distance > 1000) {
+                            distanceText = (this.neighborList[this.currentIndex][i].poiInfo.distance / 1000).toFixed(1) + ' km';
                         } else {
-                            distanceText = this.neighborList[i].poiInfo.distance.toFixed(0) + ' m';
+                            distanceText = this.neighborList[this.currentIndex][i].poiInfo.distance.toFixed(0) + ' m';
                         }
 
                         //生成sprite
-                        var poiObj = new PoiBoard(this.neighborList[i].title, distanceText);
+                        var poiObj = new PoiBoard(this.neighborList[this.currentIndex][i].title, distanceText);
                         console.log(poiObj);
                         poiObj.poiObject.material.needsUpdate = true;
                         poiObj.poiObject.material.map.needsUpdate = true;
@@ -904,10 +921,10 @@
 
                         //有了角度、有了距离，算球坐标
                         //俯仰角根据poi距离来确定，角度值在90~180之间
-                        console.log(this.neighborList[i].poiInfo.distance / 2000 * 180);
-                        var lengthVal = util.clamp(this.neighborList[i].poiInfo.distance / 2000 * this.panoSphereRadius, 0.2 * this.panoSphereRadius, this.panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
-                        var pitchVal = util.degToRad(util.clamp(this.neighborList[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
-                        var azimuthVal = util.degToRad(this.neighborList[i].poiInfo.angle);//poi球坐标的方位角
+                        console.log(this.neighborList[this.currentIndex][i].poiInfo.distance / 2000 * 180);
+                        var lengthVal = util.clamp(this.neighborList[this.currentIndex][i].poiInfo.distance / 2000 * this.panoSphereRadius, 0.2 * this.panoSphereRadius, this.panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
+                        var pitchVal = util.degToRad(util.clamp(this.neighborList[this.currentIndex][i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
+                        var azimuthVal = util.degToRad(this.neighborList[this.currentIndex][i].poiInfo.angle);//poi球坐标的方位角
 
                         // console.log(lengthVal)
                         var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
