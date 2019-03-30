@@ -444,7 +444,6 @@
 
                     var _this = this;
 
-
                     this.panoImgTex = new THREE.TextureLoader().load(this.panoBasePath + this.panosList[index].imgName,
                         function (e) {
                             _this.panoImgTex.anisotropy = 8;
@@ -735,20 +734,20 @@
                 //处理鼠标滚轮
                 mouseScrollHandler: function (e) {
                     //主要是更改场景中相机的fov以及相机y坐标
-                    console.log(e);
-                    console.log(this.camera.fov);
-                    console.log(this.cameraGroup.position.y);
+                    // console.log(e);
+                    // console.log(this.camera.fov);
+                    // console.log(this.cameraGroup.position.y);
 
                     //相机在y轴上位置范围：0~8，fov范围：75~135
 
                     // if (this.camera.fov <= 160 && this.camera.position.y<=8) {
-                        this.camera.fov += 0.006*e.deltaY;
-                        this.cameraGroup.position.y+=0.0008*e.deltaY;
+                    this.camera.fov += 0.006 * e.deltaY;
+                    this.cameraGroup.position.y += 0.0008 * e.deltaY;
 
-                        this.camera.fov=util.clamp(this.camera.fov,75,135);
-                        this.cameraGroup.position.y=util.clamp(this.cameraGroup.position.y,0,8);
+                    this.camera.fov = util.clamp(this.camera.fov, 75, 135);
+                    this.cameraGroup.position.y = util.clamp(this.cameraGroup.position.y, 0, 8);
 
-                        this.camera.updateProjectionMatrix();
+                    this.camera.updateProjectionMatrix();
                     // }
 
                 },
@@ -853,6 +852,7 @@
 
                 //加载地图函数
                 loadMap: function () {
+
                     var times = 0, _this = this;
                     var a = setInterval(function () {
                         if (_this.panosList.length == 0) {
@@ -866,22 +866,38 @@
                             clearInterval(a);
 
                             //搜索poi
-                            _this.neighborList[_this.currentIndex] = [];
-                            new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '哈师大', 2000, _this.neighborList[_this.currentIndex]);
+                            if (_this.neighborList[_this.currentIndex] === undefined) {
+                                _this.neighborList[_this.currentIndex] = [];
+                            }
+
+                            //防止重复加载 //若当前neighborList对应的当前数组中已经有了元素，就直接加入到场景中，不必再去请求
+                            if ((_this.neighborList[_this.currentIndex] instanceof Array) && (_this.neighborList[_this.currentIndex].length > 0)) {
+                                _this.addPoi();
+                                return;
+                            } else {
+                                new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '哈师大', 2000, _this.neighborList[_this.currentIndex]);
+                            }
+
 
                             //将Poi板添加到三维场景中
                             //异步问题：poi板上会在其中的icon（img）被加载前就被添加到三维场景，此时添加到三维场景中的poi板上不会显示icon；//解决方式：将poiboard材质下map的needsUpdate设为true
                             var times = 0;
                             a = setInterval(function () {
-                                if (!_this.neighborList[_this.currentIndex]) {
+                                console.log(_this.neighborList[_this.currentIndex]);
+
+                                if (_this.neighborList[_this.currentIndex].length === 0) {
                                     if (times < 30) {
-                                        console.log('没有从百度地图查到数据');
+                                        console.log('正在加载附近数据');
                                         times++;
                                         return;
                                     } else {
+                                        console.log('加载超时');
                                         clearInterval(a);
-                                        _this.addPoi();
                                     }
+                                } else {
+                                    console.log('加载成功');
+                                    clearInterval(a);
+                                    _this.addPoi();
                                 }
                             }, 200)
                         }
@@ -891,7 +907,6 @@
                 //将poiBoard加入到场景中
                 addPoi: function () {
                     console.log(this.neighborList);
-
                     console.log(this.neighborList[this.currentIndex]);
 
                     if ((this.neighborList[this.currentIndex] instanceof Array)) {
