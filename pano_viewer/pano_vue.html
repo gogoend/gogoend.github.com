@@ -13,7 +13,7 @@
     <script src="../control_stick/util.js"></script>
     <script src="../control_stick/stick.js"></script>
     <script src="../js/bmap_handler.js"></script>
-    <script src="../js/poi_handler.js"></script>
+    <!-- <script src="../js/poi_handler.js"></script> -->
     <script src="../js/public.js"></script>
 
     <style>
@@ -207,6 +207,14 @@
             height: 2px;
             background: #62d128;
         }
+
+        .panoNearbyWrap{
+            width:300px;
+            height:100%;
+            background-color: #62d128;
+            position:absolute;
+            right:0;
+        }
     </style>
 </head>
 
@@ -244,6 +252,7 @@
                 <button data-role="btn" data-todo="togglePointer" class="holaGreen">鼠标</button>
             </div>
         </div>
+        <!-- <div class="panoNearbyWrap"></div> -->
     </div>
 
     <!-- <script src="./pano_array.js"></script> -->
@@ -251,9 +260,6 @@
 
     <script>
         'use strict';
-
-
-
         var panoApp = new Vue({
             el: '#app',
             data: {
@@ -333,11 +339,9 @@
                     } else {
                         //传入全景图索引值，来确定应当以哪一张全景图来开场
                         _this.panoInit(_this.currentIndex);
-                        _this.loadMap();
-
+                        // _this.loadMap();
                         clearInterval(a);
                     }
-
                 }, 20)
 
             },
@@ -474,7 +478,7 @@
                                 //切换之后，读取相关数据，重新将sprite加入场景
                                 // _this.panoImgTex.needsUpdate = false;
 
-                                _this.loadMap();
+                                // _this.loadMap();
 
                             }
                         });
@@ -738,14 +742,14 @@
                     // console.log(this.camera.fov);
                     // console.log(this.cameraGroup.position.y);
 
-                    //相机在y轴上位置范围：0~8，fov范围：75~135
+                    //相机在y轴上位置范围：0~10，fov范围：75~135
 
-                    // if (this.camera.fov <= 160 && this.camera.position.y<=8) {
+                    // if (this.camera.fov <= 160 && this.camera.position.y<=10) {
                     this.camera.fov += 0.006 * e.deltaY;
-                    this.cameraGroup.position.y += 0.0008 * e.deltaY;
+                    this.cameraGroup.position.y += 0.001 * e.deltaY;
 
-                    this.camera.fov = util.clamp(this.camera.fov, 75, 135);
-                    this.cameraGroup.position.y = util.clamp(this.cameraGroup.position.y, 0, 8);
+                    this.camera.fov = util.clamp(this.camera.fov, 75, 150);
+                    this.cameraGroup.position.y = util.clamp(this.cameraGroup.position.y, 0, 10);
 
                     this.camera.updateProjectionMatrix();
                     // }
