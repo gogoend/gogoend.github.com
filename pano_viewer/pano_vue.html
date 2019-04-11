@@ -76,11 +76,12 @@
         .panoWrap {
             position: absolute;
             overflow: hidden;
-            cursor: -webkit-grab;
+
         }
 
-        .panoWrap:active {
-            cursor: -webkit-grabbing;
+        .panoWrap>canvas {
+            cursor: -webkit-grab;
+            cursor: grab;
         }
 
         .panoControls.bottom {
@@ -208,12 +209,12 @@
             background: #62d128;
         }
 
-        .panoNearbyWrap{
-            width:300px;
-            height:100%;
+        .panoNearbyWrap {
+            width: 300px;
+            height: 100%;
             background-color: #62d128;
-            position:absolute;
-            right:0;
+            position: absolute;
+            right: 0;
         }
     </style>
 </head>
@@ -225,7 +226,7 @@
         </div>
         <div class="panoWrap">
             <div class="panoControls onscreen">
-                <button data-role="btn" data-todo="exitVR" class="holaGreen">退出VR</button>
+                <button data-role="btn" data-todo="exitVR" class="holaGreen" v-if="ui.VRStatus">退出VR</button>
             </div>
         </div>
         <div class="panoPanelBottom" v-cloak :class="{'fold':ui.panoPanelBottomFold}">
@@ -238,7 +239,7 @@
                         <p class="panoTitle">{{pano.desc}}</p>
                     </li>
                 </ul>
-                <div class="scrollBar" data-role="miniScrollBar">
+                <div class="scrollBar" data-role="scrollBar">
                     <span class="stick"></span>
                     <div class="bar"></div>
                 </div>
@@ -301,7 +302,7 @@
                 //在vue实例创建之前，获得全景列表
                 var _this = this;
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', './pano_array.json');
+                xhr.open('GET', './pano_array2.json');
                 xhr.send();
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -498,6 +499,12 @@
                 },
                 //全景交互
                 attachController: function (eventOption) {
+
+                    //处理一下某些事件的兼容性问题
+                    /*
+                    FireFox中鼠标滚轮事件为DOMMouseScroll
+                    */
+
                     switch (eventOption) {
                         //陀螺仪和鼠标之间暂时没想到并存的办法。
                         //正常方案：在陀螺仪开启的情况下，可能使用触摸来更改cameraTarget的方向
@@ -637,6 +644,8 @@
                     switch (evtType) {
                         case "touchstart":
                         case "mousedown": {
+                            this.renderer.domElement.style.cursor = 'grab';
+
                             this.userInteract = true;
                             //得到鼠标点击位置
                             this.pointData.originX = e.clientX;
@@ -647,16 +656,18 @@
                             this.pointData.originPhi = this.targetSphereCood.phi;
                             //
 
-                            this.panoWrap.addEventListener("mousemove", this.pointHandler.bind(this), false);
-                            this.panoWrap.addEventListener("mouseup", this.pointHandler.bind(this), false);
+                            this.panoWrap.addEventListener("mousemove", this.eventBind.pointHandler, false);
+                            this.panoWrap.addEventListener("mouseup", this.eventBind.pointHandler, false);
 
-                            this.panoWrap.addEventListener("touchmove", this.pointHandler.bind(this), false);
-                            this.panoWrap.addEventListener("touchend", this.pointHandler.bind(this), false);
+                            this.panoWrap.addEventListener("touchmove", this.eventBind.pointHandler, false);
+                            this.panoWrap.addEventListener("touchend", this.eventBind.pointHandler, false);
 
                             break;
                         }
                         case "touchmove":
                         case "mousemove": {
+                            this.renderer.domElement.style.cursor = 'grabbing';
+
                             if (this.userInteract) {
 
                                 //鼠标移动时计算鼠标的偏移量
@@ -676,19 +687,23 @@
                                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                                 this.camera.lookAt(this.cameraTarget.position);
 
+
                             }
                             break;
                         }
 
                         case "touchend":
                         case "mouseup": {
+                            this.renderer.domElement.style.cursor = 'grab';
                             this.userInteract = false;
 
-                            this.panoWrap.removeEventListener("mouseup", this.pointHandler.bind(this), false);
-                            this.panoWrap.removeEventListener("touchend", this.pointHandler.bind(this), false);
+                            this.panoWrap.removeEventListener("mouseup", this.eventBind.pointHandler, false);
+                            this.panoWrap.removeEventListener("touchend", this.eventBind.pointHandler, false);
 
-                            this.panoWrap.removeEventListener("mousemove", this.pointHandler.bind(this), false);
-                            this.panoWrap.removeEventListener("touchmove", this.pointHandler.bind(this), false);
+                            this.panoWrap.removeEventListener("mousemove", this.eventBind.pointHandler, false);
+                            this.panoWrap.removeEventListener("touchmove", this.eventBind.pointHandler, false);
+
+
                             break;
                         }
                     }
@@ -737,6 +752,7 @@
                 },
                 //处理鼠标滚轮
                 mouseScrollHandler: function (e) {
+                    console.log(e)
                     //主要是更改场景中相机的fov以及相机y坐标
                     // console.log(e);
                     // console.log(this.camera.fov);
@@ -807,33 +823,38 @@
                     fullScreen(document.querySelector('.panoWrap'), false);
                     this.attachController('orient');
 
-                    //设置左眼右眼
-                    var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-                    rightCamera.name = "rightCamera";
-                    var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
-                    leftCamera.name = "leftCamera";
+                    if (!this.hmdGlasses) {
+                        //设置左眼右眼
+                        var rightCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+                        rightCamera.name = "rightCamera";
+                        var leftCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight / 2, 0.1, 1000);
+                        leftCamera.name = "leftCamera";
 
-                    //设置相机的边界
-                    leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
-                    rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
+                        //设置相机的边界
+                        leftCamera.bounds = new THREE.Vector4(0, 0, 0.5, 1);
+                        rightCamera.bounds = new THREE.Vector4(0.5, 0, 0.5, 1);
 
-                    //瞳距
-                    leftCamera.position.x = -0.2;
-                    rightCamera.position.x = 0.2;
+                        //瞳距
+                        leftCamera.position.x = -0.2;
+                        rightCamera.position.x = 0.2;
 
-                    // leftCamera.lookAt(this.cameraTarget);
-                    // rightCamera.lookAt(this.cameraTarget);
+                        // leftCamera.lookAt(this.cameraTarget);
+                        // rightCamera.lookAt(this.cameraTarget);
 
-                    var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
+                        var hmdGlasses = new THREE.ArrayCamera([leftCamera, rightCamera]);
 
-                    hmdGlasses.name = "hmdGlasses";
+                        hmdGlasses.name = "hmdGlasses";
 
-                    // hmdGlasses.lookAt(this.cameraTarget);
+                        // hmdGlasses.lookAt(this.cameraTarget);
 
-                    hmdGlasses.add(leftCamera);
-                    hmdGlasses.add(rightCamera);
-                    this.cameraGroup.add(hmdGlasses);
-                    this.camera = hmdGlasses;
+                        hmdGlasses.add(leftCamera);
+                        hmdGlasses.add(rightCamera);
+                        this.cameraGroup.add(hmdGlasses);
+
+                        this.hmdGlasses=hmdGlasses;
+                    }
+
+                    this.camera = this.hmdGlasses;
 
                 },
 
