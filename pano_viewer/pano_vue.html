@@ -302,7 +302,7 @@
                 //在vue实例创建之前，获得全景列表
                 var _this = this;
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', './pano_array2.json');
+                xhr.open('GET', './pano_array.json');
                 xhr.send();
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4 && xhr.status === 200) {
@@ -788,7 +788,13 @@
                     var screenOrientation = window.orientation || 0;//桌面端似乎不存在window.orientation
                     //代码来自threejs  //
                     var euler = new THREE.Euler();
-                    euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma), 'YXZ');//从传感器新建一个欧拉角
+                    if (screenOrientation == 0) {
+                        euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma), 'YXZ');//从传感器新建一个欧拉角
+                    }
+
+                    if (screenOrientation == 90) {
+                        euler.set(util.degToRad(e.beta), util.degToRad(e.alpha),util.degToRad(-e.gamma+45),  'YXZ');//从传感器新建一个欧拉角
+                    }
 
                     var q0 = new THREE.Quaternion();
                     var q1 = new THREE.Quaternion(- Math.sqrt(0.5), 0, 0, Math.sqrt(0.5)); // - PI/2 around the x-axis
@@ -851,7 +857,7 @@
                         hmdGlasses.add(rightCamera);
                         this.cameraGroup.add(hmdGlasses);
 
-                        this.hmdGlasses=hmdGlasses;
+                        this.hmdGlasses = hmdGlasses;
                     }
 
                     this.camera = this.hmdGlasses;
