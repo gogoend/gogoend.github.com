@@ -1,12 +1,6 @@
 "use strict";
 // import util from 'util';
 
-//stick管理器
-var StickMgr = function () {
-    var self = this;
-    self.sticks = [];
-}
-
 //stick初始化、构造函数
 var Stick = function (conf) {
     var _this = this;
@@ -252,45 +246,46 @@ Stick.prototype.getTransformMatrix = function (target) {
 
             //旋转矩阵
             //X-俯仰，Y-环视，Z-翻滚
-            //沿着x轴旋转矩阵
-            if (
-                conf.type === 'rotateX') {
-                rotateMatrix4x[5] = Math.cos(result.rad);
-                rotateMatrix4x[6] = Math.sin(result.rad);
-                rotateMatrix4x[9] = -Math.sin(result.rad);
-                rotateMatrix4x[10] = Math.cos(result.rad);
+
+            //！！！修复无人机左摇杆左右移动
+            if(conf.type === 'droneRCLeft'){
+                rotateMatrix4y[0] = Math.cos(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[2] = -Math.sin(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[8] = Math.sin(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[10] = Math.cos(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
+                console.log(rotateMatrix4y)
             }
+
+            //沿着x轴旋转矩阵
+            // if (
+            //     conf.type === 'rotateX') {
+            //     rotateMatrix4x[5] = Math.cos(result.rad);
+            //     rotateMatrix4x[6] = Math.sin(result.rad);
+            //     rotateMatrix4x[9] = -Math.sin(result.rad);
+            //     rotateMatrix4x[10] = Math.cos(result.rad);
+            // }
 
             // console.log(rotateMatrix4x)
 
             //沿着y轴旋转矩阵
-            if (
-                conf.type === 'rotateY') {
-                rotateMatrix4y[0] = Math.cos(result.rad);
-                rotateMatrix4y[2] = -Math.sin(result.rad);
-                rotateMatrix4y[8] = Math.sin(result.rad);
-                rotateMatrix4y[10] = Math.cos(result.rad);
-            }
-
-
-            //！！！修复无人机左摇杆左右移动
-            if(conf.type === 'droneRCLeft'){
-                rotateMatrix4y[0] = Math.cos(result.rad);
-                rotateMatrix4y[2] = -Math.sin(result.rad);
-                rotateMatrix4y[8] = Math.sin(result.rad);
-                rotateMatrix4y[10] = Math.cos(result.rad);
-            }
+            // if (
+            //     conf.type === 'rotateY') {
+            //     rotateMatrix4y[0] = Math.cos(result.rad);
+            //     rotateMatrix4y[2] = -Math.sin(result.rad);
+            //     rotateMatrix4y[8] = Math.sin(result.rad);
+            //     rotateMatrix4y[10] = Math.cos(result.rad);
+            // }
 
             // console.log(rotateMatrix4y)
 
             //沿着z轴的旋转矩阵
-            if (
-                conf.type === 'rotateZ') {
-                rotateMatrix4z[0] = Math.cos(result.rad);
-                rotateMatrix4z[1] = Math.sin(result.rad);
-                rotateMatrix4z[4] = -Math.sin(result.rad);
-                rotateMatrix4z[5] = Math.cos(result.rad);
-            }
+            // if (
+            //     conf.type === 'rotateZ') {
+            //     rotateMatrix4z[0] = Math.cos(result.rad);
+            //     rotateMatrix4z[1] = Math.sin(result.rad);
+            //     rotateMatrix4z[4] = -Math.sin(result.rad);
+            //     rotateMatrix4z[5] = Math.cos(result.rad);
+            // }
 
             // console.log(rotateMatrix4z)
 
@@ -299,6 +294,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             switch (conf.type) {
                 case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
                 case 'rotateY': rotateMatrix4 = rotateMatrix4y; break;
+                case 'droneRCLeft': rotateMatrix4 = rotateMatrix4y; break;
                 case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
             }
             // console.log(rotateMatrix4);
@@ -312,7 +308,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             
             //console.log('位置矩阵：' + rawPositionMatrix);
 
-            var transformMatrix4 = mmp(translateMatrix4, rotateMatrix4);
+            var transformMatrix4 = mmp(rotateMatrix4,translateMatrix4);
 
             // console.log(this.type+'原始矩阵：' + rawMatrix);
             // console.log(this.type+'平移矩阵：' + translateMatrix4);
