@@ -78,15 +78,16 @@ Stick.prototype.getDirection = function (e) {
     */
 
     // console.log(this);
-    result.stickLeft = e.clientX - 0.5 * parseInt(util.getStyle(this.stick).width) - parseInt(util.getStyle(this.zone).left);// inner.style.left
-    result.stickTop = e.clientY - 0.5 * parseInt(util.getStyle(this.stick).height) - parseInt(util.getStyle(this.zone).top);// inner.style.top
+    result.stickLeft = e.clientX - parseInt(util.getStyle(this.zone).left)- 0.5 * parseInt(util.getStyle(this.stick).width) ;// inner.style.left
+    result.stickTop = e.clientY - parseInt(util.getStyle(this.zone).top)- 0.5 * parseInt(util.getStyle(this.stick).height) ;// inner.style.top
+    
     result.stickOffsetLeft = result.stickLeft - this.originX;
     result.stickOffsetTop = result.stickTop - this.originY;
 
     //手柄的偏移量、偏移角度
-    result.distance = util.gougu(result.stickLeft - this.originX, result.stickTop - this.originY);
+    result.distance = util.gougu(result.stickOffsetLeft, result.stickOffsetTop);
     result.force = result.distance;
-    result.rad = Math.atan2(result.stickTop - this.originY, result.stickLeft - this.originX);
+    result.rad = Math.atan2(result.stickOffsetTop, result.stickOffsetLeft);
     result.deg = result.rad * (180 / Math.PI);
     var lockedDistanceOffset = (parseInt(util.getStyle(this.zone).height) / 2 - parseInt(util.getStyle(this.stick).height) / 2);
 
