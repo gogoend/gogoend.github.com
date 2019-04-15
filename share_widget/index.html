@@ -3,15 +3,16 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>分享插件</title>
+    <title>分享组件测试</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <style>
-        [data-role="shareWidget"]>.snsIcon:nth-child(n){
+        [data-role="shareWidget"]>.snsIcon:nth-child(n) {
             width: 0.4rem;
             height: 0.4rem;
             background-color: aquamarine
         }
-        [data-role="shareWidget"]>.snsIcon:nth-child(2n){
+
+        [data-role="shareWidget"]>.snsIcon:nth-child(2n) {
             width: 0.4rem;
             height: 0.4rem;
             background-color: cadetblue
@@ -30,15 +31,34 @@
     </div>
     <script>
         var ShareWidget = function () {
-            this.shareWidgetDOM = document.querySelectorAll('[data-sns="weibo"]');
-            for (let i = 0; i < this.shareWidgetDOM.length; i++) {
-                this.shareWidgetDOM[i].addEventListener('click',eventTodo,false)
+            var _this = this;
+            this.shareWidgetDOM = document.querySelectorAll('[data-role="shareWidget"]');
+
+            this.snsURL = {
+                "weibo": "http://service.weibo.com/share/share.php?title={{shareTitle}}&url={{currentURL}}",
+                "qz": "https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url={{currentURL}}&title={{shareTitle}}&summary=",
+                "linkedin": "http://www.linkedin.com/shareArticle?mini=true&ro=true&url={{currentURL}}&title={{shareTitle}}&summary=",
+                "fb": "https://www.facebook.com/share.php?u={{currentURL}}&t={{shareTitle}}&pic=",
+                "twitter": "https://twitter.com/intent/tweet?text={{shareTitle}}&url={{currentURL}}"
             }
+
+            this.currentURL = encodeURI(window.location.href);
+            this.shareTitle = encodeURI(document.title);
+
+            for (let i = 0; i < this.shareWidgetDOM.length; i++) {
+                this.shareWidgetDOM[i].addEventListener('click', this.eventTodo.bind(_this), false);
+            };
+
         }
 
         ShareWidget.prototype.eventTodo = function (e) {
-            console.log(e.target);
+            var snsType = e.target.getAttribute("data-sns");
+            var shareURL= this.snsURL[snsType].replace("{{shareTitle}}",this.shareTitle).replace("{{currentURL}}",this.currentURL);
+
+            window.open(shareURL,"_blank","toolbar=yes, location=yes, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width=640, height=480");
         }
+
+        new ShareWidget;
 
     </script>
 
