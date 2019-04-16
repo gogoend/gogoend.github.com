@@ -1,6 +1,7 @@
 <html style="font-size:100px">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
     <style>
         body {
             padding: 0;
@@ -10,11 +11,11 @@
 
         .slideBar {
             height: 0.5rem;
-            width: 2rem;
+            width:100%;
             position: absolute;
             display: flex;
             align-items: center;
-            left: 20px;
+            left: 0px;
         }
 
         .slideBar>.stick {
@@ -47,23 +48,27 @@
         <div class="bar"></div>
     </div>
     <script>
-        var SlideBar = function (target,min,max,callback) {
+        var SlideBar = function (target, min, max, callback) {
             var slideBar = document.querySelector('[data-role="slideBar"]');
             console.log(slideBar)
             var _this = this;
-            slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
+            // slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
             slideBar.addEventListener('click', this.eventTodo.bind(_this), false);
+            slideBar.addEventListener('drag', this.eventTodo.bind(_this), false);
 
             this.slideBar = slideBar;
 
+            //滑块数值
             var persentNum;
             Object.defineProperty(this, 'persentNum', {
                 set: function (n) {
-                    persentNum=n;
-                    slideBar.setAttribute('value', (n*100).toFixed(0));
-                    callback();
+                    persentNum = n;
+                    slideBar.setAttribute('data-value', (n * 100).toFixed(0));
+                    if (callback) {
+                        callback();
+                    }
                 },
-                get: function(){
+                get: function () {
                     return persentNum;
                 }
             })
@@ -76,29 +81,41 @@
             var stick = e.currentTarget.querySelector('.stick');
             switch (e.type) {
                 case 'click': {
-                    stick.style.transition = '0.5s ease left'
-                    var leftValue = e.clientX - parseInt(util.getStyle(stick).width);
-                    stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(e.currentTarget).width)) + 'px'
-                    stick.addEventListener('transitionend', function () {
-                        stick.style.transition = 'none';
-                    }, false);
+                    if (e.target.className !== 'stick') {
+                        stick.style.transition = '0.5s ease left'
+                        var leftValue = e.clientX - parseInt(util.getStyle(stick).width);
+                        stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(e.currentTarget).width)) + 'px'
+                        stick.addEventListener('transitionend', function () {
+                            stick.style.transition = 'none';
+                        }, false);
 
-                    this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(e.currentTarget).width);
-                    console.log(this.persentNum);
-
+                        this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(e.currentTarget).width);
+                        // console.log(this.persentNum);
+                    }
                 }; break;
-                case 'mousedown':
-                case 'touchstart': {
-
+                case 'drag': {
+                    if (e.target.className == 'stick') {
+                        console.log(e);
+                        var leftValue = util.clamp(e.clientX - parseInt(util.getStyle(stick).width), 0, parseInt(util.getStyle(e.currentTarget).width)) + 'px';
+                        stick.style.left = leftValue;
+                        stick.addEventListener('dragend', function (e) {
+                            stick.style.left = util.clamp(e.clientX - parseInt(util.getStyle(stick).width), 0, parseInt(util.getStyle(e.target.parentElement).width)) + 'px';
+                        })
+                    }
                 }; break;
-                case 'mousemove':
-                case 'touchmove': {
+                // case 'mousedown':
+                // case 'touchstart': {
 
-                }; break;
-                case 'mouseup':
-                case 'touchend': {
 
-                }; break;
+                // }; break;
+                // case 'mousemove':
+                // case 'touchmove': {
+
+                // }; break;
+                // case 'mouseup':
+                // case 'touchend': {
+
+                // }; break;
             }
         }
 
