@@ -1,0 +1,109 @@
+<html style="font-size:100px">
+
+<head>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+
+        .slideBar {
+            height: 0.5rem;
+            width: 2rem;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            left: 20px;
+        }
+
+        .slideBar>.stick {
+            position: absolute;
+            display: block;
+            width: 0.2rem;
+            height: 0.2rem;
+            background-color: #62d128;
+            border: #62d128 solid 2px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            opacity: 0.5;
+            margin-left: -0.1rem;
+            left: 0;
+        }
+
+        .slideBar>.bar {
+            width: 100%;
+            display: block;
+            height: 2px;
+            background: #62d128;
+        }
+    </style>
+    <script src="../control_stick/util.js"></script>
+</head>
+
+<body>
+    <div class="slideBar" data-role="slideBar">
+        <span class="stick"></span>
+        <div class="bar"></div>
+    </div>
+    <script>
+        var SlideBar = function (target,min,max,callback) {
+            var slideBar = document.querySelector('[data-role="slideBar"]');
+            console.log(slideBar)
+            var _this = this;
+            slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
+            slideBar.addEventListener('click', this.eventTodo.bind(_this), false);
+
+            this.slideBar = slideBar;
+
+            var persentNum;
+            Object.defineProperty(this, 'persentNum', {
+                set: function (n) {
+                    persentNum=n;
+                    slideBar.setAttribute('value', (n*100).toFixed(0));
+                    callback();
+                },
+                get: function(){
+                    return persentNum;
+                }
+            })
+        }
+
+        SlideBar.prototype.eventTodo = function (e) {
+            if (e.type.match('touch') !== null) {
+                e = e.touches[0];
+            }
+            var stick = e.currentTarget.querySelector('.stick');
+            switch (e.type) {
+                case 'click': {
+                    stick.style.transition = '0.5s ease left'
+                    var leftValue = e.clientX - parseInt(util.getStyle(stick).width);
+                    stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(e.currentTarget).width)) + 'px'
+                    stick.addEventListener('transitionend', function () {
+                        stick.style.transition = 'none';
+                    }, false);
+
+                    this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(e.currentTarget).width);
+                    console.log(this.persentNum);
+
+                }; break;
+                case 'mousedown':
+                case 'touchstart': {
+
+                }; break;
+                case 'mousemove':
+                case 'touchmove': {
+
+                }; break;
+                case 'mouseup':
+                case 'touchend': {
+
+                }; break;
+            }
+        }
+
+        new SlideBar()
+    </script>
+</body>
+
+</html>

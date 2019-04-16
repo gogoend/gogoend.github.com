@@ -183,7 +183,7 @@
             text-overflow: ellipsis;
         }
 
-        .scrollBar {
+        .slideBar {
             width: 2rem;
             position: absolute;
             display: flex;
@@ -191,7 +191,7 @@
             left: 20px;
         }
 
-        .scrollBar>.stick {
+        .slideBar>.stick {
             position: absolute;
             display: block;
             width: 0.2rem;
@@ -200,9 +200,11 @@
             border: #62d128 solid 2px;
             border-radius: 50%;
             flex-shrink: 0;
+            opacity: 0.5;
+            margin-left: -0.1rem;
         }
 
-        .scrollBar>.bar {
+        .slideBar>.bar {
             width: 100%;
             display: block;
             height: 2px;
@@ -239,7 +241,7 @@
                         <p class="panoTitle">{{pano.desc}}</p>
                     </li>
                 </ul>
-                <div class="scrollBar" data-role="scrollBar">
+                <div class="slideBar" data-role="slideBar">
                     <span class="stick"></span>
                     <div class="bar"></div>
                 </div>
@@ -793,7 +795,7 @@
                     }
 
                     if (screenOrientation == 90) {
-                        euler.set(util.degToRad(e.beta), util.degToRad(e.alpha),util.degToRad(-e.gamma+45),  'YXZ');//从传感器新建一个欧拉角
+                        euler.set(util.degToRad(e.beta), util.degToRad(e.alpha), util.degToRad(-e.gamma + 45), 'YXZ');//从传感器新建一个欧拉角
                     }
 
                     var q0 = new THREE.Quaternion();
