@@ -47,20 +47,30 @@
         <span class="stick"></span>
         <div class="bar"></div>
     </div>
+    <div class="target" style="
+    width:200px;
+    height: 200px;
+    margin-left: 40px;
+    margin-top:40px;
+    background-color: #62d128;
+    "></div>
     <script>
-        var SlideBar = function (target, min, max, callback) {
+        var SlideBar = function (min, max, callback) {
             var _this = this;
+            // _this.oValue=oValue;
+            _this.min = min;
+            _this.max = max;
 
             var slideBar = document.querySelector('[data-role="slideBar"]');
             var stick = slideBar.querySelector('.stick');
             var bar = slideBar.querySelector('.bar');
             console.log(slideBar)
 
-
-
             this.slideBar = slideBar;
             this.stick = stick;
             this.bar = bar;
+
+            this.finalValue = null;
 
             //滑块数值
             var persentNum;
@@ -68,19 +78,27 @@
                 set: function (n) {
                     persentNum = n;
                     slideBar.setAttribute('data-value', (n * 100).toFixed(0));
+
+                    var value = util.clamp(_this.min + (_this.max - _this.min) * n, _this.min, _this.max);
+                    this.finalValue = value;
+
                     if (callback) {
-                        callback();
+                        callback({
+                            persent: n,
+                            value: _this.finalValue
+                        });
                     }
                 },
                 get: function () {
                     return persentNum;
                 }
-            })
+            });
+
 
             // slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
             slideBar.addEventListener('click', this.eventTodo.bind(_this), false);
             window.addEventListener('resize', function (e) {
-                _this.stick.style.left = _this.persentNum * parseInt(util.getStyle(_this.bar).width) +'px';
+                _this.stick.style.left = _this.persentNum * parseInt(util.getStyle(_this.bar).width) + 'px';
             }, false)
             slideBar.addEventListener('drag', this.eventTodo.bind(_this), false);
             slideBar.addEventListener('dragend', this.eventTodo.bind(_this), false);
@@ -104,6 +122,7 @@
 
                         this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
                         // console.log(this.persentNum);
+
                     }
                 }; break;
 
@@ -114,23 +133,14 @@
                     stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
                     this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
                 }; break;
-                // case 'mousedown':
-                // case 'touchstart': {
-
-
-                // }; break;
-                // case 'mousemove':
-                // case 'touchmove': {
-
-                // }; break;
-                // case 'mouseup':
-                // case 'touchend': {
-
-                // }; break;
             }
         }
 
-        new SlideBar()
+        var target = document.querySelector(".target");
+
+        new SlideBar(10, 600, function (val) {
+            target.style.width=100*val.persent+'%';
+        })
     </script>
 </body>
 
