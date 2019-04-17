@@ -11,7 +11,7 @@
 
         .slideBar {
             height: 0.5rem;
-            width:80%;
+            width: 80%;
             /* position: absolute; */
             display: flex;
             align-items: center;
@@ -52,19 +52,15 @@
             var _this = this;
 
             var slideBar = document.querySelector('[data-role="slideBar"]');
-            var stick=slideBar.querySelector('.stick');
-            var bar=slideBar.querySelector('.bar');
+            var stick = slideBar.querySelector('.stick');
+            var bar = slideBar.querySelector('.bar');
             console.log(slideBar)
-            // slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
-            slideBar.addEventListener('click', this.eventTodo.bind(_this), false);
 
-            slideBar.addEventListener('drag', this.eventTodo.bind(_this), false);
-            slideBar.addEventListener('dragend', this.eventTodo.bind(_this), false);
 
 
             this.slideBar = slideBar;
-            this.stick=stick;
-            this.bar=bar;
+            this.stick = stick;
+            this.bar = bar;
 
             //滑块数值
             var persentNum;
@@ -80,6 +76,14 @@
                     return persentNum;
                 }
             })
+
+            // slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
+            slideBar.addEventListener('click', this.eventTodo.bind(_this), false);
+            window.addEventListener('resize', function (e) {
+                _this.stick.style.left = _this.persentNum * parseInt(util.getStyle(_this.bar).width) +'px';
+            }, false)
+            slideBar.addEventListener('drag', this.eventTodo.bind(_this), false);
+            slideBar.addEventListener('dragend', this.eventTodo.bind(_this), false);
         }
 
         SlideBar.prototype.eventTodo = function (e) {
@@ -87,13 +91,13 @@
                 e = e.touches[0];
             }
             var stick = this.stick;
-            var bar=this.bar;
+            var bar = this.bar;
             switch (e.type) {
                 case 'click': {
                     if (e.target.className !== 'stick') {
                         stick.style.transition = '0.5s ease left'
-                        var leftValue = e.clientX - parseInt(util.getStyle(stick).width);
-                        stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px'
+                        var leftValue = e.clientX;
+                        stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
                         stick.addEventListener('transitionend', function () {
                             stick.style.transition = 'none';
                         }, false);
@@ -102,13 +106,13 @@
                         // console.log(this.persentNum);
                     }
                 }; break;
+
                 case 'drag':
                 case 'dragend': {
-                    if (e.target.className == 'stick') {
-                        var leftValue = util.clamp(e.clientX - parseInt(util.getStyle(stick).width), 0, parseInt(util.getStyle(bar).width)) + 'px';
-                        stick.style.left = leftValue;
-                        this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
-                    }
+                    e.preventDefault();
+                    var leftValue = e.clientX;
+                    stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
+                    this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
                 }; break;
                 // case 'mousedown':
                 // case 'touchstart': {
