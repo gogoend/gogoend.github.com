@@ -146,15 +146,14 @@
 
 
         .panoList {
-            width: 100%;
-            height: 1.7rem;
+            position: relative;
         }
 
         .panoList>ul {
             display: flex;
             color: #fff;
             margin: 0 auto;
-            margin-bottom: 1em;
+            margin-bottom: 0.5em;
         }
 
         .panoList>ul li {
@@ -167,9 +166,9 @@
         }
 
         .panoList>ul li>img.panoThumb {
-            width: 2rem;
+            width: 1.5rem;
             display: block;
-            min-width: 2rem;
+            min-width: 1.5rem;
             flex-shrink: 0;
         }
 
@@ -181,34 +180,6 @@
             word-break: keep-all;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .slideBar {
-            width: 2rem;
-            position: absolute;
-            display: flex;
-            align-items: center;
-            left: 20px;
-        }
-
-        .slideBar>.stick {
-            position: absolute;
-            display: block;
-            width: 0.2rem;
-            height: 0.2rem;
-            background-color: #62d128;
-            border: #62d128 solid 2px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            opacity: 0.5;
-            margin-left: -0.1rem;
-        }
-
-        .slideBar>.bar {
-            width: 100%;
-            display: block;
-            height: 2px;
-            background: #62d128;
         }
 
         .panoNearbyWrap {
@@ -234,17 +205,15 @@
         <div class="panoPanelBottom" v-cloak :class="{'fold':ui.panoPanelBottomFold}">
             <button v-on:click="panoListRollToggle" class="rollOutBtn">展开收起</button>
 
-            <div class="panoList">
+            <div class="panoList" data-role="panoList" >
                 <ul>
                     <li v-for="(pano,index) in panosList">
                         <img class="panoThumb" @click="panoLoad(index)" :src="panoThumbPath+pano.imgThumb" />
                         <p class="panoTitle">{{pano.desc}}</p>
                     </li>
                 </ul>
-                <div class="slideBar" data-role="slideBar">
-                    <span class="stick"></span>
-                    <div class="bar"></div>
-                </div>
+                <!-- 滚动条 -->
+
             </div>
 
             <div class="panoControls bottom">
@@ -260,7 +229,7 @@
 
     <!-- <script src="./pano_array.js"></script> -->
     <!-- <script src="./position2_array.js"></script> -->
-
+    <script src="./js/slidebar.js"></script>
     <script>
         'use strict';
         var panoApp = new Vue({
@@ -342,7 +311,7 @@
                     } else {
                         //传入全景图索引值，来确定应当以哪一张全景图来开场
                         _this.panoInit(_this.currentIndex);
-                        // _this.loadMap();
+                        _this.loadMap();
                         clearInterval(a);
                     }
                 }, 20)
@@ -352,6 +321,9 @@
             methods: {
                 //基本场景初始化
                 sceneInit: function () {
+
+                    window.a = new SlideBar(50, 100,document.querySelector('[data-role="panoList"]'));
+
                     var scene = new THREE.Scene();
                     //用于将scene暴露到全局，仅在调试时使用
                     window.scene = scene;
@@ -930,7 +902,7 @@
                                 } else {
                                     console.log('加载成功');
                                     clearInterval(a);
-                                    _this.addPoi();
+                                    // _this.addPoi();
                                 }
                             }, 200)
                         }

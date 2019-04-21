@@ -9,43 +9,20 @@
             position: relative;
         }
 
-        .slideBar {
-            height: 0.5rem;
-            width: 80%;
-            /* position: absolute; */
-            display: flex;
-            align-items: center;
-            left: 0px;
-        }
+        .slideBar {}
 
-        .slideBar>.stick {
-            position: absolute;
-            display: block;
-            width: 0.2rem;
-            height: 0.2rem;
-            background-color: #62d128;
-            border: #62d128 solid 2px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            opacity: 0.5;
-            margin-left: -0.1rem;
-            left: 0;
-        }
+        .slideBar>.stick {}
 
-        .slideBar>.bar {
-            width: 100%;
-            display: block;
-            height: 2px;
-            background: #62d128;
-        }
+        .slideBar>.bar {}
     </style>
     <script src="../control_stick/util.js"></script>
 </head>
 
 <body>
     <div class="slideBar" data-role="slideBar">
-        <span class="stick"></span>
-        <div class="bar"></div>
+        <div class="bar">
+            <span class="stick"></span>
+        </div>
     </div>
     <div class="target" style="
     width:200px;
@@ -55,15 +32,63 @@
     background-color: #62d128;
     "></div>
     <script>
-        var SlideBar = function (min, max, callback) {
+        var SlideBar = function (min, max, parentNode, callback) {
             var _this = this;
             // _this.oValue=oValue;
             _this.min = min;
             _this.max = max;
 
-            var slideBar = document.querySelector('[data-role="slideBar"]');
-            var stick = slideBar.querySelector('.stick');
-            var bar = slideBar.querySelector('.bar');
+            _this.parentNode = parentNode;
+
+            var slideBar = document.createElement('div');
+            slideBar.setAttribute('data-role', 'slidebar');
+            slideBar.className = "slidebar";
+
+            // var slideBar = document.querySelector('[data-role="slideBar"]');
+            console.log(slideBar)
+            slideBar.style.cssText = `
+    height: 0.3rem;
+    width: 90%;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+        `;
+
+            // var slideBar = document.querySelector('[data-role="slideBar"]');
+
+            var stick = document.createElement('span');
+            stick.classList.add('stick');
+            stick.style.cssText = `            
+    position: absolute;
+    display: block;
+    width: 0.2rem;
+    height: 0.2rem;
+    background-color: rgb(98, 209, 40);
+    border: 2px solid rgb(98, 209, 40);
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.5;
+    margin-left: -0.1rem;
+    margin-top: -0.1rem;
+    left: 0;
+    transition: none 0s ease 0s;
+        `;
+            var bar = document.createElement('div');
+            bar.classList.add('bar');
+            bar.style.cssText = `
+            width: 100%;
+    display: block;
+    height: 2px;
+    background: rgb(98, 209, 40);
+    position: relative;
+        `
+                ;
+
+            bar.appendChild(stick);
+            slideBar.appendChild(bar);
+            parentNode.appendChild(slideBar);
+
+
             console.log(slideBar)
 
             this.slideBar = slideBar;
@@ -108,38 +133,39 @@
             if (e.type.match('touch') !== null) {
                 e = e.touches[0];
             }
-            var stick = this.stick;
-            var bar = this.bar;
-            switch (e.type) {
-                case 'click': {
-                    if (e.target.className !== 'stick') {
-                        stick.style.transition = '0.5s ease left'
-                        var leftValue = e.clientX;
+            var slideBar=this.slideBar,stick = this.stick,bar = this.bar;
+
+                switch (e.type) {
+                    case 'click': {
+                        if (e.target.className !== 'stick') {
+                            stick.style.transition = '0.5s ease left'
+                            var leftValue = e.clientX-slideBar.offsetLeft;
+                            stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
+                            stick.addEventListener('transitionend', function () {
+                                stick.style.transition = 'none';
+                            }, false);
+
+                            this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
+                            // console.log(this.persentNum);
+
+                        }
+                    }; break;
+
+                    case 'drag':
+                    case 'dragend': {
+                        e.preventDefault();
+                        var leftValue = e.clientX-slideBar.offsetLeft;
                         stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
-                        stick.addEventListener('transitionend', function () {
-                            stick.style.transition = 'none';
-                        }, false);
-
                         this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
-                        // console.log(this.persentNum);
+                    }; break;
+                }
 
-                    }
-                }; break;
-
-                case 'drag':
-                case 'dragend': {
-                    e.preventDefault();
-                    var leftValue = e.clientX;
-                    stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
-                    this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
-                }; break;
-            }
         }
 
         var target = document.querySelector(".target");
 
-        new SlideBar(10, 600, function (val) {
-            target.style.width=100*val.persent+'%';
+        a = new SlideBar(10, 600, document.body, function (val) {
+            target.style.width = 100 * val.persent + '%';
         })
     </script>
 </body>
