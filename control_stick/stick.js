@@ -396,8 +396,8 @@ Stick.prototype.eventTodo = function () {
                 // console.log('mousedown');
                 e.preventDefault();
 
-                zone.addEventListener('mousemove', mouseHandler, false);
-                zone.addEventListener('mouseup', mouseHandler, false);
+                document.body.addEventListener('mousemove', mouseHandler, false);
+                document.body.addEventListener('mouseup', mouseHandler, false);
                 break;
             };
             case 'touchmove':
@@ -423,24 +423,24 @@ Stick.prototype.eventTodo = function () {
                 // console.log('mouseup')
                 stick.style.left = _this.originX + 'px';
                 stick.style.top = _this.originY + 'px';
-                zone.removeEventListener('mouseup', mouseHandler, false);
-                zone.removeEventListener('mousemove', mouseHandler, false);
+                document.body.removeEventListener('mouseup', mouseHandler, false);
+                document.body.removeEventListener('mousemove', mouseHandler, false);
                 break;
             };
             case 'touchstart': {
                 e.preventDefault();
 
                 // console.log('mousedown');
-                zone.addEventListener('touchmove', mouseHandler, false);
-                zone.addEventListener('touchend', mouseHandler, false);
+                document.body.addEventListener('touchmove', mouseHandler, false);
+                document.body.addEventListener('touchend', mouseHandler, false);
                 break;
             };
             case 'touchend': {
                 console.log('mouseup')
                 stick.style.left = _this.originX + 'px';
                 stick.style.top = _this.originY + 'px';
-                zone.removeEventListener('touchup', mouseHandler, false);
-                zone.removeEventListener('touchmove', mouseHandler, false);
+                document.body.removeEventListener('touchup', mouseHandler, false);
+                document.body.removeEventListener('touchmove', mouseHandler, false);
                 break;
             };
         }

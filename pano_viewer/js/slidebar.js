@@ -85,45 +85,57 @@ position: relative;
         }
     });
 
+    _this.eventTodoBind = this.eventTodo.bind(_this);
 
     // slideBar.addEventListener('mousedown', this.eventTodo.bind(_this), false);
-    slideBar.addEventListener('click', this.eventTodo.bind(_this), false);
+    slideBar.addEventListener('click', this.eventTodoBind, false);
     window.addEventListener('resize', function (e) {
         _this.stick.style.left = _this.persentNum * parseInt(util.getStyle(_this.bar).width) + 'px';
     }, false)
-    slideBar.addEventListener('drag', this.eventTodo.bind(_this), false);
-    slideBar.addEventListener('dragend', this.eventTodo.bind(_this), false);
+
+    slideBar.addEventListener('mousedown', this.eventTodoBind, false);
 }
 
 SlideBar.prototype.eventTodo = function (e) {
     if (e.type.match('touch') !== null) {
         e = e.touches[0];
     }
-    var slideBar=this.slideBar,stick = this.stick,bar = this.bar;
+    var slideBar = this.slideBar, stick = this.stick, bar = this.bar;
 
-        switch (e.type) {
-            case 'click': {
-                if (e.target.className !== 'stick') {
-                    stick.style.transition = '0.5s ease left'
-                    var leftValue = e.clientX-slideBar.offsetLeft;
-                    stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
-                    stick.addEventListener('transitionend', function () {
-                        stick.style.transition = 'none';
-                    }, false);
+    switch (e.type) {
+        case 'click': {
+            // if (e.target.className !== 'stick') {
+            stick.style.transition = '0.5s ease left'
+            var leftValue = e.clientX - slideBar.offsetLeft;
+            stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
+            stick.addEventListener('transitionend', function () {
+                stick.style.transition = 'none';
+            }, false);
 
-                    this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
-                    // console.log(this.persentNum);
+            this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
+            // console.log(this.persentNum);
 
-                }
-            }; break;
+            // }
+        }; break;
 
-            case 'drag':
-            case 'dragend': {
-                e.preventDefault();
-                var leftValue = e.clientX-slideBar.offsetLeft;
-                stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
-                this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
-            }; break;
-        }
+        case 'mousedown': {
+            if (e.target.className == 'stick') {
+                stick.style.transform='none';
+                stick.addEventListener('mousemove', this.eventTodoBind, false);
+                stick.addEventListener('mouseup', this.eventTodoBind, false);
+            }
+        }; break;
+        case 'mousemove': {
+            console.log(e);
+            e.preventDefault();
+            var leftValue = e.clientX - slideBar.offsetLeft;
+            stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
+            this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
+        }; break;
+        case 'mouseup': {
+            this.stick.removeEventListener('mousemove', this.eventTodoBind, false);
+            this.stick.removeEventListener('mouseup', this.eventTodoBind, false);
+        }; break;
+    }
 
 }
