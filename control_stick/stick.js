@@ -235,7 +235,7 @@ Stick.prototype.getTransformMatrix = function (target) {
                 conf.type == 'translateY' || conf.type == 'droneRCLeft'
                 || conf.type == 'translateXY'
             ) {
-                translateMatrix4[13] = result.stickOffsetTop * conf.moveFactor;
+                translateMatrix4[13] = -result.stickOffsetTop * conf.moveFactor;
             }
             if (
                 conf.type == 'translateZ'
@@ -250,10 +250,10 @@ Stick.prototype.getTransformMatrix = function (target) {
 
             //！！！修复无人机左摇杆左右移动
             if(conf.type === 'droneRCLeft'){
-                rotateMatrix4y[0] = Math.cos(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
-                rotateMatrix4y[2] = -Math.sin(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
-                rotateMatrix4y[8] = Math.sin(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
-                rotateMatrix4y[10] = Math.cos(util.degToRad(result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[0] = Math.cos(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[2] = -Math.sin(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[8] = Math.sin(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
+                rotateMatrix4y[10] = Math.cos(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
                 console.log(rotateMatrix4y)
             }
 
