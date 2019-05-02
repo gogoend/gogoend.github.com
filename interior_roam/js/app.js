@@ -36,6 +36,7 @@ var APP = {
 			this.setScene( loader.parse( json.scene ) );
 			this.setCamera( loader.parse( json.camera ) );
 			scene.add(camera)
+			this.connectStick();
 
 			events = {
 				init: [],
@@ -104,6 +105,28 @@ var APP = {
 
 			dispatch( events.init, arguments );
 
+		};
+
+		this.connectStick=function(){
+			var stickConfig = {
+				type:'droneRCRight',
+				zoneSize:160,//外部尺寸
+				stickSize: 40,//内部尺寸
+				position: [null, 30, 30, null],//位置
+				target: camera,//控制目标：DOM或THREE.Object3D
+				moveFactor: 0.001,//移动因数
+			}
+			var a = new Stick(stickConfig);
+
+			var stickConfig2 = {
+				type:'droneRCLeft',
+				zoneSize:160,//外部尺寸
+				stickSize: 40,//内部尺寸
+				position: [null, null, 30, 30],//位置
+				target: camera,//控制目标：DOM或THREE.Object3D
+				moveFactor: 0.0005,//移动因数
+			}
+			var a2 = new Stick(stickConfig2);
 		};
 
 		this.setCamera = function ( value ) {
