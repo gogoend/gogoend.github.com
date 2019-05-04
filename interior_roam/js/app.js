@@ -114,7 +114,7 @@ var APP = {
 				stickSize: 40,//内部尺寸
 				position: [null, 30, 30, null],//位置
 				target: camera,//控制目标：DOM或THREE.Object3D
-				moveFactor: 0.001,//移动因数
+				moveFactor: 0.01,//移动因数
 			}
 			var a = new Stick(stickConfig);
 
@@ -124,7 +124,7 @@ var APP = {
 				stickSize: 40,//内部尺寸
 				position: [null, null, 30, 30],//位置
 				target: camera,//控制目标：DOM或THREE.Object3D
-				moveFactor: 0.0005,//移动因数
+				moveFactor: 0.005,//移动因数
 			}
 			var a2 = new Stick(stickConfig2);
 		};
@@ -282,6 +282,42 @@ var APP = {
 		}
 
 		function onDocumentMouseMove( event ) {
+			var e=event;
+			// if (e.type.match('mouse') || e.type == 'click') {
+			// 	//如果按下的按键为鼠标左键则不进行光线投射
+			// 	if (e.button == 0) {
+			// 		return;
+			// 	}
+			// }
+			var mouse = new THREE.Vector2();
+			// console.log(event);
+			var raycaster = new THREE.Raycaster();
+
+			e.preventDefault();
+			//将浏览器坐标转换到Threejs坐标
+			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
+
+			raycaster.setFromCamera(mouse, camera);
+			// console.log(camera);
+
+			//一个数组，用于保存与射线相交叉的对象
+			//数组下标按照物体远近来进行排序，下标越大越远
+			var intersects = raycaster.intersectObjects(scene.children);
+			console.log(intersects);
+			console.log(raycaster);
+			// //尝试把射线选中的除了全景球以外的元素删去
+			// //似乎可以用.filter(function(obj3d){return ...});来替换？
+			// var realIntersects = [];
+			// for (var i = 0; i < intersects.length; i++) {
+			// 	// console.log(intersects);
+			// 	if (intersects[i].object.geometry instanceof THREE.SphereBufferGeometry) {
+			// 		realIntersects.push(intersects[i]);
+			// 	}
+			// }
+			// // console.log(realIntersects);
+			// var intersectPoint = realIntersects[0].point;
+			// console.log(intersectPoint);
 
 			dispatch( events.mousemove, event );
 
