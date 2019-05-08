@@ -224,6 +224,9 @@ Stick.prototype.getTransformMatrix = function (target) {
 
             //平移矩阵
 
+            //尝试修复在物体旋转后物体位移方向不再正确 //https://blog.csdn.net/jia18337935154/article/details/83539546
+            
+
             if (
                 conf.type == 'translateX'
                 || conf.type == 'translateXY'

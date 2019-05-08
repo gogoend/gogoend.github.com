@@ -5,9 +5,13 @@
 var APP = {
 
 	Player: function () {
+		var _this=this;
 
 		var loader = new THREE.ObjectLoader();
 		var camera, scene, renderer;
+
+		var cameraGroup;
+		var cameraTarget;
 
 		var events = {};
 
@@ -35,7 +39,17 @@ var APP = {
 
 			this.setScene( loader.parse( json.scene ) );
 			this.setCamera( loader.parse( json.camera ) );
-			scene.add(camera)
+
+			cameraTarget=new THREE.Object3D();
+			cameraTarget.name="cameraTarget";
+			cameraTarget.position.x=1;
+			camera.lookAt(cameraTarget.position)
+			cameraGroup=new THREE.Group();
+			cameraGroup.name="cameraGroup";
+			cameraGroup.add(camera);
+			cameraGroup.add(cameraTarget);
+
+			scene.add(cameraGroup)
 			this.connectStick();
 
 			events = {
@@ -113,8 +127,8 @@ var APP = {
 				zoneSize:160,//外部尺寸
 				stickSize: 40,//内部尺寸
 				position: [null, 30, 30, null],//位置
-				target: camera,//控制目标：DOM或THREE.Object3D
-				moveFactor: 0.01,//移动因数
+				target: cameraGroup,//控制目标：DOM或THREE.Object3D
+				moveFactor: 0.0004,//移动因数
 			}
 			var a = new Stick(stickConfig);
 
@@ -123,7 +137,7 @@ var APP = {
 				zoneSize:160,//外部尺寸
 				stickSize: 40,//内部尺寸
 				position: [null, null, 30, 30],//位置
-				target: camera,//控制目标：DOM或THREE.Object3D
+				target: cameraTarget,//控制目标：DOM或THREE.Object3D
 				moveFactor: 0.005,//移动因数
 			}
 			var a2 = new Stick(stickConfig2);
@@ -159,6 +173,7 @@ var APP = {
 			if ( camera ) {
 
 				camera.aspect = this.width / this.height;
+
 				camera.updateProjectionMatrix();
 
 			}
@@ -197,6 +212,9 @@ var APP = {
 
 			}
 
+
+			var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
+			camera.lookAt(cameraTargetWorldPosition);
 			renderer.render( scene, camera );
 
 			prevTime = time;
@@ -269,14 +287,100 @@ var APP = {
 
 		}
 
+		//处理鼠标或者触摸屏事件
+		function pointHandler(e) {
+			// //鼠标拖动全景球事件由鼠标左键来触发
+			// if (e.type.match('mouse') || e.type == 'click') {
+			// 	if (e.button != 0) {
+			// 		return;
+			// 	}
+			// }
+
+			// var evtType = e.type;
+
+			// // e.preventDefault();
+
+			// if (e.type.match('touch')) {
+			// 	e = e.touches[0];
+			// }
+
+			// //事件处理函数中this指向的是addEventListener的元素
+			// // console.log(this);
+
+			// switch (evtType) {
+			// 	case "touchstart":
+			// 	case "mousedown": {
+			// 		renderer.domElement.style.cursor = 'grab';
+
+			// 		this.userInteract = true;
+			// 		//得到鼠标点击位置
+			// 		this.pointData.originX = e.clientX;
+			// 		this.pointData.originY = e.clientY;
+
+			// 		//
+			// 		this.pointData.originTheta = this.targetSphereCood.theta;
+			// 		this.pointData.originPhi = this.targetSphereCood.phi;
+			// 		//
+
+			// 		this.panoWrap.addEventListener("mousemove", this.eventBind.pointHandler, false);
+			// 		this.panoWrap.addEventListener("mouseup", this.eventBind.pointHandler, false);
+
+			// 		this.panoWrap.addEventListener("touchmove", this.eventBind.pointHandler, false);
+			// 		this.panoWrap.addEventListener("touchend", this.eventBind.pointHandler, false);
+
+			// 		break;
+			// 	}
+			// 	case "touchmove":
+			// 	case "mousemove": {
+			// 		renderer.domElement.style.cursor = 'grabbing';
+
+			// 		if (this.userInteract) {
+
+			// 			//鼠标移动时计算鼠标的偏移量
+			// 			this.pointData.offsetX = e.clientX - this.pointData.originX;
+			// 			this.pointData.offsetY = e.clientY - this.pointData.originY;
+
+			// 			//
+			// 			this.targetSphereCood.theta = this.pointData.offsetX * 0.005 + this.pointData.originTheta;
+			// 			// console.log(util.radToDeg(sphereCood.phi))
+
+			// 			var phi = this.pointData.offsetY * 0.005 + this.pointData.originPhi;
+			// 			//限制上下俯仰角度，以防万向锁。来自THREEJS
+			// 			this.targetSphereCood.phi = util.clamp(phi, util.degToRad(181), util.degToRad(359));
+
+			// 			// console.log(sphereCood.theta + ' ' + sphereCood.phi)
+
+			// 			this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
+			// 			this.camera.lookAt(this.cameraTarget.position);
+
+			// 		}
+			// 		break;
+			// 	}
+
+			// 	case "touchend":
+			// 	case "mouseup": {
+			// 		renderer.domElement.style.cursor = 'grab';
+			// 		this.userInteract = false;
+
+			// 		this.panoWrap.removeEventListener("mouseup", this.eventBind.pointHandler, false);
+			// 		this.panoWrap.removeEventListener("touchend", this.eventBind.pointHandler, false);
+
+			// 		this.panoWrap.removeEventListener("mousemove", this.eventBind.pointHandler, false);
+			// 		this.panoWrap.removeEventListener("touchmove", this.eventBind.pointHandler, false);
+
+
+			// 		break;
+			// 	}
+			// }
+		}
+
 		function onDocumentMouseDown( event ) {
-
+			// pointHandler(event).bind(this);
 			dispatch( events.mousedown, event );
-
 		}
 
 		function onDocumentMouseUp( event ) {
-
+			// pointHandler(event).bind(this);
 			dispatch( events.mouseup, event );
 
 		}
@@ -340,6 +444,9 @@ var APP = {
 			dispatch( events.touchmove, event );
 
 		}
+
+		console.log(this)
+
 
 	}
 
