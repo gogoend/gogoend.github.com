@@ -251,8 +251,22 @@ Stick.prototype.getTransformMatrix = function (target) {
             //旋转矩阵
             //X-俯仰，Y-环视，Z-翻滚
 
+
+            // 沿着x轴旋转矩阵
+            if (
+                conf.type === 'rotateX') {
+                rotateMatrix4x[5] = Math.cos(result.rad);
+                rotateMatrix4x[6] = Math.sin(result.rad);
+                rotateMatrix4x[9] = -Math.sin(result.rad);
+                rotateMatrix4x[10] = Math.cos(result.rad);
+            }
+
+            console.log(rotateMatrix4x)
+
             //！！！修复无人机左摇杆左右移动
-            if(conf.type === 'droneRCLeft'){
+            // 沿着y轴旋转矩阵
+            if(conf.type === 'droneRCLeft' 
+                ||conf.type === 'rotateY'){
                 rotateMatrix4y[0] = Math.cos(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
                 rotateMatrix4y[2] = -Math.sin(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
                 rotateMatrix4y[8] = Math.sin(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
@@ -260,44 +274,24 @@ Stick.prototype.getTransformMatrix = function (target) {
                 console.log(rotateMatrix4y)
             }
 
-            //沿着x轴旋转矩阵
-            // if (
-            //     conf.type === 'rotateX') {
-            //     rotateMatrix4x[5] = Math.cos(result.rad);
-            //     rotateMatrix4x[6] = Math.sin(result.rad);
-            //     rotateMatrix4x[9] = -Math.sin(result.rad);
-            //     rotateMatrix4x[10] = Math.cos(result.rad);
-            // }
+            console.log(rotateMatrix4y)
 
-            // console.log(rotateMatrix4x)
+            // 沿着z轴的旋转矩阵
+            if (
+                conf.type === 'rotateZ') {
+                rotateMatrix4z[0] = Math.cos(result.rad);
+                rotateMatrix4z[1] = Math.sin(result.rad);
+                rotateMatrix4z[4] = -Math.sin(result.rad);
+                rotateMatrix4z[5] = Math.cos(result.rad);
+            }
 
-            //沿着y轴旋转矩阵
-            // if (
-            //     conf.type === 'rotateY') {
-            //     rotateMatrix4y[0] = Math.cos(result.rad);
-            //     rotateMatrix4y[2] = -Math.sin(result.rad);
-            //     rotateMatrix4y[8] = Math.sin(result.rad);
-            //     rotateMatrix4y[10] = Math.cos(result.rad);
-            // }
-
-            // console.log(rotateMatrix4y)
-
-            //沿着z轴的旋转矩阵
-            // if (
-            //     conf.type === 'rotateZ') {
-            //     rotateMatrix4z[0] = Math.cos(result.rad);
-            //     rotateMatrix4z[1] = Math.sin(result.rad);
-            //     rotateMatrix4z[4] = -Math.sin(result.rad);
-            //     rotateMatrix4z[5] = Math.cos(result.rad);
-            // }
-
-            // console.log(rotateMatrix4z)
+            console.log(rotateMatrix4z)
 
 
             //旋转顺序以及方式
             switch (conf.type) {
                 case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
-                case 'rotateY': rotateMatrix4 = rotateMatrix4y; break;
+                case 'rotateY': 
                 case 'droneRCLeft': rotateMatrix4 = rotateMatrix4y; break;
                 case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
             }
