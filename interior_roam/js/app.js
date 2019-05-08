@@ -43,7 +43,7 @@ var APP = {
 			cameraTarget=new THREE.Object3D();
 			cameraTarget.name="cameraTarget";
 			cameraTarget.position.x=1;
-			camera.lookAt(cameraTarget.position)
+			// camera.lookAt(cameraTarget.position)
 			cameraGroup=new THREE.Group();
 			cameraGroup.name="cameraGroup";
 			cameraGroup.add(camera);
@@ -133,11 +133,11 @@ var APP = {
 			var a = new Stick(stickConfig);
 
 			var stickConfig2 = {
-				type:'droneRCLeft',
+				type:'rotateY',
 				zoneSize:160,//外部尺寸
 				stickSize: 40,//内部尺寸
 				position: [null, null, 30, 30],//位置
-				target: cameraTarget,//控制目标：DOM或THREE.Object3D
+				target: camera,//控制目标：DOM或THREE.Object3D
 				moveFactor: 0.005,//移动因数
 			}
 			var a2 = new Stick(stickConfig2);
@@ -214,7 +214,7 @@ var APP = {
 
 
 			var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
-			camera.lookAt(cameraTargetWorldPosition);
+			// camera.lookAt(cameraTargetWorldPosition);
 			renderer.render( scene, camera );
 
 			prevTime = time;
@@ -408,8 +408,8 @@ var APP = {
 			//一个数组，用于保存与射线相交叉的对象
 			//数组下标按照物体远近来进行排序，下标越大越远
 			var intersects = raycaster.intersectObjects(scene.children);
-			console.log(intersects);
-			console.log(raycaster);
+			// console.log(intersects);
+			// console.log(raycaster);
 			// //尝试把射线选中的除了全景球以外的元素删去
 			// //似乎可以用.filter(function(obj3d){return ...});来替换？
 			// var realIntersects = [];
