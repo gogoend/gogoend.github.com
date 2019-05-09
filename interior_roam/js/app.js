@@ -49,7 +49,9 @@ var APP = {
 			cameraGroup.add(camera);
 			cameraGroup.add(cameraTarget);
 
-			scene.add(cameraGroup)
+			scene.add(cameraGroup);
+
+			this.addFloor();
 			this.connectStick();
 
 			events = {
@@ -120,6 +122,18 @@ var APP = {
 			dispatch( events.init, arguments );
 
 		};
+
+		this.addFloor=function(){
+			var plane, floor;
+			plane = new THREE.PlaneGeometry( 17, 16);
+			floor=new THREE.Mesh(plane);
+			floor.position.x=5.212;
+			floor.position.y=-0.095;
+			floor.position.z=3.075;
+			floor.rotateX(util.degToRad(-90));
+			floor.name='floorClick'
+			scene.add(floor);
+		}
 
 		this.connectStick=function(){
 			var stickConfig = {
@@ -225,6 +239,8 @@ var APP = {
 
 			prevTime = performance.now();
 
+			document.addEventListener( 'click', pointHandler );
+
 			document.addEventListener( 'keydown', onDocumentKeyDown );
 			document.addEventListener( 'keyup', onDocumentKeyUp );
 			document.addEventListener( 'mousedown', onDocumentMouseDown );
@@ -241,6 +257,8 @@ var APP = {
 		};
 
 		this.stop = function () {
+
+			document.removeEventListener( 'click', pointHandler );
 
 			document.removeEventListener( 'keydown', onDocumentKeyDown );
 			document.removeEventListener( 'keyup', onDocumentKeyUp );
@@ -289,6 +307,62 @@ var APP = {
 
 		//处理鼠标或者触摸屏事件
 		function pointHandler(e) {
+
+			var e=event;
+			// if (e.type.match('mouse') || e.type == 'click') {
+			// 	//如果按下的按键为鼠标左键则不进行光线投射
+			// 	if (e.button == 0) {
+			// 		return;
+			// 	}
+			// }
+			// console.log(e.target.tagName.toLowerCase());
+
+			if(e.target.tagName.toLowerCase()!=='canvas'){
+				return;
+			}
+
+			var mouse = new THREE.Vector2();
+			// console.log(event);
+			var raycaster = new THREE.Raycaster();
+
+			e.preventDefault();
+			//将浏览器坐标转换到Threejs坐标
+			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+			mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
+
+			raycaster.setFromCamera(mouse, camera);
+			// console.log(camera);
+
+			//一个数组，用于保存与射线相交叉的对象
+			//数组下标按照物体远近来进行排序，下标越大越远
+			var intersects = raycaster.intersectObjects(scene.children);
+			// console.log(intersects);
+			// console.log(raycaster);
+			//尝试把射线选中的除了交互地板以外的元素删去
+			//似乎可以用.filter(function(obj3d){return ...});来替换？
+			var realIntersects = [];
+			for (var i = 0; i < intersects.length; i++) {
+				// console.log(intersects);
+				if (intersects[i].object.name==='floorClick') {
+					realIntersects.push(intersects[i]);
+				}
+			}
+			console.log(realIntersects);
+
+			if(realIntersects.length!==0){
+				var intersectPoint = realIntersects[0].point;
+				console.log(intersectPoint);
+
+				//TWEENJS补间
+
+				camera.position.x=intersectPoint.x;
+				camera.position.z=intersectPoint.z;
+				camera.updateProjectionMatrix();
+			}
+
+
+
+
 			// //鼠标拖动全景球事件由鼠标左键来触发
 			// if (e.type.match('mouse') || e.type == 'click') {
 			// 	if (e.button != 0) {
@@ -376,52 +450,19 @@ var APP = {
 
 		function onDocumentMouseDown( event ) {
 			// pointHandler(event).bind(this);
+
 			dispatch( events.mousedown, event );
 		}
 
 		function onDocumentMouseUp( event ) {
 			// pointHandler(event).bind(this);
+			
 			dispatch( events.mouseup, event );
 
 		}
 
 		function onDocumentMouseMove( event ) {
-			var e=event;
-			// if (e.type.match('mouse') || e.type == 'click') {
-			// 	//如果按下的按键为鼠标左键则不进行光线投射
-			// 	if (e.button == 0) {
-			// 		return;
-			// 	}
-			// }
-			var mouse = new THREE.Vector2();
-			// console.log(event);
-			var raycaster = new THREE.Raycaster();
 
-			e.preventDefault();
-			//将浏览器坐标转换到Threejs坐标
-			mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-			mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
-
-			raycaster.setFromCamera(mouse, camera);
-			// console.log(camera);
-
-			//一个数组，用于保存与射线相交叉的对象
-			//数组下标按照物体远近来进行排序，下标越大越远
-			var intersects = raycaster.intersectObjects(scene.children);
-			// console.log(intersects);
-			// console.log(raycaster);
-			// //尝试把射线选中的除了全景球以外的元素删去
-			// //似乎可以用.filter(function(obj3d){return ...});来替换？
-			// var realIntersects = [];
-			// for (var i = 0; i < intersects.length; i++) {
-			// 	// console.log(intersects);
-			// 	if (intersects[i].object.geometry instanceof THREE.SphereBufferGeometry) {
-			// 		realIntersects.push(intersects[i]);
-			// 	}
-			// }
-			// // console.log(realIntersects);
-			// var intersectPoint = realIntersects[0].point;
-			// console.log(intersectPoint);
 
 			dispatch( events.mousemove, event );
 
