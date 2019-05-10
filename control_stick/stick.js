@@ -49,12 +49,12 @@ var Stick = function (conf) {
         rad: 0,
         deg: 0,                                       //获得stick相对于zone中心的旋转度数
         lockedPos: [],                                //当stick移动超出zone时，获得stick在边缘锁定的位置
-        matrices:{
-            rawPositionMatrix:null,                   //移到原点矩阵
-            rawPositionMatrix0:null,                  //移回原位矩阵
-            rawMatrix:null,                           //原始矩阵
-            translateMatrix:util.originMatrix4.concat(),                     //位移矩阵
-            rotateMatrix:util.originMatrix4.concat(),                        //旋转矩阵
+        matrices: {
+            rawPositionMatrix: null,                   //移到原点矩阵
+            rawPositionMatrix0: null,                  //移回原位矩阵
+            rawMatrix: null,                           //原始矩阵
+            translateMatrix: util.originMatrix4.concat(),                     //位移矩阵
+            rotateMatrix: util.originMatrix4.concat(),                        //旋转矩阵
             transformMatrix: null,                    //变换矩阵
         }
     };
@@ -78,9 +78,9 @@ Stick.prototype.getDirection = function (e) {
     */
 
     // console.log(this);
-    result.stickLeft = e.clientX - parseInt(util.getStyle(this.zone).left)- 0.5 * parseInt(util.getStyle(this.stick).width) ;// inner.style.left
-    result.stickTop = e.clientY - parseInt(util.getStyle(this.zone).top)- 0.5 * parseInt(util.getStyle(this.stick).height) ;// inner.style.top
-    
+    result.stickLeft = e.clientX - parseInt(util.getStyle(this.zone).left) - 0.5 * parseInt(util.getStyle(this.stick).width);// inner.style.left
+    result.stickTop = e.clientY - parseInt(util.getStyle(this.zone).top) - 0.5 * parseInt(util.getStyle(this.stick).height);// inner.style.top
+
     result.stickOffsetLeft = result.stickLeft - this.originX;
     result.stickOffsetTop = result.stickTop - this.originY;
 
@@ -144,8 +144,8 @@ Stick.prototype.getRawMatrix = function () {
             rawPositionMatrix0[13] = rawPosition.y;
             rawPositionMatrix0[14] = rawPosition.z;
 
-            this.result.matrices.rawPositionMatrix=rawPositionMatrix;
-            this.result.matrices.rawPositionMatrix0=rawPositionMatrix0;
+            this.result.matrices.rawPositionMatrix = rawPositionMatrix;
+            this.result.matrices.rawPositionMatrix0 = rawPositionMatrix0;
         }
     } else {
         console.error('对象不受到支持。')
@@ -156,18 +156,18 @@ Stick.prototype.getRawMatrix = function () {
 
 //获得变换矩阵
 Stick.prototype.getTransformMatrix = function (target) {
-    var conf=this.conf
+    var conf = this.conf
     var mmp = util.matrixMuitply;
     var result = this.result;
     if (target instanceof Element || target instanceof THREE.Object3D) {
 
         //原始矩阵
         var rawMatrix = target instanceof Element ? util.parseTransformMatrix(util.getStyle(target).transform) : target.matrixWorld.elements.slice(0);
-        result.matrices.rawMatrix=rawMatrix;
+        result.matrices.rawMatrix = rawMatrix;
 
         if (rawMatrix.length == 9) {
             console.log('2D变换模式');
-        }else if (rawMatrix.length == 16) {
+        } else if (rawMatrix.length == 16) {
             // console.log('3D变换模式');
             //初始化原矩阵
             var translateMatrix4 = util.originMatrix4.slice(0);//位移矩阵
@@ -223,11 +223,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             */
 
             //平移矩阵
-
-            //尝试修复在物体旋转后物体位移方向不再正确 //https://blog.csdn.net/jia18337935154/article/details/83539546
-            
-
-            if (
+if (
                 conf.type == 'translateX'
                 || conf.type == 'translateXY'
                 || conf.type == 'translateXZ' || conf.type == 'droneRCRight'
@@ -246,6 +242,46 @@ Stick.prototype.getTransformMatrix = function (target) {
             ) {
                 translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
             }
+
+            
+            //尝试修复在物体旋转后物体位移方向不再正确 
+            //https://blog.csdn.net/jia18337935154/article/details/83539546
+            //https://www.azimiao.com/2570.html
+
+
+            //相机问题 //要使得相机朝向运动方向移动，来自misc_fps.html
+        console.log((target instanceof THREE.Camera )+ '  '+this.conf.type)
+        if (target instanceof THREE.Camera && this.conf.type==="droneRCRight") {
+            var forward=new THREE.Vector3();
+            var sideways=new THREE.Vector3();
+
+            forward.set(Math.sin(target.rotation.y),0,Math.cos(target.rotation.y));
+            sideways.set(forward.z,0,-forward.x);
+
+            console.log(forward)
+            console.log(sideways)
+
+            var combined=forward.add(sideways);
+            console.log(combined);
+
+
+
+            target.position.x+=combined.x;
+            target.position.y+=combined.y;
+            target.position.z+=combined.z;
+
+            var __c=new THREE.BoxGeometry(0.2,0.2,0.2)
+
+            var _cube=new THREE.Mesh(__c)
+
+            _cube.position.x=target.position.x+1
+            _cube.position.y=target.position.y+1
+            _cube.position.z=target.position.z+1
+
+            scene.add(_cube)
+            
+        }
+            
             // console.log(translateMatrix4);
 
             //旋转矩阵
@@ -261,20 +297,20 @@ Stick.prototype.getTransformMatrix = function (target) {
                 rotateMatrix4x[10] = Math.cos(result.rad);
             }
 
-            console.log(rotateMatrix4x)
+            // console.log(rotateMatrix4x)
 
             //！！！修复无人机左摇杆左右移动
             // 沿着y轴旋转矩阵
-            if(conf.type === 'droneRCLeft' 
-                ||conf.type === 'rotateY'){
-                rotateMatrix4y[0] = Math.cos(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
-                rotateMatrix4y[2] = -Math.sin(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
-                rotateMatrix4y[8] = Math.sin(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
-                rotateMatrix4y[10] = Math.cos(util.degToRad(-result.stickOffsetLeft*20*conf.moveFactor));
+            if (conf.type === 'droneRCLeft'
+                || conf.type === 'rotateY') {
+                rotateMatrix4y[0] = Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[2] = -Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[8] = Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[10] = Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
                 console.log(rotateMatrix4y)
             }
 
-            console.log(rotateMatrix4y)
+            // console.log(rotateMatrix4y)
 
             // 沿着z轴的旋转矩阵
             if (
@@ -285,28 +321,28 @@ Stick.prototype.getTransformMatrix = function (target) {
                 rotateMatrix4z[5] = Math.cos(result.rad);
             }
 
-            console.log(rotateMatrix4z)
+            // console.log(rotateMatrix4z)
 
 
             //旋转顺序以及方式
             switch (conf.type) {
                 case 'rotateX': rotateMatrix4 = rotateMatrix4x; break;
-                case 'rotateY': 
+                case 'rotateY':
                 case 'droneRCLeft': rotateMatrix4 = rotateMatrix4y; break;
                 case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
             }
             // console.log(rotateMatrix4);
 
-            result.matrices.rawMatrix=rawMatrix;
+            result.matrices.rawMatrix = rawMatrix;
 
-            result.matrices.translateMatrix=translateMatrix4;
+            result.matrices.translateMatrix = translateMatrix4;
 
-            result.matrices.rotateMatrix=rotateMatrix4;
+            result.matrices.rotateMatrix = rotateMatrix4;
 
-            
+
             //console.log('位置矩阵：' + rawPositionMatrix);
 
-            var transformMatrix4 = mmp(rotateMatrix4,translateMatrix4);
+            var transformMatrix4 = mmp(rotateMatrix4, translateMatrix4);
 
             // console.log(this.type+'原始矩阵：' + rawMatrix);
             // console.log(this.type+'平移矩阵：' + translateMatrix4);
@@ -317,7 +353,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             //返回变换矩阵
             // return mmp(mmp(rawPositionMatrix, matrix), rawPositionMatrix0);
             // console.log(transformMatrix4);
-            result.matrices.transformMatrix=transformMatrix4;
+            result.matrices.transformMatrix = transformMatrix4;
             return transformMatrix4;
         }
         // return result;
@@ -326,28 +362,29 @@ Stick.prototype.getTransformMatrix = function (target) {
 
 //对目标设置矩阵
 Stick.prototype.setMatrix = function () {
-    var target=this.conf.target;//目标
+    var target = this.conf.target;//目标
     var mmp = util.matrixMuitply.bind(util);
     var result = this.result;//结果
-    var rawMatrix=result.matrices.rawMatrix;
-    var transformMatrix=this.getTransformMatrix(target);//获得的变换矩阵
+    var rawMatrix = result.matrices.rawMatrix;
+    var transformMatrix = this.getTransformMatrix(target);//获得的变换矩阵
     this.getRawMatrix();//获得的原始矩阵
     // console.log(rawMatrix3d);
-    var rawPositionMatrix=result.matrices.rawPositionMatrix;//位置平移到原点矩阵
-    var rawPositionMatrix0=result.matrices.rawPositionMatrix0;//位置平移回原位矩阵
+    var rawPositionMatrix = result.matrices.rawPositionMatrix;//位置平移到原点矩阵
+    var rawPositionMatrix0 = result.matrices.rawPositionMatrix0;//位置平移回原位矩阵
 
     //应用矩阵
     if (target instanceof Element) {
         //矩阵相乘
-        var finalMatrix=mmp(mmp(mmp(rawMatrix, rawPositionMatrix), transformMatrix), rawPositionMatrix0);
-        var cssTransformText = 'matrix3d(' + finalMatrix[0] + ',' + finalMatrix[1] + ',' + finalMatrix[2] +',' + finalMatrix[3] + ',' + finalMatrix[4] +',' + finalMatrix[5] + ',' + finalMatrix[6] + ',' + finalMatrix[7] + ',' + finalMatrix[8] +',' + finalMatrix[9] +',' + finalMatrix[10] +',' + finalMatrix[11] +',' + finalMatrix[12] +',' + finalMatrix[13] +',' + finalMatrix[14] +',' + finalMatrix[15] +')';
-        target.style.transform=cssTransformText;
+        var finalMatrix = mmp(mmp(mmp(rawMatrix, rawPositionMatrix), transformMatrix), rawPositionMatrix0);
+        var cssTransformText = 'matrix3d(' + finalMatrix[0] + ',' + finalMatrix[1] + ',' + finalMatrix[2] + ',' + finalMatrix[3] + ',' + finalMatrix[4] + ',' + finalMatrix[5] + ',' + finalMatrix[6] + ',' + finalMatrix[7] + ',' + finalMatrix[8] + ',' + finalMatrix[9] + ',' + finalMatrix[10] + ',' + finalMatrix[11] + ',' + finalMatrix[12] + ',' + finalMatrix[13] + ',' + finalMatrix[14] + ',' + finalMatrix[15] + ')';
+        target.style.transform = cssTransformText;
     } else if (target instanceof THREE.Object3D) {
         //矩阵相乘
-        var finalMatrix=mmp(mmp(rawPositionMatrix, transformMatrix), rawPositionMatrix0);
+        var finalMatrix = mmp(mmp(rawPositionMatrix, transformMatrix), rawPositionMatrix0);
         var finalMatrixList = new THREE.Matrix4();
         finalMatrixList.fromArray(finalMatrix);
         target.applyMatrix(finalMatrixList);
+        
     } else {
         console.error('目标元素不支持，必须为Element或THREE.Object3D。');
     }
@@ -400,13 +437,13 @@ Stick.prototype.eventTodo = function () {
             case 'touchmove':
             case 'mousemove': {
                 //e.movementX和e.movementY是两次移动之间距离的差
-                console.log(e.movementX+' '+e.movementY);
+                // console.log(e.movementX + ' ' + e.movementY);
                 var result = _this.getDirection(e);
                 // console.log(result);
                 e.preventDefault();
 
-                stick.style.left = result.stickLeft+ 'px';
-                stick.style.top = result.stickTop+ 'px';
+                stick.style.left = result.stickLeft + 'px';
+                stick.style.top = result.stickTop + 'px';
 
                 //...
                 // console.log(_this)

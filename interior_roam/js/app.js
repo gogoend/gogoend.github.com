@@ -10,6 +10,9 @@ var APP = {
 		var loader = new THREE.ObjectLoader();
 		var camera, scene, renderer;
 
+		var tween;
+		var controls;
+
 		var cameraGroup;
 		var cameraTarget;
 
@@ -53,6 +56,7 @@ var APP = {
 
 			this.addFloor();
 			this.connectStick();
+			// this.connectOrbitControl();
 
 			events = {
 				init: [],
@@ -128,12 +132,13 @@ var APP = {
 			plane = new THREE.PlaneGeometry( 17, 16);
 			floor=new THREE.Mesh(plane);
 			floor.position.x=5.212;
-			floor.position.y=-0.095;
+			floor.position.y=-0.05;
 			floor.position.z=3.075;
 			floor.rotateX(util.degToRad(-90));
 			floor.name='floorClick'
 			scene.add(floor);
 		}
+
 
 		this.connectStick=function(){
 			var stickConfig = {
@@ -141,7 +146,7 @@ var APP = {
 				zoneSize:160,//外部尺寸
 				stickSize: 40,//内部尺寸
 				position: [null, 30, 30, null],//位置
-				target: cameraGroup,//控制目标：DOM或THREE.Object3D
+				target: camera,//控制目标：DOM或THREE.Object3D
 				moveFactor: 0.0004,//移动因数
 			}
 			var a = new Stick(stickConfig);
@@ -229,7 +234,11 @@ var APP = {
 
 			var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
 			// camera.lookAt(cameraTargetWorldPosition);
+
+
 			renderer.render( scene, camera );
+
+			// tween.start();
 
 			prevTime = time;
 
@@ -353,11 +362,24 @@ var APP = {
 				var intersectPoint = realIntersects[0].point;
 				console.log(intersectPoint);
 
-				//TWEENJS补间
+				// TWEENJS补间
+				cameraMoveTransition(intersectPoint);
 
-				camera.position.x=intersectPoint.x;
-				camera.position.z=intersectPoint.z;
-				camera.updateProjectionMatrix();
+				var originCameraPosition={
+					x:camera.position.x,
+					z:camera.position.z
+				}
+				var afterCameraPosition={
+					x:intersectPoint.x,
+					z:intersectPoint.z
+				}
+
+				camera.position.x=afterCameraPosition.x;
+				camera.position.z=afterCameraPosition.z
+
+				// camera.position.z=intersectPoint.z;
+				// camera.updateProjectionMatrix();
+
 			}
 
 
@@ -446,6 +468,32 @@ var APP = {
 			// 		break;
 			// 	}
 			// }
+		}
+
+		function cameraMoveTransition(targetPoint){
+
+			//TWEENJS补间
+			var originPosition={
+				x:camera.position.x,
+				z:camera.position.z
+			}
+			var endPosition={
+				x:targetPoint.x,
+				z:targetPoint.z
+			}
+
+			tween=new TWEEN.Tween(originPosition);
+			tween.to(endPosition,1000);
+			tween.onUpdate(
+				function(){
+					camera.updateProjectionMatrix();
+					console.log(this.x)
+				}
+			)
+			tween.start();
+
+			console.log(tween)
+
 		}
 
 		function onDocumentMouseDown( event ) {
