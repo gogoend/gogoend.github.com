@@ -231,6 +231,9 @@ var APP = {
 
 			}
 
+			camera.position.x=util.clamp(camera.position.x,-3.2,12.8);
+			camera.position.z=util.clamp(camera.position.z,-5,10.9)
+
 
 			var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
 			// camera.lookAt(cameraTargetWorldPosition);
