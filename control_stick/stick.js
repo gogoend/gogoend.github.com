@@ -37,8 +37,14 @@ var Stick = function (conf) {
     _this.eventTodo();
 
 
-    //记录各项配置
+    //处理相机
 
+    if ((conf.target instanceof THREE.Camera )&& this.conf.type === "droneRCRight") {
+        _this.cameraRawVector=new THREE.Vector3();
+        conf.target.getWorldDirection(_this.cameraRawVector);
+    }
+
+    //记录各项配置
     _this.result = {
         stickLeft: null,
         stickTop: null,                               //用于计算stick样式
@@ -168,6 +174,7 @@ Stick.prototype.getTransformMatrix = function (target) {
         if (rawMatrix.length == 9) {
             console.log('2D变换模式');
         } else if (rawMatrix.length == 16) {
+
             // console.log('3D变换模式');
             //初始化原矩阵
             var translateMatrix4 = util.originMatrix4.slice(0);//位移矩阵
@@ -223,7 +230,7 @@ Stick.prototype.getTransformMatrix = function (target) {
             */
 
             //平移矩阵
-if (
+            if (
                 conf.type == 'translateX'
                 || conf.type == 'translateXY'
                 || conf.type == 'translateXZ' || conf.type == 'droneRCRight'
@@ -243,45 +250,98 @@ if (
                 translateMatrix4[14] = result.stickOffsetTop * conf.moveFactor;
             }
 
-            
+
             //尝试修复在物体旋转后物体位移方向不再正确 
             //https://blog.csdn.net/jia18337935154/article/details/83539546
             //https://www.azimiao.com/2570.html
 
 
             //相机问题 //要使得相机朝向运动方向移动，来自misc_fps.html
-        console.log((target instanceof THREE.Camera )+ '  '+this.conf.type)
-        if (target instanceof THREE.Camera && this.conf.type==="droneRCRight") {
-            var forward=new THREE.Vector3();
-            var sideways=new THREE.Vector3();
+            console.log((target instanceof THREE.Camera) + '  ' + this.conf.type)
+            if (target instanceof THREE.Camera && this.conf.type === "droneRCRight") {
+                var periousDirection=this.cameraRawVector;
+                console.log(periousDirection);
 
-            forward.set(Math.sin(target.rotation.y),0,Math.cos(target.rotation.y));
-            sideways.set(forward.z,0,-forward.x);
-
-            console.log(forward)
-            console.log(sideways)
-
-            var combined=forward.add(sideways);
-            console.log(combined);
+                var cameraDirection=new THREE.Vector3();
+                target.getWorldDirection(cameraDirection);
+                console.log(cameraDirection);
 
 
+                var vectorAngle=periousDirection.angleTo(cameraDirection);
+                var mX=conf.moveFactor*Math.sin(vectorAngle);
+                var mY=conf.moveFactor*Math.cos(vectorAngle);
 
-            target.position.x+=combined.x;
-            target.position.y+=combined.y;
-            target.position.z+=combined.z;
+                translateMatrix4[12] = result.stickOffsetLeft*mX;
+                translateMatrix4[14] = result.stickOffsetTop*mY;
 
-            var __c=new THREE.BoxGeometry(0.2,0.2,0.2)
+                console.log(vectorAngle)
 
-            var _cube=new THREE.Mesh(__c)
+                // var __c = new THREE.BoxGeometry(0.2, 0.2, 0.2)
 
-            _cube.position.x=target.position.x+1
-            _cube.position.y=target.position.y+1
-            _cube.position.z=target.position.z+1
+                // var _cube = new THREE.Mesh(__c)
 
-            scene.add(_cube)
-            
-        }
-            
+                // _cube.position.x = cameraDirection.x + 1
+                // _cube.position.y = cameraDirection.y + 1
+                // _cube.position.z = cameraDirection.z + 1
+
+                // scene.add(_cube)
+
+                // var forward=new THREE.Vector3();
+                // var sideways=new THREE.Vector3();
+
+                // forward.set(Math.sin(target.rotation.y),0,Math.cos(target.rotation.y));
+                // sideways.set(forward.z,0,-forward.x);
+
+                // console.log(forward)
+                // console.log(sideways)
+
+                // var combined=forward.add(sideways);
+                // console.log(combined);
+
+
+
+                // target.position.x+=combined.x;
+                // target.position.y+=combined.y;
+                // target.position.z+=combined.z;
+
+
+                // var offsetX=-this.result.stickOffsetTop //DOM与THREE中Y轴坐标相反
+                // var offsetY=this.result.stickOffsetLeft;
+                // var rotateY=0;
+
+                // if (offsetY > 0) {
+                //     //第一二象限
+                //     //一二象限角度值的正负及大小和我们需要的一致，正常求解即可
+                //     //Mathf.Atan计算并返回参数 f 中指定的数字的反正切值。返回值介于负二分之 pi 与正二分之 pi 之间。
+                //     rotateY = Math.atan(offsetX / offsetY) * 180 / Math.PI;
+                // } else if (offsetY < 0 && offsetX < 0) {
+                //     //第三象限
+                //     //用-180°加上摇杆轴线与与y轴负方向间的夹角
+                //     rotateY = -180 + Math.atan(offsetX / offsetY) * 180 / Math.PI;
+                // } else if (offsetY < 0 && offsetX > 0) {
+                //     //第四象限
+                //     //用180°加上摇杆轴线与y轴负方向的夹角
+                //     rotateY = 180 + Math.atan(offsetX / offsetY) * 180 / Math.PI;
+                // }
+        
+                // // Convert velocity to world coordinates
+                // euler.x = pitchObject.rotation.x;
+                // euler.y = yawObject.rotation.y;
+                // euler.order = "XYZ";
+                // quat.setFromEuler(euler);
+                // inputVelocity.applyQuaternion(quat);
+                // //quat.multiplyVector3(inputVelocity);
+        
+                // // Add to the object
+                // velocity.x += inputVelocity.x;
+                // velocity.z += inputVelocity.z;
+        
+                // yawObject.position.copy(cannonBody.position);
+
+
+
+            }
+
             // console.log(translateMatrix4);
 
             //旋转矩阵
@@ -384,7 +444,7 @@ Stick.prototype.setMatrix = function () {
         var finalMatrixList = new THREE.Matrix4();
         finalMatrixList.fromArray(finalMatrix);
         target.applyMatrix(finalMatrixList);
-        
+
     } else {
         console.error('目标元素不支持，必须为Element或THREE.Object3D。');
     }
