@@ -39,9 +39,9 @@ var Stick = function (conf) {
 
     //处理相机
 
-    if ((conf.target instanceof THREE.Camera )&& this.conf.type === "droneRCRight") {
+    if (conf.cameraObject && this.conf.type === "droneRCRight") {
         _this.cameraRawVector=new THREE.Vector3();
-        conf.target.getWorldDirection(_this.cameraRawVector);
+        conf.cameraObject.getWorldDirection(_this.cameraRawVector);
     }
 
     //记录各项配置
@@ -257,52 +257,49 @@ Stick.prototype.getTransformMatrix = function (target) {
 
 
             //相机问题 //要使得相机朝向运动方向移动，来自misc_fps.html
-            console.log((target instanceof THREE.Camera) + '  ' + this.conf.type)
-            if (target instanceof THREE.Camera && this.conf.type === "droneRCRight") {
+            // console.log((target instanceof THREE.Camera || target.name==="cameraGroup") + '  ' + this.conf.type)
+            if (this.conf.cameraObject && this.conf.type === "droneRCRight") {
                 var periousDirection=this.cameraRawVector;
                 console.log(periousDirection);
 
                 var cameraDirection=new THREE.Vector3();
-                target.getWorldDirection(cameraDirection);
+                conf.cameraObject.getWorldDirection(cameraDirection);
                 console.log(cameraDirection);
 
 
                 var vectorAngle=periousDirection.angleTo(cameraDirection);
+                // if(util.radToDeg(vectorAngle)<=90){
+                //     var mX=conf.moveFactor*Math.sin(vectorAngle);
+                //     var mY=conf.moveFactor*Math.cos(vectorAngle);
+                // }else if(util.radToDeg(vectorAngle)<90&&util.radToDeg(vectorAngle)<=180){
+                //     var mX=conf.moveFactor*Math.sin(vectorAngle);
+                //     var mY=conf.moveFactor*Math.cos(vectorAngle);
+                // }else if(util.radToDeg(vectorAngle)<180&&util.radToDeg(vectorAngle)<=270){
+                //     var mX=conf.moveFactor*Math.sin(vectorAngle);
+                //     var mY=conf.moveFactor*Math.cos(vectorAngle);
+                // }else if(util.radToDeg(vectorAngle)<270&&util.radToDeg(vectorAngle)<360){
+                //     var mX=conf.moveFactor*Math.sin(vectorAngle);
+                //     var mY=conf.moveFactor*Math.cos(vectorAngle);
+                // }
+
                 var mX=conf.moveFactor*Math.sin(vectorAngle);
                 var mY=conf.moveFactor*Math.cos(vectorAngle);
 
                 translateMatrix4[12] = result.stickOffsetLeft*mX;
                 translateMatrix4[14] = result.stickOffsetTop*mY;
 
-                console.log(vectorAngle)
+                console.log(util.radToDeg(vectorAngle))
 
-                // var __c = new THREE.BoxGeometry(0.2, 0.2, 0.2)
+                var __c = new THREE.BoxGeometry(0.2, 0.2, 0.2)
 
-                // var _cube = new THREE.Mesh(__c)
+                var _cube = new THREE.Mesh(__c)
 
-                // _cube.position.x = cameraDirection.x + 1
-                // _cube.position.y = cameraDirection.y + 1
-                // _cube.position.z = cameraDirection.z + 1
+                _cube.position.x = cameraDirection.x + 1
+                _cube.position.y = cameraDirection.y + 1
+                _cube.position.z = cameraDirection.z + 1
 
-                // scene.add(_cube)
+                scene.add(_cube)
 
-                // var forward=new THREE.Vector3();
-                // var sideways=new THREE.Vector3();
-
-                // forward.set(Math.sin(target.rotation.y),0,Math.cos(target.rotation.y));
-                // sideways.set(forward.z,0,-forward.x);
-
-                // console.log(forward)
-                // console.log(sideways)
-
-                // var combined=forward.add(sideways);
-                // console.log(combined);
-
-
-
-                // target.position.x+=combined.x;
-                // target.position.y+=combined.y;
-                // target.position.z+=combined.z;
 
 
                 // var offsetX=-this.result.stickOffsetTop //DOM与THREE中Y轴坐标相反
@@ -350,11 +347,15 @@ Stick.prototype.getTransformMatrix = function (target) {
 
             // 沿着x轴旋转矩阵
             if (
-                conf.type === 'rotateX') {
-                rotateMatrix4x[5] = Math.cos(result.rad);
-                rotateMatrix4x[6] = Math.sin(result.rad);
-                rotateMatrix4x[9] = -Math.sin(result.rad);
-                rotateMatrix4x[10] = Math.cos(result.rad);
+                conf.type === 'rotateX' ||conf.type === 'rotateXY') {
+                // rotateMatrix4x[5] = Math.cos(result.rad);
+                // rotateMatrix4x[6] = Math.sin(result.rad);
+                // rotateMatrix4x[9] = -Math.sin(result.rad);
+                // rotateMatrix4x[10] = Math.cos(result.rad);
+                rotateMatrix4y[5] = Math.cos(util.degToRad(-result.stickOffsetTop * 20 * conf.moveFactor));
+                rotateMatrix4y[6] = Math.sin(util.degToRad(-result.stickOffsetTop * 20 * conf.moveFactor));
+                rotateMatrix4y[9] =-Math.sin(util.degToRad(-result.stickOffsetTop * 20 * conf.moveFactor));
+                rotateMatrix4y[10]= Math.cos(util.degToRad(-result.stickOffsetTop * 20 * conf.moveFactor));
             }
 
             // console.log(rotateMatrix4x)
@@ -362,11 +363,11 @@ Stick.prototype.getTransformMatrix = function (target) {
             //！！！修复无人机左摇杆左右移动
             // 沿着y轴旋转矩阵
             if (conf.type === 'droneRCLeft'
-                || conf.type === 'rotateY') {
+                || conf.type === 'rotateY'|| conf.type==="rotateXY") {
                 rotateMatrix4y[0] = Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
-                rotateMatrix4y[2] = -Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[2] =-Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
                 rotateMatrix4y[8] = Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
-                rotateMatrix4y[10] = Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[10]= Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
                 console.log(rotateMatrix4y)
             }
 
@@ -375,10 +376,14 @@ Stick.prototype.getTransformMatrix = function (target) {
             // 沿着z轴的旋转矩阵
             if (
                 conf.type === 'rotateZ') {
-                rotateMatrix4z[0] = Math.cos(result.rad);
-                rotateMatrix4z[1] = Math.sin(result.rad);
-                rotateMatrix4z[4] = -Math.sin(result.rad);
-                rotateMatrix4z[5] = Math.cos(result.rad);
+                // rotateMatrix4z[0] = Math.cos(result.rad);
+                // rotateMatrix4z[1] = Math.sin(result.rad);
+                // rotateMatrix4z[4] = -Math.sin(result.rad);
+                // rotateMatrix4z[5] = Math.cos(result.rad);
+                rotateMatrix4y[0] = Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[1] = Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[4] =-Math.sin(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
+                rotateMatrix4y[5]= Math.cos(util.degToRad(-result.stickOffsetLeft * 20 * conf.moveFactor));
             }
 
             // console.log(rotateMatrix4z)
@@ -390,6 +395,7 @@ Stick.prototype.getTransformMatrix = function (target) {
                 case 'rotateY':
                 case 'droneRCLeft': rotateMatrix4 = rotateMatrix4y; break;
                 case 'rotateZ': rotateMatrix4 = rotateMatrix4z; break;
+                case 'rotateXY':rotateMatrix4=util.matrixMuitply(rotateMatrix4x,rotateMatrix4y);break;
             }
             // console.log(rotateMatrix4);
 
@@ -444,7 +450,11 @@ Stick.prototype.setMatrix = function () {
         var finalMatrixList = new THREE.Matrix4();
         finalMatrixList.fromArray(finalMatrix);
         target.applyMatrix(finalMatrixList);
-
+        if (this.conf.cameraObject && this.conf.type === "rotateXY") {
+            target.scale.x=1;
+            target.scale.y=1;
+            target.scale.z=1;
+        }
     } else {
         console.error('目标元素不支持，必须为Element或THREE.Object3D。');
     }

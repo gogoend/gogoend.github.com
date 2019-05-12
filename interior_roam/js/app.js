@@ -43,6 +43,8 @@ var APP = {
 			this.setScene( loader.parse( json.scene ) );
 			this.setCamera( loader.parse( json.camera ) );
 
+			camera.position.set(0,0,0)
+
 			cameraTarget=new THREE.Object3D();
 			cameraTarget.name="cameraTarget";
 			cameraTarget.position.x=1;
@@ -51,6 +53,7 @@ var APP = {
 			cameraGroup.name="cameraGroup";
 			cameraGroup.add(camera);
 			cameraGroup.add(cameraTarget);
+			cameraGroup.position.set(1.92,2.7,10.9)
 
 			scene.add(cameraGroup);
 
@@ -146,8 +149,10 @@ var APP = {
 				zoneSize:160,//外部尺寸
 				stickSize: 40,//内部尺寸
 				position: [null, 30, 30, null],//位置
-				target: camera,//控制目标：DOM或THREE.Object3D
+				target: cameraGroup,//控制目标：DOM或THREE.Object3D
 				moveFactor: 0.0004,//移动因数
+				cameraObject:camera
+
 			}
 			var a = new Stick(stickConfig);
 
@@ -231,13 +236,13 @@ var APP = {
 
 			}
 
-			camera.position.x=util.clamp(camera.position.x,-3.2,12.8);
-			camera.position.z=util.clamp(camera.position.z,-5,10.9)
-
 
 			var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
 			// camera.lookAt(cameraTargetWorldPosition);
 
+			cameraGroup.position.x=util.clamp(cameraGroup.position.x,-3.2,12.8);
+			cameraGroup.position.y=2.7;
+			cameraGroup.position.z=util.clamp(cameraGroup.position.z,-5,10.9)
 
 			renderer.render( scene, camera );
 
@@ -369,16 +374,16 @@ var APP = {
 				cameraMoveTransition(intersectPoint);
 
 				var originCameraPosition={
-					x:camera.position.x,
-					z:camera.position.z
+					x:cameraGroup.position.x,
+					z:cameraGroup.position.z
 				}
 				var afterCameraPosition={
 					x:intersectPoint.x,
 					z:intersectPoint.z
 				}
 
-				camera.position.x=afterCameraPosition.x;
-				camera.position.z=afterCameraPosition.z
+				cameraGroup.position.x=afterCameraPosition.x;
+				cameraGroup.position.z=afterCameraPosition.z
 
 				// camera.position.z=intersectPoint.z;
 				// camera.updateProjectionMatrix();
