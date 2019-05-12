@@ -13,7 +13,7 @@
     <script src="../control_stick/util.js"></script>
     <script src="../control_stick/stick.js"></script>
     <script src="../js/bmap_handler.js"></script>
-    <!-- <script src="../js/poi_handler.js"></script> -->
+    <script src="../js/poi_handler.js"></script>
     <script src="../js/public.js"></script>
 
     <style>
@@ -206,7 +206,7 @@
         <div class="panoPanelBottom" v-cloak :class="{'fold':ui.panoPanelBottomFold}">
             <button v-on:click="panoListRollToggle" class="rollOutBtn">展开收起</button>
 
-            <div class="panoList" data-role="panoList" >
+            <div class="panoList" data-role="panoList">
                 <ul>
                     <li v-for="(pano,index) in panosList">
                         <img class="panoThumb" @click="panoLoad(index)" :src="panoThumbPath+pano.imgThumb" />
@@ -310,6 +310,7 @@
                         }
                         return;
                     } else {
+                        _this.panoListTodo()
                         //传入全景图索引值，来确定应当以哪一张全景图来开场
                         _this.panoInit(_this.currentIndex);
                         _this.loadMap();
@@ -323,7 +324,7 @@
                 //基本场景初始化
                 sceneInit: function () {
 
-                    window.a = new SlideBar(50, 100,document.querySelector('[data-role="panoList"]'));
+                    // window.a = new SlideBar(50, 100,document.querySelector('[data-role="panoList"]'));
 
                     var scene = new THREE.Scene();
                     //用于将scene暴露到全局，仅在调试时使用
@@ -366,6 +367,8 @@
 
                     //添加窗口缩放事件
                     window.addEventListener('resize', this.resizeHandler.bind(this), false);
+
+                    
 
                     this.scene = scene;
                     this.camera = defaultCamera;
@@ -417,6 +420,20 @@
                     this.panoWrap.addEventListener('contextmenu', function (e) {
                         e.preventDefault();
                     }, false);
+                },
+
+                panoListTodo: function () {
+                    //全景列表处理
+                    var panoListDOM = document.querySelector('[data-role="panoList"]>ul');
+                    console.log(panoListDOM.scrollWidth - window.innerWidth);
+                    window.a = new SlideBar(0, panoListDOM.scrollWidth - window.innerWidth, document.querySelector('[data-role="panoList"]'), function (val) {
+                        console.log()
+                        console.log(val);
+                        panoListDOM.style.marginLeft = -val.value + 'px';
+                    });
+                    window.addEventListener('resize', function (e) {
+                        a.max=panoListDOM.scrollWidth - window.innerWidth;
+                    }, false)
                 },
 
                 //根据对应的panosList索引来载入对应全景照片。
@@ -662,7 +679,6 @@
                                 this.cameraTarget.position.setFromSpherical(this.targetSphereCood);
                                 this.camera.lookAt(this.cameraTarget.position);
 
-
                             }
                             break;
                         }
@@ -733,14 +749,14 @@
                     // console.log(this.camera.fov);
                     // console.log(this.cameraGroup.position.y);
 
-                    //相机在y轴上位置范围：0~10，fov范围：75~135
+                    //相机在y轴上位置范围：0~4.5，fov范围：75~120
 
-                    // if (this.camera.fov <= 160 && this.camera.position.y<=10) {
+                    // if (this.camera.fov <= 120 && this.camera.position.y<=4.5) {
                     this.camera.fov += 0.006 * e.deltaY;
                     this.cameraGroup.position.y += 0.001 * e.deltaY;
 
-                    this.camera.fov = util.clamp(this.camera.fov, 75, 150);
-                    this.cameraGroup.position.y = util.clamp(this.cameraGroup.position.y, 0, 10);
+                    this.camera.fov = util.clamp(this.camera.fov, 75, 120);
+                    this.cameraGroup.position.y = util.clamp(this.cameraGroup.position.y, 0, 4.5);
 
                     this.camera.updateProjectionMatrix();
                     // }
@@ -844,7 +860,7 @@
                     this.ui.VRStatus = false;
                     this.attachController('mouse');
                     this.camera = this.defaultCamera;
-                    fullScreen('exit');
+                    // fullScreen('exit');
                 },
 
                 //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
@@ -903,7 +919,7 @@
                                 } else {
                                     console.log('加载成功');
                                     clearInterval(a);
-                                    // _this.addPoi();
+                                    _this.addPoi();
                                 }
                             }, 200)
                         }
