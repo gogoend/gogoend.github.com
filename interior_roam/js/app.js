@@ -237,12 +237,15 @@ var APP = {
 			}
 
 
-			var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
+			// var cameraTargetWorldPosition=new THREE.Vector3(cameraTarget.matrixWorld.elements[12],cameraTarget.matrixWorld.elements[13],cameraTarget.matrixWorld.elements[14])
 			// camera.lookAt(cameraTargetWorldPosition);
 
 			cameraGroup.position.x=util.clamp(cameraGroup.position.x,-3.2,12.8);
 			cameraGroup.position.y=2.7;
-			cameraGroup.position.z=util.clamp(cameraGroup.position.z,-5,10.9)
+			cameraGroup.position.z=util.clamp(cameraGroup.position.z,-5,10.9);
+			cameraGroup.scale.set(1,1,1);
+			camera.scale.set(1,1,1);
+
 
 			renderer.render( scene, camera );
 

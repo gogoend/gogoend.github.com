@@ -268,22 +268,24 @@ Stick.prototype.getTransformMatrix = function (target) {
 
 
                 var vectorAngle=periousDirection.angleTo(cameraDirection);
+                console.log(Math.sin(vectorAngle)+'   '+Math.cos(vectorAngle))
                 // if(util.radToDeg(vectorAngle)<=90){
                 //     var mX=conf.moveFactor*Math.sin(vectorAngle);
                 //     var mY=conf.moveFactor*Math.cos(vectorAngle);
-                // }else if(util.radToDeg(vectorAngle)<90&&util.radToDeg(vectorAngle)<=180){
+                // }
+                // else if(util.radToDeg(vectorAngle)>90&&util.radToDeg(vectorAngle)<=180){
                 //     var mX=conf.moveFactor*Math.sin(vectorAngle);
                 //     var mY=conf.moveFactor*Math.cos(vectorAngle);
-                // }else if(util.radToDeg(vectorAngle)<180&&util.radToDeg(vectorAngle)<=270){
+                // }else if(util.radToDeg(vectorAngle)>180&&util.radToDeg(vectorAngle)<=270){
                 //     var mX=conf.moveFactor*Math.sin(vectorAngle);
                 //     var mY=conf.moveFactor*Math.cos(vectorAngle);
-                // }else if(util.radToDeg(vectorAngle)<270&&util.radToDeg(vectorAngle)<360){
+                // }else if(util.radToDeg(vectorAngle)>270&&util.radToDeg(vectorAngle)<360){
                 //     var mX=conf.moveFactor*Math.sin(vectorAngle);
                 //     var mY=conf.moveFactor*Math.cos(vectorAngle);
                 // }
-
-                var mX=conf.moveFactor*Math.sin(vectorAngle);
-                var mY=conf.moveFactor*Math.cos(vectorAngle);
+                
+                var mX=conf.moveFactor;
+                var mY=conf.moveFactor;
 
                 translateMatrix4[12] = result.stickOffsetLeft*mX;
                 translateMatrix4[14] = result.stickOffsetTop*mY;
