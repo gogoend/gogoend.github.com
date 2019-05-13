@@ -50,12 +50,26 @@
             padding: 0
         }
 
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 0;
+            line-height: 1em
+        }
+
         p {
             margin: 0;
         }
 
         [v-cloak] {
             display: none
+        }
+        a,a:link,a:visited,a:hover,a:active{
+            text-decoration: none;
+            color:#000
         }
 
         #app {
@@ -104,7 +118,8 @@
 
         button.holaGreen {
             background: #1c1c1c;
-            border: #62d128 solid 2px;
+            /* border: #62d128 solid 2px; */
+            border: 0;
             color: #62d128;
         }
 
@@ -184,11 +199,76 @@
         }
 
         .panoNearbyWrap {
-            width: 300px;
-            height: 100%;
-            background-color: #62d128;
+            width: 3rem;
+            background-color: rgba(0, 0, 0, 0.5);
             position: absolute;
-            right: 0;
+            right: 0.16rem;
+            top: 0.16rem;
+            height: max-content;
+            color: #fff;
+            resize: vertical;
+        }
+
+        .panoNearbyWrap>h2 {
+            line-height: 0.6rem;
+            text-align: center;
+            font-size: 0.16rem;
+            font-weight: 400;
+            border-bottom: 1px solid rgba(255, 255, 255, 1);
+            display: flex;
+            align-items: center;
+            padding: 0 0.2rem;
+            justify-content: space-between;
+        }
+
+        .panoNearbyWrap>h2 input {
+            border: 0;
+            background: rgba(0, 0, 0, 0);
+            text-align: inherit;
+            font: inherit;
+            color: #fff;
+            width: 2.4rem;
+        }
+
+        .panoNearbyWrap>h2 button {
+            width: 0.3rem;
+            height: 0.3rem;
+        }
+
+        .panoNearbyWrap>ul {
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 4rem;
+            font-size: 0.14rem;
+            transition: 0.5s ease height;
+        }
+
+        .panoNearbyWrap>ul.fold {
+            height: 0;
+        }
+
+        .panoNearbyWrap>ul>li>a {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.1rem 0.05rem;
+            transition: ease 0.2s background-color;
+            cursor: pointer;
+            color:#fff
+        }
+
+        .panoNearbyWrap>ul>li:hover {
+            background-color: #62d128;
+        }
+
+        .panoNearbyWrap>ul>li .title {
+            margin-left: 1em;
+        }
+
+        .panoNearbyWrap>ul>li .distance {
+            width: 4em;
+            text-align: right;
+            margin-left: 1em;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -204,7 +284,7 @@
             </div>
         </div>
         <div class="panoPanelBottom" v-cloak :class="{'fold':ui.panoPanelBottomFold}">
-            <button v-on:click="panoListRollToggle" class="rollOutBtn">展开收起</button>
+            <button v-on:click="panoListRollToggle" class="rollOutBtn holaGreen">展开收起</button>
 
             <div class="panoList" data-role="panoList">
                 <ul>
@@ -225,7 +305,22 @@
                 <button data-role="btn" data-todo="togglePointer" class="holaGreen">鼠标</button>
             </div>
         </div>
-        <!-- <div class="panoNearbyWrap"></div> -->
+        <div class="panoNearbyWrap">
+            <h2>
+                查找附近
+                <!-- <input name="findNearby" v-model="neighborSearchKeyword" placeholder="查找附近" />
+                <button class="holaGreen" v-on:click="manualSearch()" >→</button> -->
+                <button class="holaGreen" v-on:click="foldNeighbor()">×</button>
+            </h2>
+            <ul class="nearbyList" v-cloak :class="{'fold':ui.neighborFold}">
+                <li class="nearbyItems" v-for="(nearby,index) in poiObjArr">
+                    <a :href="nearby.detailUrl" target="_blank">
+                        <div class="title">{{nearby.posName}}</div>
+                        <div class="distance">{{nearby.posDistance}}</div>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <!-- <script src="./pano_array.js"></script> -->
@@ -236,9 +331,13 @@
         var panoApp = new Vue({
             el: '#app',
             data: {
+                //附近查询关键字
+                neighborSearchKeyword: '',
+                neighborSearchResult: [],
                 //UI状态
                 ui: {
                     panoPanelBottomFold: false,
+                    neighborFold: true,
                     VRStatus: false
                 },
                 //检测是否存在用户交互
@@ -269,6 +368,17 @@
                 },
                 //存储Poi对象的数组
                 poiObjArr: []
+            },
+            computed: {
+                _neighborSearchResult: {
+                    set: function (val) {
+                        console.log(val);
+                        this.addPoi(val);
+                    },
+                    get: function () {
+                        return this.neighborSearchResult;
+                    }
+                }
             },
             beforeCreate: function () {
                 //在vue实例创建之前，获得全景列表
@@ -368,8 +478,6 @@
                     //添加窗口缩放事件
                     window.addEventListener('resize', this.resizeHandler.bind(this), false);
 
-                    
-
                     this.scene = scene;
                     this.camera = defaultCamera;
                     this.defaultCamera = defaultCamera;
@@ -432,7 +540,7 @@
                         panoListDOM.style.marginLeft = -val.value + 'px';
                     });
                     window.addEventListener('resize', function (e) {
-                        a.max=panoListDOM.scrollWidth - window.innerWidth;
+                        a.max = panoListDOM.scrollWidth - window.innerWidth;
                     }, false)
                 },
 
@@ -456,22 +564,22 @@
 
                                 _this.panoImgTex.needsUpdate = true;
 
-                                for (let i = 0; i < _this.spriteGroup.lenght; i++) {
+                                for (let i = 0; i < _this.spriteGroup.length; i++) {
                                     _this.spriteGroup[i].dispose();//在切换之前把当前全景上所有的sprite poi清空
                                 }
                                 _this.spriteGroup.children = [];//在切换之前把当前全景上所有的sprite poi清空
 
-                                for (let i = 0; i < _this.poiObjArr.lenght; i++) {
-                                    _this.poiObjArr[i].dispose();
-                                    _this.poiObjArr[i].material.dispose();
-                                    _this.poiObjArr[i].material.map.needsUpdate = false;
-                                    _this.poiObjArr[i].material.map.dispose();
-                                }
+                                // for (let i = 0; i < _this.poiObjArr.length; i++) {
+                                //     _this.poiObjArr[i].dispose();
+                                //     _this.poiObjArr[i].material.dispose();
+                                //     _this.poiObjArr[i].material.map.needsUpdate = false;
+                                //     _this.poiObjArr[i].material.map.dispose();
+                                // }
 
                                 //切换之后，读取相关数据，重新将sprite加入场景
                                 // _this.panoImgTex.needsUpdate = false;
 
-                                // _this.loadMap();
+                                _this.loadMap();
 
                             }
                         });
@@ -743,7 +851,7 @@
                 },
                 //处理鼠标滚轮
                 mouseScrollHandler: function (e) {
-                    console.log(e)
+                    // console.log(e)
                     //主要是更改场景中相机的fov以及相机y坐标
                     // console.log(e);
                     // console.log(this.camera.fov);
@@ -894,10 +1002,10 @@
 
                             //防止重复加载 //若当前neighborList对应的当前数组中已经有了元素，就直接加入到场景中，不必再去请求
                             if ((_this.neighborList[_this.currentIndex] instanceof Array) && (_this.neighborList[_this.currentIndex].length > 0)) {
-                                _this.addPoi();
+                                _this.addPoi(_this.neighborList[_this.currentIndex]);
                                 return;
                             } else {
-                                new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '哈师大', 2000, _this.neighborList[_this.currentIndex]);
+                                new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, '美食', 2000, _this.neighborList[_this.currentIndex]);
                             }
 
 
@@ -909,17 +1017,21 @@
 
                                 if (_this.neighborList[_this.currentIndex].length === 0) {
                                     if (times < 30) {
+                                        _this.ui.neighborFold = true;
                                         console.log('正在加载附近数据');
                                         times++;
                                         return;
                                     } else {
                                         console.log('加载超时');
+                                        _this.ui.neighborFold = true;
+
                                         clearInterval(a);
                                     }
                                 } else {
                                     console.log('加载成功');
+                                    _this.ui.neighborFold = false;
                                     clearInterval(a);
-                                    _this.addPoi();
+                                    _this.addPoi(_this.neighborList[_this.currentIndex]);
                                 }
                             }, 200)
                         }
@@ -927,52 +1039,56 @@
                 },
 
                 //将poiBoard加入到场景中
-                addPoi: function () {
-                    console.log(this.neighborList);
-                    console.log(this.neighborList[this.currentIndex]);
+                addPoi: function (bMapArray) {
+                    console.log(bMapArray)
+                    console.log(bMapArray.length)
+                    // if (bMapArray.length!==undefined) {
+                    //     for (let i = 0; i < bMapArray.length; i++) {
+                    //         console.log(bMapArray[i])
 
-                    if ((this.neighborList[this.currentIndex] instanceof Array)) {
-                        for (let i = 0; i < this.neighborList[this.currentIndex].lenght; i++) {
-                            this.neighborList[this.currentIndex][i].dispose();
-                            this.neighborList[this.currentIndex].remove(this.neighborList[this.currentIndex][i]);
-                        }
-                    }
+                    //         // bMapArray[i].dispose();
+                    //         // bMapArray.remove(bMapArray[i]);
+                    //     }
+                    // }
 
                     var originP = this.panosList[this.currentIndex].geoCood;
-                    for (var i = 0; i < this.neighborList[this.currentIndex].length; i++) {
-                        this.neighborList[this.currentIndex][i].poiInfo = this.poiCalc(originP, this.neighborList[this.currentIndex][i].point);//算出poi与全景照片拍摄点的距离和角度
-                        console.log(this.neighborList[this.currentIndex][i].poiInfo);
+                    this.poiObjArr = [];
+                    for (var i = 0; i < bMapArray.length; i++) {
+                        bMapArray[i].poiInfo = this.poiCalc(originP, bMapArray[i].point);//算出poi与全景照片拍摄点的距离和角度
+                        console.log(bMapArray[i].poiInfo);
                         var distanceText;
-                        if (this.neighborList[this.currentIndex][i].poiInfo.distance > 1000) {
-                            distanceText = (this.neighborList[this.currentIndex][i].poiInfo.distance / 1000).toFixed(1) + ' km';
+                        if (bMapArray[i].poiInfo.distance > 1000) {
+                            distanceText = (bMapArray[i].poiInfo.distance / 1000).toFixed(1) + ' km';
                         } else {
-                            distanceText = this.neighborList[this.currentIndex][i].poiInfo.distance.toFixed(0) + ' m';
+                            distanceText = bMapArray[i].poiInfo.distance.toFixed(0) + ' m';
                         }
 
                         //生成sprite
-                        var poiObj = new PoiBoard(this.neighborList[this.currentIndex][i].title, distanceText);
+                        var poiObj = new PoiBoard(bMapArray[i].title, distanceText,bMapArray[i].detailUrl);
                         console.log(poiObj);
                         poiObj.poiObject.material.needsUpdate = true;
                         poiObj.poiObject.material.map.needsUpdate = true;
                         this.poiObjArr.push(poiObj);
 
-                        //有了角度、有了距离，算球坐标
-                        //俯仰角根据poi距离来确定，角度值在90~180之间
-                        console.log(this.neighborList[this.currentIndex][i].poiInfo.distance / 2000 * 180);
-                        var lengthVal = util.clamp(this.neighborList[this.currentIndex][i].poiInfo.distance / 2000 * this.panoSphereRadius, 0.2 * this.panoSphereRadius, this.panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
-                        var pitchVal = util.degToRad(util.clamp(this.neighborList[this.currentIndex][i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
-                        var azimuthVal = util.degToRad(this.neighborList[this.currentIndex][i].poiInfo.angle);//poi球坐标的方位角
+                        // console.log(this.poiObjArr)
 
-                        // console.log(lengthVal)
-                        var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
+                        // //有了角度、有了距离，算球坐标
+                        // //俯仰角根据poi距离来确定，角度值在90~180之间
+                        // console.log(bMapArray[i].poiInfo.distance / 2000 * 180);
+                        // var lengthVal = util.clamp(bMapArray[i].poiInfo.distance / 2000 * this.panoSphereRadius, 0.2 * this.panoSphereRadius, this.panoSphereRadius * 0.3);//poi半径长度，poi越远值越大，但限制在给定范围内
+                        // var pitchVal = util.degToRad(util.clamp(bMapArray[i].poiInfo.distance / 2000 * 180 + util.rand(-20, 20), 75, 90));//poi球坐标的俯仰角，角度值在90~180之间。
+                        // var azimuthVal = util.degToRad(bMapArray[i].poiInfo.angle);//poi球坐标的方位角
 
-                        var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
-                        // console.log(poiCood);
-                        poiObj.poiObject.position.x = poiCood.x;
-                        poiObj.poiObject.position.y = poiCood.y;
-                        poiObj.poiObject.position.z = poiCood.z;
+                        // // console.log(lengthVal)
+                        // var poiSpherical = new THREE.Spherical(lengthVal, pitchVal, azimuthVal);
 
-                        this.spriteGroup.add(poiObj.poiObject);
+                        // var poiCood = new THREE.Vector3().setFromSpherical(poiSpherical);
+                        // // console.log(poiCood);
+                        // poiObj.poiObject.position.x = poiCood.x;
+                        // poiObj.poiObject.position.y = poiCood.y;
+                        // poiObj.poiObject.position.z = poiCood.z;
+
+                        // this.spriteGroup.add(poiObj.poiObject);
 
                     }
                 },
@@ -990,7 +1106,20 @@
 
                     //现渲染现截图，若不渲染就截图，会导致截到全黑画面
                     this.renderer.render(this.scene, this.camera);
-                    console.log(this.renderer.domElement.toDataURL('image/jpeg', 0.92));
+                    // console.log(this.renderer.domElement.toDataURL('image/jpeg', 0.92));
+                    // window.open();
+
+                    var date = new Date();
+                    var filenameTime = 'panoshot_' + date.getFullYear() + (date.getMonth() + 1) + date.getDate() + date.getHours() + date.getMinutes() + date.getSeconds();
+                    var imglink = document.createElement('a');
+                    imglink.download = filenameTime;
+                    imglink.setAttribute('href', this.renderer.domElement.toDataURL('image/jpeg', 0.7));
+                    console.log(imglink);
+                    var event = new MouseEvent('click')
+                    imglink.dispatchEvent(event);
+                    // imglink.click()
+
+
 
                     // canvas.toBlob(
                     //     function (blob) {
@@ -999,6 +1128,17 @@
                     //     'image/jpeg',
                     //     0.92
                     // );
+
+                },
+                foldNeighbor: function () {
+                    this.ui.neighborFold ? this.ui.neighborFold = false : this.ui.neighborFold = true;
+                },
+                manualSearch: function () {
+                    var _this = this;
+                    _this.neighborSearchResult = [];
+                    _this._neighborSearchResult = [];
+                    _this.poiObjArr = [];
+                    new BaiduMap(_this.panosList[_this.currentIndex].geoCood.lng, _this.panosList[_this.currentIndex].geoCood.lat, _this.neighborSearchKeyword, 2000, _this._neighborSearchResult);
 
                 }
             }

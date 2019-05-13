@@ -1,12 +1,15 @@
 // //poiBoard是独立组件，可在毕业设计其它场景（全景照片展示、完全虚拟场景、增强现实场景）中复用。
 // //poiBoard生成器
 
-var PoiBoard = function (posName, posDistance) {
+var PoiBoard = function (posName, posDistance,detailUrl) {
     var _this = this
     _this.posName = posName;
     _this.posDistance = posDistance;
     _this.poiCanvas = null;
     _this.poiBoardGenerator(_this.posName, _this.posDistance);
+    if(detailUrl){
+        _this.detailUrl=detailUrl;
+    }
     return _this.poiSpriteGenerator(_this.poiCanvas);
 };
 PoiBoard.prototype.poiBoardGenerator = function (posName, posDistance) {
