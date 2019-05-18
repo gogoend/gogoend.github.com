@@ -279,7 +279,7 @@ var util = {
         var angleRadians = Math.atan2(p2.y - p1.y, p2.x - p1.x);
         // angle in degrees
         var angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-        console.log(angleDeg);
+        // console.log(angleDeg);
         return angleDeg;
 
         /*2--------------------------------------

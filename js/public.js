@@ -1,28 +1,27 @@
 //请求全屏
 //element：要进入全屏幕的元素
 //toggle：是否进行全屏幕切换，不传入就不切换
-function fullScreen(element, noToggle) {
+function fullScreen(element, noToggle,todo) {
     //添加全屏事件监听
-    if(arguments[0] instanceof Element){
-        element.addEventListener('fullscreenchange',function(e){
-        console.log(e)
-    })
-    }
 
     //如果第一个参数为字符串exit就无论如何都退出全屏
     if (arguments[0] === 'exit') {
         document.exitFullscreen();
+        document.addEventListener('fullscreenchange',todo);
         return;
     }
+
     //如果document对象中不存在已经全屏的元素，就进入全屏
-    if (!document.fullscreenElement) {
-        element.requestFullscreen();
-    } else if (noToggle) {
-        //如果传入了noToggle，就不要切换
-        return;
-    } else {
-        document.exitFullscreen();
-    }
+    !document.fullscreenElement ? element.requestFullscreen(): (noToggle==true?  void 0 : document.exitFullscreen())
+
+    // if (!document.fullscreenElement) {
+    //     element.requestFullscreen();
+    // } else if (noToggle!=false) {
+    //     //如果传入了noToggle，就不要切换
+    //     return;
+    // } else {
+    //     document.exitFullscreen();
+    // }
 }
 
 //对获取用户媒体进行兼容性处理

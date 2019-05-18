@@ -94,6 +94,7 @@ position: relative;
     }, false)
 
     slideBar.addEventListener('mousedown', this.eventTodoBind, false);
+    slideBar.addEventListener('touchstart', this.eventTodoBind, false);
 }
 
 SlideBar.prototype.eventTodo = function (e) {
@@ -118,23 +119,30 @@ SlideBar.prototype.eventTodo = function (e) {
             // }
         }; break;
 
-        case 'mousedown': {
+        case 'mousedown':
+        case 'touchstart': {
             if (e.target.className == 'stick') {
                 stick.style.transform='none';
-                stick.addEventListener('mousemove', this.eventTodoBind, false);
-                stick.addEventListener('mouseup', this.eventTodoBind, false);
+                document.body.addEventListener('mousemove', this.eventTodoBind, false);
+                document.body.addEventListener('mouseup', this.eventTodoBind, false);
+                document.body.addEventListener('touchmove', this.eventTodoBind, false);
+                document.body.addEventListener('touchend', this.eventTodoBind, false);
             }
         }; break;
-        case 'mousemove': {
+        case 'mousemove':
+        case 'touchmove': {
             console.log(e);
-            e.preventDefault();
+            // e.preventDefault();
             var leftValue = e.clientX - slideBar.offsetLeft;
             stick.style.left = util.clamp(leftValue, 0, parseInt(util.getStyle(bar).width)) + 'px';
             this.persentNum = parseInt(stick.style.left) / parseInt(util.getStyle(bar).width);
         }; break;
-        case 'mouseup': {
-            this.stick.removeEventListener('mousemove', this.eventTodoBind, false);
-            this.stick.removeEventListener('mouseup', this.eventTodoBind, false);
+        case 'mouseup':
+        case 'touchend': {
+                document.body.removeEventListener('mousemove', this.eventTodoBind, false);
+                document.body.removeEventListener('mouseup', this.eventTodoBind, false);
+                document.body.removeEventListener('touchmove', this.eventTodoBind, false);
+                document.body.removeEventListener('touchend', this.eventTodoBind, false);
         }; break;
     }
 

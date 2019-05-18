@@ -16,6 +16,7 @@
     <script src="../js/poi_handler.js"></script>
     <script src="../js/public.js"></script>
 
+
     <style>
         html,
         body,
@@ -67,9 +68,20 @@
         [v-cloak] {
             display: none
         }
-        a,a:link,a:visited,a:hover,a:active{
+
+        a,
+        a:link,
+        a:visited,
+        a:hover,
+        a:active {
             text-decoration: none;
-            color:#000
+            color: #000
+        }
+
+        button,
+        .buttonLike {
+            cursor: pointer;
+            user-select: none;
         }
 
         #app {
@@ -116,17 +128,46 @@
             pointer-events: all;
         }
 
-        button.holaGreen {
+        button.holaGreen,
+        .buttonLike.holaGreen {
             background: #1c1c1c;
             /* border: #62d128 solid 2px; */
             border: 0;
             color: #62d128;
         }
 
-        .panoControls.bottom button {
+        .panoControls.bottom button,
+        .panoControls.bottom .buttonLike {
             padding: 0.1rem 0.2rem;
             display: block;
             margin: 0 10px
+        }
+
+
+
+        .panoControls.bottom [data-todo="share"] {
+            position: relative;
+        }
+
+        .panoControls.bottom [data-todo="share"] ul {
+            display: none;
+            position: absolute;
+            bottom: 0.36rem;
+            left: 0;
+        }
+
+        .panoControls.bottom [data-todo="share"]:hover ul {
+            display: block;
+        }
+
+        .panoControls.bottom [data-todo="share"] ul>li {
+            padding: 0.75em 0.4em;
+            text-align: center;
+        }
+
+        .panoControls.bottom [data-todo="share"] ul>li:hover {
+            background-color: #62d128;
+            color: #fff
         }
 
         .panoControls.onscreen {
@@ -214,7 +255,7 @@
             text-align: center;
             font-size: 0.16rem;
             font-weight: 400;
-            border-bottom: 1px solid rgba(255, 255, 255, 1);
+            /* border-bottom: 1px solid rgba(255, 255, 255, 1); */
             display: flex;
             align-items: center;
             padding: 0 0.2rem;
@@ -243,6 +284,16 @@
             transition: 0.5s ease height;
         }
 
+        .panoNearbyWrap>ul::-webkit-scrollbar {
+            width: 0.08rem;
+            border-radius: 0.04rem 0.04rem 0.04rem 0.04rem
+        }
+
+        .panoNearbyWrap>ul::-webkit-scrollbar-thumb {
+            background-color: #62d128;
+            border-radius: 0.04rem 0.04rem 0.04rem 0.04rem
+        }
+
         .panoNearbyWrap>ul.fold {
             height: 0;
         }
@@ -253,7 +304,7 @@
             padding: 0.1rem 0.05rem;
             transition: ease 0.2s background-color;
             cursor: pointer;
-            color:#fff
+            color: #fff
         }
 
         .panoNearbyWrap>ul>li:hover {
@@ -289,7 +340,8 @@
             <div class="panoList" data-role="panoList">
                 <ul>
                     <li v-for="(pano,index) in panosList">
-                        <img class="panoThumb" @click="panoLoad(index)" :src="panoThumbPath+pano.imgThumb" />
+                        <img class="panoThumb" lazyload="on" @click="panoLoad(index)"
+                            :src="panoThumbPath+pano.imgThumb" />
                         <p class="panoTitle">{{pano.desc}}</p>
                     </li>
                 </ul>
@@ -298,6 +350,16 @@
             </div>
 
             <div class="panoControls bottom">
+                <!-- <div data-role="btn" data-todo="share" class="holaGreen buttonLike shareButtonList">
+                    <span>分享</span>
+                    <ul data-role="shareWidget">
+                        <li data-sns="weibo">微博</li>
+                        <li data-sns="qz">QQ空间</li>
+                        <li data-sns="linkedin">Linkedin</li>
+                        <li data-sns="fb">Facebook</li>
+                        <li data-sns="twitter">Twitter</li>
+                    </ul>
+                </div> -->
                 <button data-role="btn" data-todo="shot" class="holaGreen">截屏</button>
                 <button data-role="btn" data-todo="enterVR" class="holaGreen">VR</button>
                 <button data-role="btn" data-todo="toggleFullScreen" class="holaGreen">全屏</button>
@@ -306,11 +368,11 @@
             </div>
         </div>
         <div class="panoNearbyWrap">
-            <h2>
+            <h2 v-on:click="foldNeighbor()">
                 查找附近
                 <!-- <input name="findNearby" v-model="neighborSearchKeyword" placeholder="查找附近" />
                 <button class="holaGreen" v-on:click="manualSearch()" >→</button> -->
-                <button class="holaGreen" v-on:click="foldNeighbor()">×</button>
+                <button class="holaGreen">×</button>
             </h2>
             <ul class="nearbyList" v-cloak :class="{'fold':ui.neighborFold}">
                 <li class="nearbyItems" v-for="(nearby,index) in poiObjArr">
@@ -326,6 +388,7 @@
     <!-- <script src="./pano_array.js"></script> -->
     <!-- <script src="./position2_array.js"></script> -->
     <script src="./js/slidebar.js"></script>
+
     <script>
         'use strict';
         var panoApp = new Vue({
@@ -393,6 +456,9 @@
                     }
                 };
             },
+            beforeMount: function () {
+
+            },
             mounted: function () {
                 var _this = this;
                 //将事件中的this进行bind
@@ -405,6 +471,8 @@
 
                 //为页面中各个按钮增加事件
                 _this.btnTodoHandler();
+
+
 
                 //初始化sprite
                 _this.spriteGroupInit();
@@ -431,6 +499,8 @@
             },
 
             methods: {
+
+
                 //基本场景初始化
                 sceneInit: function () {
 
@@ -491,6 +561,7 @@
 
                     console.log(this.targetSphereCood);
 
+
                 },
                 //全景球初始化
                 panoInit: function (panoIndex) {
@@ -521,8 +592,6 @@
                     this.renderer.render(this.scene, this.camera);
 
                     this.animateHandler();
-
-
 
                     //阻止默认的鼠标右键菜单弹出
                     this.panoWrap.addEventListener('contextmenu', function (e) {
@@ -562,7 +631,7 @@
 
                                 _this.panoPhotoMaterial.map = e;
 
-                                _this.panoImgTex.needsUpdate = true;
+                                // _this.panoImgTex.needsUpdate = true;
 
                                 for (let i = 0; i < _this.spriteGroup.length; i++) {
                                     _this.spriteGroup[i].dispose();//在切换之前把当前全景上所有的sprite poi清空
@@ -643,7 +712,7 @@
                         group.addEventListener('click', function (e) {
                             switch (e.target.dataset.todo) {
                                 case 'toggleFullScreen': {
-                                    fullScreen(document.querySelector('body'));
+                                    fullScreen(document.querySelector('body'), false);
                                     break;
                                 };
                                 case 'enterVR': {
@@ -925,7 +994,18 @@
                 enterVR: function () {
                     this.ui.VRStatus = true;
 
-                    fullScreen(document.querySelector('.panoWrap'), false);
+
+                    var element = document.querySelector('.panoWrap');
+                    if (document.fullscreenElement) {
+                        fullScreen('exit');
+                        fullScreen(element, true);
+                    } else {
+                        fullScreen(element, true);
+                    }
+                    // element.addEventListener('fullscreenchange', function (e) {
+                    //     console.log(e);
+                    //     fullScreen('exit');
+                    // });
                     this.attachController('orient');
 
                     if (!this.hmdGlasses) {
@@ -963,12 +1043,16 @@
 
                 },
 
-                //切换到VR
+                //退出VR
                 exitVR: function () {
-                    this.ui.VRStatus = false;
-                    this.attachController('mouse');
-                    this.camera = this.defaultCamera;
-                    // fullScreen('exit');
+                    var _this = this;
+                    fullScreen('exit', false, function () {
+                        if (document.fullscreenElement === null) {
+                            _this.ui.VRStatus = false;
+                            _this.attachController('mouse');
+                            _this.camera = _this.defaultCamera;
+                        }
+                    })
                 },
 
                 //计算poi与全景拍摄距离，并将得到的距离赋值给源对象
@@ -1055,7 +1139,7 @@
                     this.poiObjArr = [];
                     for (var i = 0; i < bMapArray.length; i++) {
                         bMapArray[i].poiInfo = this.poiCalc(originP, bMapArray[i].point);//算出poi与全景照片拍摄点的距离和角度
-                        console.log(bMapArray[i].poiInfo);
+                        // console.log(bMapArray[i].poiInfo);
                         var distanceText;
                         if (bMapArray[i].poiInfo.distance > 1000) {
                             distanceText = (bMapArray[i].poiInfo.distance / 1000).toFixed(1) + ' km';
@@ -1064,8 +1148,8 @@
                         }
 
                         //生成sprite
-                        var poiObj = new PoiBoard(bMapArray[i].title, distanceText,bMapArray[i].detailUrl);
-                        console.log(poiObj);
+                        var poiObj = new PoiBoard(bMapArray[i].title, distanceText, bMapArray[i].detailUrl);
+                        // console.log(poiObj);
                         poiObj.poiObject.material.needsUpdate = true;
                         poiObj.poiObject.material.map.needsUpdate = true;
                         this.poiObjArr.push(poiObj);
@@ -1146,6 +1230,9 @@
 
 
     </script>
+    <a class="bshareDiv" href="http://www.bshare.cn/share">分享按钮</a>
+    <script type="text/javascript" charset="utf-8"
+        src="http://static.bshare.cn/b/buttonLite.js#uuid=&amp;style=3&amp;fs=4&amp;textcolor=#fff&amp;bgcolor=#9C3&amp;text=分享到"></script>
 </body>
 
 </html>
