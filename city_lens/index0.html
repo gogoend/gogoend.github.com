@@ -45,10 +45,8 @@
         // navigator.geolocation.getCurrentPosition(positionHandler, errorHandler, positionOption);
         positionHandler();
 
-        window.addEventListener("deviceorientation", orientationHandler, true);
-
         //调百度地图
-        function bMap(place, rad) {
+        function bMap(placeName, rad) {
             var mapContainer = document.createElement("div");
             mapContainer.style.cssText = 'height: 100%;width:100%;';
 
@@ -80,7 +78,7 @@
                     console.log(JSON.stringify(e.Ar));
                 }
             });
-            var result = local.searchNearby(place, mPoint, rad);//要查找的地点名称、中心点、半径
+            var result = local.searchNearby(placeName, mPoint, rad);//要查找的地点名称、中心点、半径
 
             console.log(local)
 
@@ -122,34 +120,8 @@
             // document.body.append(mapContainer);
         };
 
-        function positionHandler(pos) {
-            locationData.curPos = {
-                // lng: pos.coords.lng,
-                // lat: pos.coords.lat,
-                lng: 116.313408,
-                lat: 39.925278,
-                errCode: -1
-            };
-            console.log(locationData);
-            // aMap('美食', 2000);
-            bMap("中央电视塔", 2000);
-        }
-        function errorHandler(e) {
-            console.log(e);
-            locationData.curPos = {
-                errCode: 0
-            };
-            console.log('没获取到位置。')
-        }
 
-        //orientationHandler的参数中包含有手机传感器数据
-        function orientationHandler(orientData) {
-            var absolute = orientData.absolute;
-            var alpha = orientData.alpha;
-            var beta = orientData.beta;
-            var gamma = orientData.gamma;
-            console.log(orientData);
-        }
+
 
     </script>
 </body>

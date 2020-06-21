@@ -112,10 +112,15 @@
         });
 
         window.addEventListener("deviceorientation", orientationHandler, true);
-        function orientationHandler(orientData) {
-            compassApp.compassRad = Math.floor(orientData.alpha);
+        function orientationHandler(e) {
+            console.log(e);
+            //手机平放
+            // if(Math.abs(e.beta)<30&&Math.abs(e.gamma)<30)  
+            
+            //手机垂直竖立
+            //if(Math.abs(e.beta-90)<30)
+            compassApp.compassRad = Math.floor(e.alpha);
             document.getElementById('compassPointer').style.transform = "rotate(" + compassApp.compassRad + "deg)"
-
         }
     </script>
 </body>

@@ -6,8 +6,7 @@
     <meta charset="utf-8" />
     <title>城市望远镜 - Hello全视界</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-    <script type="text/javascript"
-        src="https://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa&s=1"></script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=4woYXvjYCbrpX0jVGBO2Dy5SxLptnrBa&s=1"></script>
     <script src="../lib/three.js"></script>
 
     <script src="../lib/vue.js"></script>
@@ -128,7 +127,8 @@
                         errCode: -1
                     };
 
-                    var mapData = new BaiduMap(this.curGPSCood.lng, this.curGPSCood.lat, '美食', 2000);
+                    console.log(this)
+                    var mapData = new BaiduMap(this.curGPSCood.lng, this.curGPSCood.lat, '美食', 2000,this);
                     //异步问题：下方console.log会在mapData未得到以前执行，此时mapData.resultList中没有数据
                     // console.log(mapData);
 
